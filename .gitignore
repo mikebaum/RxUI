@@ -27,3 +27,4 @@ gradle-app.setting
 # eclipse files
 *.classpath
 *.project
+.settings/
