@@ -24,7 +24,7 @@ There are two main problems with the `BehaviorSubject`
 2. **Reentrancy** - ~~If~~ When you create binding loops, you can end up with reentrancy which ~~could~~ will cause problems. Again, I found a solution to this and in the end I felt it could be easier.
 
 ### Where are we now
-This library is in it's infancy. There is a lot of work to be done, so if you want to get in and participate in the design and implementation now's the time. The first thing I've worked on is the Property, Data Binding API. Since this is such a core element, I've spent considerable time developing it and it is thuroughly tested. It's not 100% nailed down (90% maybe), so I'm open to suggestions. Here's an example that demonstrates how the Properties API can be used. I have yet to commit any type of model or view object, so please ignore that fact for the moment. The application presents a form with two text fields that are synchronized, so that edits in one field are mirrored in the other.
+This library is in it's infancy. There is a lot of work to be done, so if you want to get in and participate in the design and implementation now's the time. The first thing I've worked on is the Property, Data Binding API. Since this is such a core element, I've spent considerable time developing it and it is thuroughly tested. It's not 100% nailed down (~~90~~70% maybe), so I'm open to suggestions. Here's an example that demonstrates how the Properties API can be used. I have yet to commit any type of model or view object, so please ignore that fact for the moment. The application presents a form with two text fields that are synchronized, so that edits in one field are mirrored in the other.
 ```
 public class SynchronizedTextFieldApp {
 
