@@ -3,7 +3,7 @@ Tools for creating reactive based UI applications
 
 ### Motivation
 #### Minimize Boilerplate
-Creating UIs generally means wiring together components using listeners. Although writing listeners and callbacks is exciting in it's own way (sick!), writing all the boilerplate to achive this is error prone and highly repetative. Never mind the ***callback hell*** that goes along with the traditional apporach. In an ideal world we as developers should be focused on the look and feel, and behavior of the application. So in a nutshell, let's consider ourselves as designers/architects rather than plumbers and capenters. Using a reactive (streaming/event) based approach allows us to escape callback hell.
+Creating UIs generally means wiring together components using listeners. Although writing listeners and callbacks is exciting in it's own way, writing all the boilerplate to achive this is error prone and highly repetative. Never mind the ***callback hell*** that goes along with the traditional apporach. In an ideal world we as developers should be focused on the look and feel, and behavior of the application. So in a nutshell, let's consider ourselves as designers/architects rather than plumbers and capenters. Using a reactive (streaming/event) based approach allows us to escape callback hell.
 #### Ensure thread correctness
 Most UI toolkits are not thread safe, so if you're not careful you can introduce subtle bugs. Part of the goal of this library is to make it easier to ensure that we only ever interact with the underlying UI toolkit on it's event loop.
 #### Improve Consistency and Re-Usability
