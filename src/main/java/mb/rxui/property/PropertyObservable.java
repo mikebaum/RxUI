@@ -26,6 +26,7 @@ import mb.rxui.ThreadChecker;
 import mb.rxui.property.operator.OperatorFilter;
 import mb.rxui.property.operator.OperatorIsDirty;
 import mb.rxui.property.operator.OperatorMap;
+import mb.rxui.property.operator.OperatorTake;
 import mb.rxui.property.operator.PropertyOperator;
 import rx.Observable;
 import rx.subscriptions.Subscriptions;
@@ -164,6 +165,23 @@ public class PropertyObservable<M> implements Supplier<M> {
      */
     public final PropertyObservable<Boolean> isDirty() {
         return lift(new OperatorIsDirty<M>(initialValue));
+    }
+    
+    /**
+     * Creates a new {@link PropertyObservable} that when subscribed to will
+     * only every emit as many items as specified by the provided amount
+     * parameter.<br>
+     * <br>
+     * NOTE: The returned {@link PropertyObservable} will always return the
+     * latest value of the property observable that it was derived from.
+     * 
+     * @param amount
+     *            the amount of values to emit
+     * @return a new {@link PropertyObservable} that only emits as many items as
+     *         specified in the amount parameter
+     */
+    public final PropertyObservable<M> take(int amount) {
+        return lift(new OperatorTake<>(amount));
     }
     
     /**

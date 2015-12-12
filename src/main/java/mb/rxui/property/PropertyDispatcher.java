@@ -37,7 +37,7 @@ public final class PropertyDispatcher<M> implements Dispatcher<M> {
     @Override
     public void dispatchValue(M newValue) {
         checkState(! isDisposed, "Dispatcher has been dipsoed, cannot dispatch: " + newValue);
-        subscribers.forEach(subscriber -> subscriber.onChanged(newValue));
+        new ArrayList<>(subscribers).forEach(subscriber -> subscriber.onChanged(newValue));
     }
 
     @Override
