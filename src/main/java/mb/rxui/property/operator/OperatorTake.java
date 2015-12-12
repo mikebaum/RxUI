@@ -13,6 +13,7 @@
  */
 package mb.rxui.property.operator;
 
+import mb.rxui.Preconditions;
 import mb.rxui.property.PropertyObservable;
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertyPublisher;
@@ -23,7 +24,7 @@ import mb.rxui.property.PropertySubscriber;
  * <br>
  * NOTE: the get method of the new {@link PropertyObservable} created via this
  * operator will always return the latest value of the property observable it
- * was derrived from.
+ * was derived from.
  * 
  * @param <M>
  *            the type of value the property provides

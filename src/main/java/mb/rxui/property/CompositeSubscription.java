@@ -25,6 +25,12 @@ public class CompositeSubscription implements Subscription {
     private final List<Subscription> subscriptions = new ArrayList<>();
     private boolean isDisposed = false;
     
+    public CompositeSubscription(List<Subscription> subscriptions) {
+        this.subscriptions.addAll(subscriptions);
+    }
+    
+    public CompositeSubscription() {}
+    
     @Override
     public void dispose() {
         if(isDisposed)

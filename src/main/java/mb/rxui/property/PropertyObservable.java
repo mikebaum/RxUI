@@ -15,13 +15,17 @@ package mb.rxui.property;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import mb.rxui.Preconditions;
 import mb.rxui.ThreadChecker;
 import mb.rxui.property.operator.OperatorFilter;
 import mb.rxui.property.operator.OperatorIsDirty;
@@ -179,8 +183,10 @@ public class PropertyObservable<M> implements Supplier<M> {
      *            the amount of values to emit
      * @return a new {@link PropertyObservable} that only emits as many items as
      *         specified in the amount parameter
+     * @throws IllegalStateException if zero elements is requested
      */
     public final PropertyObservable<M> take(int amount) {
+        Preconditions.checkState(amount > 0, "Cannot take zero elements");
         return lift(new OperatorTake<>(amount));
     }
     
@@ -212,5 +218,27 @@ public class PropertyObservable<M> implements Supplier<M> {
             Subscription subscription = observe(subscriber::onNext, subscriber::onCompleted);
             subscriber.add(Subscriptions.create(subscription::dispose));
         });
+    }
+    
+    /**
+     * Combines the values of two property observables and produces a new result
+     * using the provided function any time either of the values changes.
+     * 
+     * @param observable1
+     *            the first observable to combine
+     * @param observable2
+     *            the second observable to combine
+     * @param combiner
+     *            some function that will be called any time either of the
+     *            provided observables changes
+     * @return a new Property Observable that will emit the result of combining
+     *         the values of the provided observables using the provided
+     *         function any time either observables' value changes.
+     */
+    public static <T1, T2, R> PropertyObservable<R> combine(PropertyObservable<T1> observable1, PropertyObservable<T2> observable2, BiFunction<T1, T2, R> combiner) {
+        List<PropertyObservable<?>> observables =Arrays.asList(observable1, observable2);
+        Supplier<R> combineSupplier = () -> combiner.apply(observable1.get(), observable2.get());
+        
+        return new PropertyObservable<R>(new CombinePropertyPublisher<R>(combineSupplier, observables), ThreadChecker.create());
     }
 }
