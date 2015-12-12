@@ -31,7 +31,7 @@ public class ModelPropertySource<M> implements PropertySource<M> {
 
     private ModelPropertySource(M initialValue, PropertyDispatcher<M> dispatcher) {
         this.value = requireNonNull(initialValue);
-        this.dispatcher = dispatcher;
+        this.dispatcher = requireNonNull(dispatcher);
     }
     
     @Override

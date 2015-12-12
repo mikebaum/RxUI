@@ -21,6 +21,7 @@ import javax.security.auth.Subject;
 
 import mb.rxui.ThreadChecker;
 import mb.rxui.disposables.Disposable;
+import mb.rxui.property.operator.OperatorIsDirty;
 import rx.Subscription;
 import rx.subjects.BehaviorSubject;
 import rx.subscriptions.CompositeSubscription;
@@ -63,25 +64,29 @@ import rx.subscriptions.CompositeSubscription;
  */
 public class Property<M> extends PropertyObservable<M> implements PropertySource<M>, Disposable {
 
+    private final PropertySource<M> propertySource;
+    private final PropertyDispatcher<M> dispatcher;
     private final M initialValue;
+    private final ThreadChecker threadChecker;
 
-    protected Property(PropertySourceFactory<M> propertySourceFactory, ThreadChecker threadChecker) {
-        super(propertySourceFactory, threadChecker);
+    private Property(PropertySource<M> propertySource, PropertyDispatcher<M> dispatcher, ThreadChecker threadChecker) {
+        super(new PropertyPublisherImpl<>(propertySource, dispatcher), threadChecker);
+        this.propertySource = requireNonNull(propertySource);
+        this.dispatcher = requireNonNull(dispatcher);
         this.initialValue = requireNonNull(get(), "A Property must be initialized with a value");
+        this.threadChecker = requireNonNull(threadChecker);
     }
     
     @Override
     public void dispose() {
-        checkThread();
-        getDispatcher().dispose();
+        threadChecker.checkThread();
+        dispatcher.dispose();
     }
 
     @Override
     public void setValue(M value) {
-        checkThread();
+        threadChecker.checkThread();
     
-        PropertyDispatcher<M> dispatcher = getDispatcher();
-        
         // blocks reentrant calls
         if (dispatcher.isDispatching())
             return;
@@ -94,7 +99,7 @@ public class Property<M> extends PropertyObservable<M> implements PropertySource
         if (get().equals(value))
             return;
     
-        getPropertySource().setValue(requireNonNull(value));
+        propertySource.setValue(requireNonNull(value));
     }
 
     /**
@@ -167,7 +172,30 @@ public class Property<M> extends PropertyObservable<M> implements PropertySource
         return subscriptions;
     }
 
+    public final boolean hasObservers() {
+        threadChecker.checkThread();
+        return dispatcher.hasSubscribers();
+    }
+    
     // Factory methods
+    
+    /**
+     * Creates a property using the provided property source factory and thread
+     * checker.
+     * 
+     * @param propertySourceFactory
+     *            some factory that can be used to create a property source.
+     * @param threadChecker
+     *            the thread checker to use to verify thread contract when using
+     *            the created property
+     * @return a new {@link Property}
+     */
+    static final <M> Property<M> create(PropertySourceFactory<M> propertySourceFactory, 
+                                        ThreadChecker threadChecker) {
+        PropertyDispatcher<M> dispatcher = new PropertyDispatcher<>();
+        return new Property<>(propertySourceFactory.apply(dispatcher), dispatcher, threadChecker);
+    }
+    
     /**
      * Creates a property that is initialized with the provided value.
      * 
@@ -190,7 +218,7 @@ public class Property<M> extends PropertyObservable<M> implements PropertySource
      * @return a new property.
      */
     public static <M> Property<M> create(PropertySourceFactory<M> propertySourceFactory) {
-        return new Property<>(propertySourceFactory, ThreadChecker.create());
+        return Property.create(propertySourceFactory, ThreadChecker.create());
     }
 
     /**

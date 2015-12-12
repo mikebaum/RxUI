@@ -13,9 +13,10 @@
  */
 package mb.rxui.property;
 
+import static mb.rxui.Preconditions.checkState;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 import mb.rxui.annotations.RequiresTest;
 import mb.rxui.disposables.Disposable;
@@ -26,15 +27,17 @@ import mb.rxui.disposables.Disposable;
  * @param <M> the type of value this dispatcher dispatches.
  */
 @RequiresTest
-public final class PropertyDispatcher<M> implements Disposable {
+public final class PropertyDispatcher<M> implements Dispatcher<M> {
 
     private final List<PropertySubscriber<M>> subscribers = new ArrayList<>();
+    private final IsDispatching isDispatching = new IsDispatching();
     
-    private boolean isDispatching = false;
     private boolean isDisposed = false;
     
+    @Override
     public void dispatchValue(M newValue) {
-        subscribers.forEach(subscriber -> dispatchOnChanged(subscriber, newValue));
+        checkState(! isDisposed, "Dispatcher has been dipsoed, cannot dispatch: " + newValue);
+        subscribers.forEach(subscriber -> subscriber.onChanged(newValue));
     }
 
     @Override
@@ -44,41 +47,77 @@ public final class PropertyDispatcher<M> implements Disposable {
         subscribers.clear();
     }
     
+    @Override
     public void onDisposed(Disposable toDispose)
     {
+        if (isDisposed) {            
+            toDispose.dispose();
+            return;
+        }
+        
         Runnable runnable = toDispose::dispose;
         subscribers.add(new PropertySubscriber<>(PropertyObserver.create(runnable)));
     }
     
+    @Override
     public boolean isDispatching() {
-        return isDispatching;
+        return isDispatching.isDispatching();
     }
     
+    @Override
     public boolean isDisposed() {
         return isDisposed;
     }
     
-    public boolean hasObservers() {
+    @Override
+    public boolean hasSubscribers() {
         return ! subscribers.isEmpty();
     }
     
-    /**
-     * Adds a subscriber to this dispatcher.
-     * 
-     * @param subscriber
-     *            some property subscriber.
-     * @return a consumer that could be used to dispatch the first value to the
-     *         subscriber.
-     */
-    public Consumer<M> addSubscriber(PropertySubscriber<M> subscriber) {
+    @Override
+    public PropertySubscriber<M> subscribe(PropertyObserver<M> observer) {
+        
+        PropertySubscriber<M> subscriber = new PropertySubscriber<>(wrapObserver(observer, isDispatching));
+        
         subscriber.doOnUnsubscribe(() -> subscribers.remove(subscriber));
         subscribers.add(subscriber);
-        return value -> dispatchOnChanged(subscriber, value);
+        
+        return subscriber;
     }
     
-    private void dispatchOnChanged(PropertySubscriber<M> subscriber, M valueToDispatch) {
-        isDispatching = true;
-        subscriber.onChanged(valueToDispatch);
-        isDispatching = false;
+    private static <M> PropertyObserver<M> wrapObserver( PropertyObserver<M> observer, IsDispatching isDispatching ) {
+        return new PropertyObserver<M>() {
+
+            @Override
+            public void onChanged(M newValue) {
+                try {
+                    isDispatching.setDispatching(true);
+                    observer.onChanged(newValue);
+                } finally {
+                    isDispatching.setDispatching(false);
+                }
+            }
+
+            @Override
+            public void onDisposed() {
+                observer.onDisposed();
+            }
+        };
+    }
+    
+    /**
+     * Small helper to share the dispatching flag between a Subscription and the dispatcher.
+     */
+    static class IsDispatching
+    {
+        private boolean isDispatching = false;
+
+        public void setDispatching(boolean isDispatching) {
+            this.isDispatching = isDispatching;
+        }
+
+        public boolean isDispatching() {
+            return isDispatching;
+        }
     }
 }
