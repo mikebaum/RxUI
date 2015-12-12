@@ -15,11 +15,18 @@ package mb.rxui.property;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import mb.rxui.ThreadChecker;
-import mb.rxui.property.PropertySource.PropertySourceFactory;
+import mb.rxui.property.operator.OperatorFilter;
+import mb.rxui.property.operator.OperatorIsDirty;
+import mb.rxui.property.operator.OperatorMap;
+import mb.rxui.property.operator.PropertyOperator;
 import rx.Observable;
 import rx.Subscription;
 
@@ -39,13 +46,14 @@ import rx.Subscription;
  */
 public class PropertyObservable<M> implements Supplier<M> {
     
-    private final PropertySource<M> propertySource;
+    private final PropertyPublisher<M> propertyPublisher;
     private final ThreadChecker threadChecker;
-    private final PropertyDispatcher<M> dispatcher = new PropertyDispatcher<>();
+    private final M initialValue;
     
-    protected PropertyObservable(PropertySourceFactory<M> propertySourceFactory, ThreadChecker threadChecker) {
-        this.propertySource = requireNonNull(propertySourceFactory).apply(dispatcher);
-        this.threadChecker = threadChecker;
+    protected PropertyObservable(PropertyPublisher<M> propertyPublisher, ThreadChecker threadChecker) {
+        this.propertyPublisher = requireNonNull(propertyPublisher);
+        this.threadChecker = requireNonNull(threadChecker);
+        initialValue = requireNonNull(propertyPublisher.get());
     }
 
     /**
@@ -61,27 +69,13 @@ public class PropertyObservable<M> implements Supplier<M> {
      */
     @Override
     public final M get() {
-        checkThread();
-        return propertySource.get();
-    }
-
-    public final boolean hasObservers() {
         threadChecker.checkThread();
-        return dispatcher.hasObservers();
+        return propertyPublisher.get();
     }
 
     public final Subscription observe(PropertyObserver<M> observer) {
         threadChecker.checkThread();
-
-        PropertySubscriber<M> subscriber = new PropertySubscriber<>(observer);
-
-        // adds and pushes the latest value to the subscriber
-        dispatcher.addSubscriber(subscriber).accept(get());
-
-        if (dispatcher.isDisposed())
-            subscriber.onDisposed();
-
-        return subscriber;
+        return propertyPublisher.subscribe(observer);
     }
 
     /**
@@ -141,9 +135,49 @@ public class PropertyObservable<M> implements Supplier<M> {
      * @param mapper some function the emitted values of this property observable.
      * @return a new PropertyObservable with the values transformed by the provided mapper.
      */
-//    public final <R> PropertyObservable<M> map(Function<M, R> mapper) {
-//        
-//    }
+    public final <R> PropertyObservable<R> map(Function<M, R> mapper) {
+        return lift(new OperatorMap<>(mapper));
+    }
+    
+    /**
+     * Filters out the values emitted by this property that do not satisfy the
+     * provided predicate. If the current value of this property observable do
+     * not satisfy the predicate the current value of the filtered property will
+     * become {@link Optional#empty()}.
+     * 
+     * @param predicate
+     *            some predicate to use to filter this property observable.
+     * @return a new {@link PropertyObservable} that optionally emits the
+     *         current value or empty if the current value does not satisfy the
+     *         predicate.
+     */
+    public final PropertyObservable<Optional<M>> filter(Predicate<M> predicate) {
+        return lift(new OperatorFilter<>(predicate));
+    }
+    
+    /**
+     * Converts this property observable into boolean property observable
+     * representing whether or not the current value differs from the initial.
+     * 
+     * @return a new {@link PropertyObservable} that emits true if the current
+     *         value is different than the initial value, false otherwise.
+     */
+    public final PropertyObservable<Boolean> isDirty() {
+        return lift(new OperatorIsDirty<M>(initialValue));
+    }
+    
+    /**
+     * Using the provided operator creates a new, converted property observable.
+     * 
+     * @param operator
+     *            some operator that converts the value stream.
+     * @return a new {@link PropertyObservable} which results from applying the
+     *         provided operator to this property observable.
+     */
+    public final <R> PropertyObservable<R> lift(PropertyOperator<M, R> operator) {
+        Objects.requireNonNull(operator);
+        return new PropertyObservable<>(operator.apply(propertyPublisher), threadChecker);
+    }
     
     /**
      * Creates an Observable that is backed by this property.<br>
@@ -160,19 +194,5 @@ public class PropertyObservable<M> implements Supplier<M> {
             Subscription subscription = observe(subscriber::onNext, subscriber::onCompleted);
             subscriber.add(subscription);
         });
-    }
-    
-    protected void checkThread()
-    {
-        threadChecker.checkThread();
-    }
-    
-    protected PropertyDispatcher<M> getDispatcher()
-    {
-        return dispatcher;
-    }
-    
-    protected PropertySource<M> getPropertySource() {
-        return propertySource;
     }
 }

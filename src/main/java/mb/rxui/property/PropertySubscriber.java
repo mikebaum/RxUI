@@ -13,9 +13,10 @@
  */
 package mb.rxui.property;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import mb.rxui.annotations.RequiresTest;
 import rx.Subscription;
@@ -40,7 +41,7 @@ public class PropertySubscriber<M> implements PropertyObserver<M>, Subscription 
     private boolean isUnsubscribed = false;
 
     public PropertySubscriber(PropertyObserver<M> observer) {
-        this.observer = Objects.requireNonNull(observer);
+        this.observer = requireNonNull(observer);
         onUnsubscribedActions = new ArrayList<>();
     }
 
