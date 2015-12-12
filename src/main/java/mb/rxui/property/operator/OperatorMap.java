@@ -54,7 +54,7 @@ public class OperatorMap<Downstream, Upstream> implements PropertyOperator<Downs
                             }
                         });
                 
-                subscriber.doOnUnsubscribe(sourceSubscriber::unsubscribe);
+                subscriber.doOnUnsubscribe(sourceSubscriber::dispose);
                 
                 return subscriber;
             }

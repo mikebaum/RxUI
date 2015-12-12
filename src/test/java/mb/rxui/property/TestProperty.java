@@ -31,7 +31,6 @@ import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 import rx.Observable;
-import rx.Subscription;
 import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.subjects.BehaviorSubject;
@@ -138,7 +137,7 @@ public class TestProperty {
         property.setValue("burritos");
         verify(consumer).accept("burritos");
 
-        subscription.unsubscribe();
+        subscription.dispose();
 
         property.setValue("fajitas");
         Mockito.verifyNoMoreInteractions(consumer);
@@ -152,10 +151,10 @@ public class TestProperty {
         Subscription subscription = property.onChanged(consumer);
         verify(consumer).accept("tacos");
 
-        assertFalse(subscription.isUnsubscribed());
+        assertFalse(subscription.isDisposed());
 
         property.dispose();
-        assertTrue(subscription.isUnsubscribed());
+        assertTrue(subscription.isDisposed());
         assertEquals("tacos", property.get());
 
         // This setValue should have been ignored and not forwarded to the
@@ -170,7 +169,7 @@ public class TestProperty {
         Subscription subscription2 = property.onChanged(consumer2);
 
         verify(consumer2).accept("tacos");
-        assertTrue(subscription2.isUnsubscribed());
+        assertTrue(subscription2.isDisposed());
     }
 
     @Test
@@ -190,9 +189,9 @@ public class TestProperty {
         Subscription subscription2 = property.observe(observer2);
         Subscription subscription3 = property.observe(observer3);
 
-        Assert.assertFalse(subscription.isUnsubscribed());
-        Assert.assertFalse(subscription2.isUnsubscribed());
-        Assert.assertFalse(subscription3.isUnsubscribed());
+        Assert.assertFalse(subscription.isDisposed());
+        Assert.assertFalse(subscription2.isDisposed());
+        Assert.assertFalse(subscription3.isDisposed());
 
         InOrder inOrder = Mockito.inOrder(observer, observer2, observer3);
 
@@ -208,9 +207,9 @@ public class TestProperty {
 
         inOrder.verifyNoMoreInteractions();
 
-        Assert.assertTrue(subscription.isUnsubscribed());
-        Assert.assertTrue(subscription2.isUnsubscribed());
-        Assert.assertTrue(subscription3.isUnsubscribed());
+        Assert.assertTrue(subscription.isDisposed());
+        Assert.assertTrue(subscription2.isDisposed());
+        Assert.assertTrue(subscription3.isDisposed());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -347,9 +346,9 @@ public class TestProperty {
         verify(consumer1).accept("fajitas");
         verifyNoMoreInteractions(consumer1, consumer2);
 
-        // unsubscribe and asser that the properties are no longer bound and
+        // dispose and asser that the properties are no longer bound and
         // that they still emit value updates
-        subscription.unsubscribe();
+        subscription.dispose();
 
         property2.setValue("enchiladas");
         verify(consumer2).accept("enchiladas");
@@ -374,11 +373,11 @@ public class TestProperty {
         verify(consumer1).accept("burritos");
 
         // destroy the binding source property and assert the binding
-        // subscription is unsubscribed.
+        // subscription is disposed.
         property2.dispose();
-        assertTrue(bindSubscription.isUnsubscribed());
-        // the consumer of property1 should not have been unsubscribed.
-        assertFalse(consumerSubscription.isUnsubscribed());
+        assertTrue(bindSubscription.isDisposed());
+        // the consumer of property1 should not have been disposed.
+        assertFalse(consumerSubscription.isDisposed());
     }
 
     @Test
@@ -487,7 +486,7 @@ public class TestProperty {
 
         property1.dispose();
 
-        assertTrue(synchronize1Sub.isUnsubscribed());
+        assertTrue(synchronize1Sub.isDisposed());
     }
 
     @Test
@@ -577,7 +576,7 @@ public class TestProperty {
 
         assertFalse(property.hasObservers());
 
-        Subscription subscription = observable.subscribe();
+        rx.Subscription subscription = observable.subscribe();
         assertTrue(property.hasObservers());
 
         subscription.unsubscribe();

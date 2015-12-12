@@ -13,10 +13,10 @@
  */
 package mb.rxui.property.opertator;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
-
-import java.util.Optional;
 
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -24,7 +24,7 @@ import org.mockito.Mockito;
 import mb.rxui.property.Property;
 import mb.rxui.property.PropertyObservable;
 import mb.rxui.property.PropertyObserver;
-import rx.Subscription;
+import mb.rxui.property.Subscription;
 
 public class TestOperatorIsDirty {
 
@@ -56,7 +56,7 @@ public class TestOperatorIsDirty {
         
         property.dispose();
         verify(observer).onDisposed();
-        assertTrue(subscription.isUnsubscribed());
+        assertTrue(subscription.isDisposed());
         Mockito.verifyNoMoreInteractions(observer);
     }
     
@@ -71,7 +71,7 @@ public class TestOperatorIsDirty {
         Subscription subscription = isDirty.observe(observer);
         assertTrue(property.hasObservers());
         
-        subscription.unsubscribe();
+        subscription.dispose();
         assertFalse(property.hasObservers());
     }
     
@@ -89,6 +89,6 @@ public class TestOperatorIsDirty {
         Mockito.verifyNoMoreInteractions(observer);
         
         assertFalse(property.hasObservers());
-        assertTrue(subscription.isUnsubscribed());
+        assertTrue(subscription.isDisposed());
     }
 }
