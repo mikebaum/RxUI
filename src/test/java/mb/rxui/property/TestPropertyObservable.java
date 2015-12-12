@@ -18,8 +18,6 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import rx.Subscription;
-
 public class TestPropertyObservable {
     
     @Test
@@ -33,7 +31,7 @@ public class TestPropertyObservable {
         Subscription subscription = observable.onChanged(val -> {});
         assertTrue(property.hasObservers());
         
-        subscription.unsubscribe();
+        subscription.dispose();
         assertFalse(property.hasObservers());
     }
 }

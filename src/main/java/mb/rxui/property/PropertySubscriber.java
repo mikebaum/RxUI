@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import mb.rxui.annotations.RequiresTest;
-import rx.Subscription;
 
 /**
  * A subscriber of Property events. A property can emit one or many
@@ -46,14 +45,14 @@ public class PropertySubscriber<M> implements PropertyObserver<M>, Subscription 
     }
 
     @Override
-    public void unsubscribe() {
+    public void dispose() {
         isUnsubscribed = true;
         onUnsubscribedActions.stream().map(PropertySubscriber::createSafeCallback).forEach(Runnable::run);
         onUnsubscribedActions.clear();
     }
 
     @Override
-    public boolean isUnsubscribed() {
+    public boolean isDisposed() {
         return isUnsubscribed;
     }
 
@@ -77,7 +76,7 @@ public class PropertySubscriber<M> implements PropertyObserver<M>, Subscription 
     @Override
     public void onDisposed() {
         runSafeCallback(observer::onDisposed);
-        unsubscribe();
+        dispose();
     }
 
     private static void runSafeCallback(Runnable runnable) {

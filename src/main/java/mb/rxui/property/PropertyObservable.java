@@ -28,7 +28,7 @@ import mb.rxui.property.operator.OperatorIsDirty;
 import mb.rxui.property.operator.OperatorMap;
 import mb.rxui.property.operator.PropertyOperator;
 import rx.Observable;
-import rx.Subscription;
+import rx.subscriptions.Subscriptions;
 
 /**
  * A property that can only be observed. This is effectively a read-only version
@@ -192,7 +192,7 @@ public class PropertyObservable<M> implements Supplier<M> {
     public final Observable<M> asObservable() {
         return Observable.create(subscriber -> {
             Subscription subscription = observe(subscriber::onNext, subscriber::onCompleted);
-            subscriber.add(subscription);
+            subscriber.add(Subscriptions.create(subscription::dispose));
         });
     }
 }

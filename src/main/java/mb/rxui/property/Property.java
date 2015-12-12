@@ -22,9 +22,7 @@ import javax.security.auth.Subject;
 import mb.rxui.ThreadChecker;
 import mb.rxui.disposables.Disposable;
 import mb.rxui.property.operator.OperatorIsDirty;
-import rx.Subscription;
 import rx.subjects.BehaviorSubject;
-import rx.subscriptions.CompositeSubscription;
 
 /**
  * A Property is some value that can change over time. It is similar to a
@@ -166,8 +164,8 @@ public class Property<M> extends PropertyObservable<M> implements PropertySource
         subscriptions.add(propertyToSynchornizeWith.bind(this));
 
         // If either of the properties is destroyed, cancel the subscription.
-        onDisposed(subscriptions::unsubscribe);
-        propertyToSynchornizeWith.onDisposed(subscriptions::unsubscribe);
+        onDisposed(subscriptions::dispose);
+        propertyToSynchornizeWith.onDisposed(subscriptions::dispose);
 
         return subscriptions;
     }
@@ -256,7 +254,7 @@ public class Property<M> extends PropertyObservable<M> implements PropertySource
     public static <T> Property<T> fromSubject(BehaviorSubject<T> subject) {
         Property<T> property = Property.create(subject.getValue());
 
-        Subscription subscription = subject.subscribe(property::setValue);
+        rx.Subscription subscription = subject.subscribe(property::setValue);
         property.onDisposed(subscription::unsubscribe);
 
         return property;

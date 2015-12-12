@@ -50,7 +50,7 @@ public class OperatorFilter<M> implements PropertyOperator<M, Optional<M>> {
                         source.subscribe(PropertyObserver.<M>create(value -> subscriber.onChanged(filteredValue(value)),
                                                                     subscriber::onDisposed));
                 
-                subscriber.doOnUnsubscribe(sourceSubscriber::unsubscribe);
+                subscriber.doOnUnsubscribe(sourceSubscriber::dispose);
                 
                 return subscriber;
             }

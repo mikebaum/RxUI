@@ -25,7 +25,7 @@ import org.mockito.Mockito;
 import mb.rxui.property.Property;
 import mb.rxui.property.PropertyObservable;
 import mb.rxui.property.PropertyObserver;
-import rx.Subscription;
+import mb.rxui.property.Subscription;
 
 public class TestOperatorFilter {
     @Test
@@ -43,7 +43,7 @@ public class TestOperatorFilter {
         assertEquals(observable.get(), Optional.empty());
         verify(observer).onChanged(Optional.empty());
         
-        subscription.unsubscribe();
+        subscription.dispose();
         assertEquals(observable.get(), Optional.empty());
     }
     
@@ -58,7 +58,7 @@ public class TestOperatorFilter {
         
         property.dispose();
         verify(observer).onDisposed();
-        assertTrue(subscription.isUnsubscribed());
+        assertTrue(subscription.isDisposed());
         Mockito.verifyNoMoreInteractions(observer);
     }
     
@@ -74,7 +74,7 @@ public class TestOperatorFilter {
         verify(observer).onChanged(Optional.of("taco"));
         assertTrue(property.hasObservers());
         
-        subscription.unsubscribe();
+        subscription.dispose();
         assertFalse(property.hasObservers());
     }
     
@@ -92,6 +92,6 @@ public class TestOperatorFilter {
         Mockito.verifyNoMoreInteractions(observer);
         
         assertFalse(property.hasObservers());
-        assertTrue(subscription.isUnsubscribed());
+        assertTrue(subscription.isDisposed());
     }
 }

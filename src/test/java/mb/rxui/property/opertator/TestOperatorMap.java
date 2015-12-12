@@ -19,15 +19,13 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-import java.util.function.Consumer;
-
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import mb.rxui.property.Property;
 import mb.rxui.property.PropertyObservable;
 import mb.rxui.property.PropertyObserver;
-import rx.Subscription;
+import mb.rxui.property.Subscription;
 
 public class TestOperatorMap {
     @Test
@@ -60,7 +58,7 @@ public class TestOperatorMap {
         
         property.dispose();
         verify(observer).onDisposed();
-        assertTrue(subscription.isUnsubscribed());
+        assertTrue(subscription.isDisposed());
         Mockito.verifyNoMoreInteractions(observer);
     }
     
@@ -75,7 +73,7 @@ public class TestOperatorMap {
         Subscription subscription = observable.observe(observer);
         assertTrue(property.hasObservers());
         
-        subscription.unsubscribe();
+        subscription.dispose();
         assertFalse(property.hasObservers());
     }
     
@@ -93,6 +91,6 @@ public class TestOperatorMap {
         Mockito.verifyNoMoreInteractions(observer);
         
         assertFalse(property.hasObservers());
-        assertTrue(subscription.isUnsubscribed());
+        assertTrue(subscription.isDisposed());
     }
 }
