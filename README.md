@@ -25,7 +25,7 @@ There are four main problems with the `BehaviorSubject`
 3. **Early Completion** - Care must be taken when creating bindings between Subjects, since a completion or error in one Subject could complete the other if they are bound on `onError` and/or `onCompleted`. This could create a cascading effect which may inadvertently complete subjects that should not have been completed. The point is that in UI programming it is normal that elements have different lifetimes. Of course you could be careful to only subscribe `onNext` everywhere but why tip toe around like this if you don't have to.
 4. **Value Retrieval** Considering a Property is meant to replace a mutable field in a Model, you should be able to get the value even after the property is no longer streaming values. A `BehaviorSubject` does not do this, it returns `null`. In contrast, an `AsyncSubject` only provides the value after completion, so in effect a Property acts like a combination of a `BehaviorSubject` and `AsyncSubject`.
 
-### Where are we now
+### Where am I now
 This library is in it's infancy. There is a lot of work to be done, so suggestions about design and implementation are welcome. The first thing I've worked on is the Property, Data Binding API. Since this is such a core element, I've spent considerable time developing it and it is thoroughly tested. It's not 100% nailed down (~~90~~70% maybe), so I'm open to suggestions. Here's an example that demonstrates how the Properties API can be used. I have yet to commit any type of model or view object, so please ignore that fact for the moment. The application presents a form with two text fields that are synchronized, so that edits in one field are mirrored in the other.
 ```java
 public class SynchronizedTextFieldApp {
