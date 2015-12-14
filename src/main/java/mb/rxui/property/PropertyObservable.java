@@ -220,6 +220,36 @@ public class PropertyObservable<M> implements Supplier<M> {
         });
     }
     
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((get() == null) ? 0 : get().hashCode());
+        return result;
+    }
+
+    /**
+     * Compares the current value of this property observable to the current
+     * value of the provided property observable.
+     * 
+     * @param obj
+     *            some other property to compare for equality
+     * @return true if the provided object is a property and if the current
+     *         value of this property and the provided object are equal, false
+     *         otherwise.
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+            
+        return get().equals(((Supplier<?>) obj).get());
+    }
+
     /**
      * Combines the values of two property observables and produces a new result
      * using the provided function any time either of the values changes.

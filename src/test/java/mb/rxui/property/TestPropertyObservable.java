@@ -13,8 +13,7 @@
  */
 package mb.rxui.property;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import org.junit.Test;
 
@@ -33,5 +32,19 @@ public class TestPropertyObservable {
         
         subscription.dispose();
         assertFalse(property.hasObservers());
+    }
+    
+    @Test
+    public void testEquals() throws Exception {
+        Property<String> stringProperty = Property.create("tacos");
+        Property<String> stringProperty2 = Property.create("burritos");
+        Property<Integer> integerProperty = Property.create(10);
+        
+        assertFalse(stringProperty.equals(stringProperty2));
+        assertFalse(stringProperty.equals(integerProperty));
+        assertFalse(stringProperty.equals(new Double(20)));
+        
+        stringProperty2.setValue("tacos");
+        assertTrue(stringProperty.equals(stringProperty2));
     }
 }
