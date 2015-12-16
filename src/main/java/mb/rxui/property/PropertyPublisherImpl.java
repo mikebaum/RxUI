@@ -15,7 +15,6 @@ package mb.rxui.property;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.Objects;
 import java.util.function.Supplier;
 
 /**

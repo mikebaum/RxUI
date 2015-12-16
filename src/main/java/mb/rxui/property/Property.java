@@ -21,7 +21,6 @@ import javax.security.auth.Subject;
 
 import mb.rxui.ThreadChecker;
 import mb.rxui.disposables.Disposable;
-import mb.rxui.property.operator.OperatorIsDirty;
 import rx.subjects.BehaviorSubject;
 
 /**

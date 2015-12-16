@@ -51,7 +51,7 @@ public class TestProperty {
 
     @Test(expected = NullPointerException.class)
     public void testCannotStartWithNullValue() throws Exception {
-        Property.create(null);
+        Property.create((String)null);
     }
 
     @Test
