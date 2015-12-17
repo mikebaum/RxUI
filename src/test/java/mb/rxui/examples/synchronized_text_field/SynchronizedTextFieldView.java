@@ -21,18 +21,21 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 import mb.rxui.property.Property;
+import mb.rxui.property.recorder.PropertyRecorder;
 
 public final class SynchronizedTextFieldView {
     private final Property<String> textProperty;
     private final JComponent component;
     private final TextComponent<JComponent> textComponent1;
     private final TextComponent<JComponent> textComponent2;
+    private final PropertyRecorder<String> recorderComponent;
     
     public SynchronizedTextFieldView(String initialTextValue) {
         textProperty = Property.create(initialTextValue);
         textComponent1 = buildTextComponent(textProperty);
         textComponent2 = buildTextComponent(textProperty);
-        component = buildUI(textComponent1, textComponent2);
+        recorderComponent = new PropertyRecorder<>(textProperty);
+        component = buildUI(textComponent1, textComponent2, recorderComponent);
     }
 
     private static TextComponent<JComponent> buildTextComponent(Property<String> textProperty) {
@@ -42,11 +45,13 @@ public final class SynchronizedTextFieldView {
     }
     
     private static JComponent buildUI(TextComponent<JComponent> textComponent1,
-                                      TextComponent<JComponent> textComponent2) {
-        JPanel panel = new JPanel(new GridLayout(2, 1));
+                                      TextComponent<JComponent> textComponent2, 
+                                      PropertyRecorder<String> recorderComponent) {
+        JPanel panel = new JPanel(new GridLayout(2, 2));
         
         panel.add(textComponent1.getView());
         panel.add(textComponent2.getView());
+        panel.add(recorderComponent.getView());
         
         return panel;
     }

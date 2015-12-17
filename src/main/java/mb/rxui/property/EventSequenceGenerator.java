@@ -22,7 +22,7 @@ import java.util.Optional;
  * numbers. The sequence numbers can be used to order events from different
  * sources into a canonical ordering.
  */
-class EventSequenceGenerator {
+public class EventSequenceGenerator {
     private long lastSequenceNumber = 0;
     private final Map<Long, Long> sequenceMap = new HashMap<>();
     
@@ -63,7 +63,7 @@ class EventSequenceGenerator {
      *         sequence number. This will be empty if a time for the sequence
      *         number does not exist.
      */
-    Optional<Long> getTimeForSequence(long sequenceNumber) {
+    public Optional<Long> getTimeForSequence(long sequenceNumber) {
         return Optional.ofNullable(sequenceMap.get(sequenceNumber));
     }
 }

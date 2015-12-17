@@ -24,6 +24,8 @@ import mb.rxui.ThreadChecker;
 import mb.rxui.disposables.Disposable;
 import mb.rxui.property.dispatcher.Dispatcher;
 import mb.rxui.property.publisher.PropertyPublisher;
+import mb.rxui.property.recorder.PropertyRecorderModel;
+import mb.rxui.property.recorder.PropertyRecordings;
 import rx.Observable;
 import rx.subjects.BehaviorSubject;
 
@@ -187,6 +189,10 @@ public class Property<M> extends PropertyObservable<M> implements PropertySource
                              .filter(Optional::isPresent)
                              .filter(optional -> optional.get().getOldValue() != null)
                              .map(Optional::get);
+    }
+    
+    public final PropertyRecorderModel<M> record() {
+        return PropertyRecordings.getInstance().createRecorder(this);
     }
     
     // Factory methods

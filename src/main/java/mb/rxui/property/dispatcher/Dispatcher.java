@@ -13,6 +13,8 @@
  */
 package mb.rxui.property.dispatcher;
 
+import java.util.function.Supplier;
+
 import mb.rxui.disposables.Disposable;
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertySubscriber;
