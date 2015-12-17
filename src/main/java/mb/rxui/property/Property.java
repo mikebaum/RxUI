@@ -14,6 +14,7 @@
 package mb.rxui.property;
 
 import static java.util.Objects.requireNonNull;
+import static mb.rxui.property.dispatcher.Dispatcher.createPropertyDispatcher;
 
 import java.util.Optional;
 
@@ -21,6 +22,7 @@ import javax.security.auth.Subject;
 
 import mb.rxui.ThreadChecker;
 import mb.rxui.disposables.Disposable;
+import mb.rxui.property.dispatcher.Dispatcher;
 import rx.subjects.BehaviorSubject;
 
 /**
@@ -62,16 +64,16 @@ import rx.subjects.BehaviorSubject;
 public class Property<M> extends PropertyObservable<M> implements PropertySource<M>, Disposable {
 
     private final PropertySource<M> propertySource;
-    private final PropertyDispatcher<M> dispatcher;
+    private final Dispatcher<M> dispatcher;
     private final M initialValue;
     private final ThreadChecker threadChecker;
 
-    private Property(PropertySource<M> propertySource, PropertyDispatcher<M> dispatcher, ThreadChecker threadChecker) {
-        super(new PropertyPublisherImpl<>(propertySource, dispatcher), threadChecker);
+    private Property(PropertySource<M> propertySource, Dispatcher<M> dispatcher) {
+        super(new PropertyPublisherImpl<>(propertySource, dispatcher));
         this.propertySource = requireNonNull(propertySource);
         this.dispatcher = requireNonNull(dispatcher);
         this.initialValue = requireNonNull(get(), "A Property must be initialized with a value");
-        this.threadChecker = requireNonNull(threadChecker);
+        this.threadChecker = ThreadChecker.create();
     }
     
     @Override
@@ -187,10 +189,9 @@ public class Property<M> extends PropertyObservable<M> implements PropertySource
      *            the created property
      * @return a new {@link Property}
      */
-    static final <M> Property<M> create(PropertySourceFactory<M> propertySourceFactory, 
-                                        ThreadChecker threadChecker) {
-        PropertyDispatcher<M> dispatcher = new PropertyDispatcher<>();
-        return new Property<>(propertySourceFactory.apply(dispatcher), dispatcher, threadChecker);
+    public static final <M> Property<M> create(PropertySourceFactory<M> propertySourceFactory) {
+        Dispatcher<M> dispatcher = createPropertyDispatcher();
+        return new Property<>(propertySourceFactory.apply(dispatcher), dispatcher);
     }
     
     /**
@@ -202,20 +203,6 @@ public class Property<M> extends PropertyObservable<M> implements PropertySource
      */
     public static <M> Property<M> create(M initialValue) {
         return create(ModelPropertySource.createFactory(initialValue));
-    }
-
-    /**
-     * Creates a new property that is backed by the provided
-     * {@link PropertySource}.
-     * 
-     * @param setter
-     *            some consumer of set calls.
-     * @param getter
-     *            some supplier of values for this property.
-     * @return a new property.
-     */
-    public static <M> Property<M> create(PropertySourceFactory<M> propertySourceFactory) {
-        return Property.create(propertySourceFactory, ThreadChecker.create());
     }
 
     /**

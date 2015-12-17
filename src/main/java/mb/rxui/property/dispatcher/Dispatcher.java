@@ -11,9 +11,11 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package mb.rxui.property;
+package mb.rxui.property.dispatcher;
 
 import mb.rxui.disposables.Disposable;
+import mb.rxui.property.PropertyObserver;
+import mb.rxui.property.PropertySubscriber;
 
 /**
  * Used to dispatch events to susbcribers. Guarantees to always flag dispatching
@@ -71,4 +73,12 @@ public interface Dispatcher<V> extends Disposable {
      *             if called when the dispatcher has already been disposed.
      */
     PropertySubscriber<V> subscribe(PropertyObserver<V> observer);
+    
+    /**
+     * Creates a {@link Dispatcher} to be used to dispatch property events.
+     * @return a new {@link Dispatcher} to be used to dispatch property events.
+     */
+    static <V> Dispatcher<V> createPropertyDispatcher() {
+        return new PropertyDispatcher<>();
+    }
 }

@@ -21,7 +21,7 @@ import javax.swing.text.JTextComponent;
 import mb.rxui.annotations.RequiresTest;
 import mb.rxui.disposables.Disposable;
 import mb.rxui.property.Property;
-import mb.rxui.property.PropertyDispatcher;
+import mb.rxui.property.dispatcher.Dispatcher;
 
 /**
  * A Swing text property source.
@@ -29,7 +29,7 @@ import mb.rxui.property.PropertyDispatcher;
 @RequiresTest
 public class TextPropertySource extends SwingPropertySource<String, DocumentListener, Document> {
 
-    private TextPropertySource(JTextComponent textComponent, PropertyDispatcher<String> dispatcher) {
+    private TextPropertySource(JTextComponent textComponent, Dispatcher<String> dispatcher) {
         super(textComponent::getText, textComponent::setText, textComponent.getDocument(), dispatcher);
     }
     
@@ -44,7 +44,7 @@ public class TextPropertySource extends SwingPropertySource<String, DocumentList
     }
     
     @Override
-    protected DocumentListener createListener(PropertyDispatcher<String> dispatcher) {
+    protected DocumentListener createListener(Dispatcher<String> dispatcher) {
         return new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {

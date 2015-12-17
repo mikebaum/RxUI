@@ -17,6 +17,8 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.function.Supplier;
 
+import mb.rxui.property.dispatcher.Dispatcher;
+
 /**
  * Base implementation of a property publisher.
  *

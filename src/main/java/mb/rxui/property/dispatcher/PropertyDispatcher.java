@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package mb.rxui.property;
+package mb.rxui.property.dispatcher;
 
 import static mb.rxui.Preconditions.checkState;
 
@@ -20,6 +20,8 @@ import java.util.List;
 
 import mb.rxui.annotations.RequiresTest;
 import mb.rxui.disposables.Disposable;
+import mb.rxui.property.PropertyObserver;
+import mb.rxui.property.PropertySubscriber;
 
 /**
  * A dispatcher for property change events.
@@ -33,6 +35,8 @@ public final class PropertyDispatcher<M> implements Dispatcher<M> {
     private final IsDispatching isDispatching = new IsDispatching();
     
     private boolean isDisposed = false;
+    
+    PropertyDispatcher() {}
     
     @Override
     public void dispatchValue(M newValue) {
