@@ -18,6 +18,9 @@ import static mb.rxui.Preconditions.checkState;
 
 import javax.swing.SwingUtilities;
 
+import com.sun.javafx.PlatformUtil;
+
+import javafx.application.Platform;
 import mb.rxui.annotations.RequiresTest;
 
 /**
@@ -53,6 +56,12 @@ public interface ThreadChecker extends Runnable {
     static final ThreadChecker EDT_THREAD_CHECKER = () -> {
         checkState(SwingUtilities.isEventDispatchThread(),
                    "Method should have been called on the EDT, but instead it was called from: " + 
+                   Thread.currentThread());
+    };
+    
+    static final ThreadChecker PLATFORM_THREAD_CHECKER = () -> {
+        checkState(Platform.isFxApplicationThread(),
+                   "Method should have been called on the JavaFx Platform Thread, but instead it was called from: " + 
                    Thread.currentThread());
     };
 }

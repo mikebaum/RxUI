@@ -60,6 +60,21 @@ public class PropertyObservable<M> implements Supplier<M> {
         this.threadChecker = requireNonNull(threadChecker);
         initialValue = requireNonNull(propertyPublisher.get());
     }
+    
+    /**
+     * Creates a property observable for the provided property publisher.<br>
+     * <br>
+     * NOTE:<br>
+     * 1) Only use this constructor if the provided property publisher is a read only source, since
+     * there is no guarantee that the provided publisher will respect the re-entrancy contract that
+     * is ensured by using the {@link Property} class.
+     * 
+     * @param propertyPublisher some property publisher
+     * @return a new {@link PropertyObservable} that is linked to the provided publisher
+     */
+    public static <M> PropertyObservable<M> create(PropertyPublisher<M> propertyPublisher) {
+        return new PropertyObservable<>(propertyPublisher, ThreadChecker.create());
+    }
 
     /**
      * Gets the current value of this property.
