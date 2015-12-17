@@ -26,68 +26,69 @@ There are four main problems with the `BehaviorSubject`
 4. **Value Retrieval** Considering a Property is meant to replace a mutable field in a Model, you should be able to get the value even after the property is no longer streaming values. A `BehaviorSubject` does not do this, it returns `null`. In contrast, an `AsyncSubject` only provides the value after completion, so in effect a Property acts like a combination of a `BehaviorSubject` and `AsyncSubject`.
 
 ### Where am I now
-This library is in it's infancy. There is a lot of work to be done, so suggestions about design and implementation are welcome. The first thing I've worked on is the Property, Data Binding API. Since this is such a core element, I've spent considerable time developing it and it is thoroughly tested. It's not 100% nailed down (~~90~~70% maybe), so I'm open to suggestions. Here's an example that demonstrates how the Properties API can be used. I have yet to commit any type of model or view object, so please ignore that fact for the moment. The application presents a form with two text fields that are synchronized, so that edits in one field are mirrored in the other.
+This library is in it's infancy. There is a lot of work to be done, so suggestions about design and implementation are welcome. The first thing I've worked on is the Property, Data Binding API. Since this is such a core element, I've spent considerable time developing it and it is thoroughly tested. It's not 100% nailed down (~~90~~70% maybe), so I'm open to suggestions. Here's an example that demonstrates how the Properties API can be used. I have yet to commit any type of model or view object, so please ignore that fact for the moment. The application presents a form with two text fields that are synchronized, so that edits in one field are mirrored in the other. Here's two examples, the first using Swing, the second using JavaFx. Note tht the only differences are the way in which the UI is constructed.
 ```java
-public class SynchronizedTextFieldApp {
+public class SwingSynchronizedTextFieldApp {
 
+    private static void buildAndShowSwingView() {
+        TextComponent<JComponent> textComponent1 = new TextComponent<>(defaultSwingTextView(), "tacos");
+        TextComponent<JComponent> textComponent2 = new TextComponent<>(defaultSwingTextView(), "");
+        textComponent2.getModel().getTextProperty().synchronize(textComponent1.getModel().getTextProperty());
+        
+        initUI(textComponent1, textComponent2);
+    }
+
+    private static void initUI(TextComponent<JComponent> textComponent1, 
+                               TextComponent<JComponent> textComponent2) {
+        
+        JFrame frame = new JFrame("Synchronized Text Field Test App");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        JPanel panel = new JPanel(new GridLayout(2, 1));
+        
+        panel.add(textComponent1.getView());
+        panel.add(textComponent2.getView());
+        
+        frame.setContentPane(panel);
+        
+        frame.pack();
+        frame.setVisible(true);
+    }
+    
     public static void main(String[] args) {
+        SwingUtilities.invokeLater(SwingSynchronizedTextFieldApp::buildAndShowSwingView );
+    }
+}
+```
+JavaFx example
+```java
+public class JavaFxSynchronizedTextFieldApp extends Application {
+    
+    public JavaFxSynchronizedTextFieldApp() {}
+    
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        TextComponent<Control> textComponent1 = new TextComponent<>(defaultJavaFxTextView(), "tacos");
+        TextComponent<Control> textComponent2 = new TextComponent<>(defaultJavaFxTextView(), "");
+        textComponent2.getModel().getTextProperty().synchronize(textComponent1.getModel().getTextProperty());
         
-        SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Synchronized Text Field Test App");
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            
-            JTextComponent textComponent1 = new JTextField();
-            TextView textView1 = new TextView(textComponent1);
-            TextModel textModel1 = new TextModel("tacos");
-            textView1.getTextProperty().synchronize(textModel1.getTextProperty());
-            
-            JTextComponent textComponent2 = new JTextField();
-            TextView textView2 = new TextView(textComponent2);
-            TextModel textModel2 = new TextModel("");
-            textView2.getTextProperty().synchronize(textModel2.getTextProperty());
-            
-            textModel2.getTextProperty().synchronize(textModel1.getTextProperty());
-            
-            JPanel panel = new JPanel(new GridLayout(2, 1));
-            
-            panel.add(textView1.getText());
-            panel.add(textView2.getText());
-            
-            frame.setContentPane(panel);
-            
-            frame.pack();
-            frame.setVisible(true);
-        });
+        initUI(textComponent1, textComponent2, primaryStage);
+    }
+
+    private static void initUI(TextComponent<Control> textComponent1, 
+                               TextComponent<Control> textComponent2,
+                               Stage primaryStage) {
+
+        primaryStage.setTitle("Synchronized Text Field Test App");
+        
+        GridPane gridPane = new GridPane();
+        gridPane.add(textComponent1.getView(), 1, 1);
+        gridPane.add(textComponent2.getView(), 1, 2);
+        primaryStage.setScene(new Scene(gridPane, 300, 250));
+        primaryStage.show();
     }
     
-    private static class TextView {
-        private final Property<String> textProperty;
-        private final JComponent textComponent;
-        
-        public TextView(JTextComponent textComponent) {
-            textProperty = TextPropertySource.createTextProperty(textComponent);
-            this.textComponent = textComponent;
-        }
-        
-        public JComponent getText() {
-            return textComponent;
-        }
-        
-        public Property<String> getTextProperty() {
-            return textProperty;
-        }
-    }
-    
-    private static class TextModel {
-        private final Property<String> textProperty;
-        
-        public TextModel(String initialValue) {
-            textProperty = Property.create(initialValue);
-        }
-        
-        public Property<String> getTextProperty() {
-            return textProperty;
-        }
+    public static void main(String[] args) {
+        launch(args);
     }
 }
 ```
