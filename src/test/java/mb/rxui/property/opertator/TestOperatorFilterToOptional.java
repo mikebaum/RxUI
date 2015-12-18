@@ -27,14 +27,14 @@ import mb.rxui.property.PropertyObservable;
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.Subscription;
 
-public class TestOperatorFilter {
+public class TestOperatorFilterToOptional {
     @Test
     public void testFilter() throws Exception {
         Property<String> property = Property.create("taco");
         
         PropertyObserver<Optional<String>> observer = mock(PropertyObserver.class);
         
-        PropertyObservable<Optional<String>> observable = property.filter(value -> value.equals("taco"));
+        PropertyObservable<Optional<String>> observable = property.filterToOptional(value -> value.equals("taco"));
         
         Subscription subscription = observable.observe(observer);
         verify(observer).onChanged(Optional.of("taco"));
@@ -50,7 +50,7 @@ public class TestOperatorFilter {
     @Test
     public void testDisposeUnsubscribesObserver() throws Exception {
         Property<String> property = Property.create("taco");
-        PropertyObservable<Optional<String>> observable = property.filter(value -> value.equals("taco"));
+        PropertyObservable<Optional<String>> observable = property.filterToOptional(value -> value.equals("taco"));
         PropertyObserver<Optional<String>> observer = Mockito.mock(PropertyObserver.class);
         
         Subscription subscription = observable.observe(observer);
@@ -65,7 +65,7 @@ public class TestOperatorFilter {
     @Test
     public void testUnsubscribeRemovesObserver() throws Exception {
         Property<String> property = Property.create("taco");
-        PropertyObservable<Optional<String>> observable = property.filter(value -> value.equals("taco"));
+        PropertyObservable<Optional<String>> observable = property.filterToOptional(value -> value.equals("taco"));
         PropertyObserver<Optional<String>> observer = Mockito.mock(PropertyObserver.class);
         
         assertFalse(property.hasObservers());
@@ -81,7 +81,7 @@ public class TestOperatorFilter {
     @Test
     public void testSubscribeAfterDispose() throws Exception {
         Property<String> property = Property.create("taco");
-        PropertyObservable<Optional<String>> observable = property.filter(value -> value.equals("taco"));
+        PropertyObservable<Optional<String>> observable = property.filterToOptional(value -> value.equals("taco"));
         PropertyObserver<Optional<String>> observer = Mockito.mock(PropertyObserver.class);
         
         property.dispose();

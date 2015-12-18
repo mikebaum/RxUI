@@ -13,42 +13,51 @@
  */
 package mb.rxui.property.operator;
 
-import java.util.Optional;
 import java.util.function.Predicate;
 
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertyPublisher;
 import mb.rxui.property.PropertySubscriber;
 
-public class OperatorFilter<M> implements PropertyOperator<M, Optional<M>> {
+/**
+ * Operator that filters the values emitted by the source property observable
+ * such that only those values that satisfy the predicate are emitted.<br>
+ * <br>
+ * NOTES:<br>
+ * 1) This operator differs from {@link OperatorFilterToOptional} since it will
+ * only emit values that satisfy the predicate.<br>
+ * 2) The get method of the new property observable this operator creates will
+ * always return the current value of the source property observable.
+ * 
+ * @param <M>
+ *            the type of values this operator filters
+ */
+public class OperatorFilter<M> implements PropertyOperator<M, M> {
+
     private final Predicate<M> predicate;
     
     public OperatorFilter(Predicate<M> predicate) {
         this.predicate = predicate;
-        
     }
+
     @Override
-    public PropertyPublisher<Optional<M>> apply(PropertyPublisher<M> source) {
-        
-        return new PropertyPublisher<Optional<M>>() {
-
+    public PropertyPublisher<M> apply(PropertyPublisher<M> source) {
+        return new PropertyPublisher<M>() {
             @Override
-            public Optional<M> get() {
-                return filteredValue(source.get());
-            }
-
-            private Optional<M> filteredValue(M currentValue) {
-                return Optional.of(currentValue).filter(predicate);
+            public M get() {
+                return source.get();
             }
 
             @Override
-            public PropertySubscriber<Optional<M>> subscribe(PropertyObserver<Optional<M>> observer) {
-                
-                PropertySubscriber<Optional<M>> subscriber = new PropertySubscriber<>(observer);
+            public PropertySubscriber<M> subscribe(PropertyObserver<M> observer) {
+                PropertySubscriber<M> subscriber = new PropertySubscriber<>(observer);
                 
                 PropertySubscriber<M> sourceSubscriber = 
-                        source.subscribe(PropertyObserver.<M>create(value -> subscriber.onChanged(filteredValue(value)),
-                                                                    subscriber::onDisposed));
+                        source.subscribe(PropertyObserver.<M>create(value -> { 
+                            if (predicate.test(value))
+                                subscriber.onChanged(value); 
+                            },
+                            subscriber::onDisposed));
                 
                 subscriber.doOnUnsubscribe(sourceSubscriber::dispose);
                 
