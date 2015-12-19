@@ -25,7 +25,7 @@ import mb.rxui.property.Subscription;
 /**
  * A {@link PropertyConditionBuilder} can be used to setup some multi-condition
  * filter to apply to a property. The action that is provided in the
- * {@link #then(Runnable)} clause will only be executed if all the provided
+ * {@link #then(Runnable)} clause will only be executed if any of the provided
  * {@link #or(Object)} conditions are met.
  * 
  * @param <M>
