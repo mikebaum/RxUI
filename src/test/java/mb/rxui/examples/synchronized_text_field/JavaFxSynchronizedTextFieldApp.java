@@ -43,7 +43,9 @@ public class JavaFxSynchronizedTextFieldApp extends Application {
         GridPane gridPane = new GridPane();
         gridPane.add(textComponent1.getView(), 1, 1);
         gridPane.add(textComponent2.getView(), 1, 2);
-        primaryStage.setScene(new Scene(gridPane, 300, 250));
+        Scene scene = new Scene(gridPane);
+        primaryStage.setScene(scene);
+        primaryStage.sizeToScene();
         primaryStage.show();
     }
     

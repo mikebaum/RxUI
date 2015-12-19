@@ -13,12 +13,11 @@
  */
 package mb.rxui;
 
+import static javafx.application.Platform.isFxApplicationThread;
 import static javax.swing.SwingUtilities.isEventDispatchThread;
 import static mb.rxui.Preconditions.checkState;
 
 import javax.swing.SwingUtilities;
-
-import com.sun.javafx.PlatformUtil;
 
 import javafx.application.Platform;
 import mb.rxui.annotations.RequiresTest;
@@ -43,6 +42,9 @@ public interface ThreadChecker extends Runnable {
     static ThreadChecker create() {
         if (isEventDispatchThread())
             return EDT_THREAD_CHECKER;
+        
+        if(isFxApplicationThread())
+            return PLATFORM_THREAD_CHECKER;
 
         long threadId = Thread.currentThread().getId();
 

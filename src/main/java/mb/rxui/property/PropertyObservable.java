@@ -29,7 +29,6 @@ import mb.rxui.Preconditions;
 import mb.rxui.ThreadChecker;
 import mb.rxui.property.operator.OperatorFilter;
 import mb.rxui.property.operator.OperatorFilterToOptional;
-import mb.rxui.property.operator.OperatorIs;
 import mb.rxui.property.operator.OperatorIsDirty;
 import mb.rxui.property.operator.OperatorMap;
 import mb.rxui.property.operator.OperatorTake;
@@ -58,9 +57,13 @@ public class PropertyObservable<M> implements Supplier<M> {
     private final ThreadChecker threadChecker;
     private final M initialValue;
     
-    protected PropertyObservable(PropertyPublisher<M> propertyPublisher, ThreadChecker threadChecker) {
+    /**
+     * Creates a new {@link PropertyObservable}
+     * @param propertyPublisher some property publisher to back this property observable.
+     */
+    protected PropertyObservable(PropertyPublisher<M> propertyPublisher) {
         this.propertyPublisher = requireNonNull(propertyPublisher);
-        this.threadChecker = requireNonNull(threadChecker);
+        this.threadChecker = ThreadChecker.create();
         initialValue = requireNonNull(propertyPublisher.get());
     }
     
@@ -76,7 +79,7 @@ public class PropertyObservable<M> implements Supplier<M> {
      * @return a new {@link PropertyObservable} that is linked to the provided publisher
      */
     public static <M> PropertyObservable<M> create(PropertyPublisher<M> propertyPublisher) {
-        return new PropertyObservable<>(propertyPublisher, ThreadChecker.create());
+        return new PropertyObservable<>(propertyPublisher);
     }
 
     /**
@@ -96,6 +99,11 @@ public class PropertyObservable<M> implements Supplier<M> {
         return propertyPublisher.get();
     }
 
+    /**
+     * Adds an observer to this property observable.
+     * @param observer some property observer
+     * @return a {@link Subscription} that can be used to cancel the subscription.
+     */
     public final Subscription observe(PropertyObserver<M> observer) {
         threadChecker.checkThread();
         return propertyPublisher.subscribe(observer);
@@ -204,8 +212,9 @@ public class PropertyObservable<M> implements Supplier<M> {
     }
     
     /**
-     * Converts this property observable into boolean property observable
-     * representing whether or not the current value differs from the initial.
+     * Creates a new property observable that emits true or false whether or not
+     * the current value of this property observable differs from the initial
+     * value.
      * 
      * @return a new {@link PropertyObservable} that emits true if the current
      *         value is different than the initial value, false otherwise.
@@ -243,7 +252,7 @@ public class PropertyObservable<M> implements Supplier<M> {
      */
     public final <R> PropertyObservable<R> lift(PropertyOperator<M, R> operator) {
         Objects.requireNonNull(operator);
-        return new PropertyObservable<>(operator.apply(propertyPublisher), threadChecker);
+        return new PropertyObservable<>(operator.apply(propertyPublisher));
     }
     
     /**
@@ -261,6 +270,13 @@ public class PropertyObservable<M> implements Supplier<M> {
             Subscription subscription = observe(subscriber::onNext, subscriber::onCompleted);
             subscriber.add(Subscriptions.create(subscription::dispose));
         });
+    }
+    
+    public final Observable<PropertyChangeEvent<M>> getChangeEvents() {
+        return asObservable().scan(Optional.<PropertyChangeEvent<M>>empty(),
+                                   (lastEvent, newValue)  -> PropertyChangeEvent.next(lastEvent, newValue))
+                             .filter(Optional::isPresent)
+                             .map(Optional::get);
     }
     
     @Override
@@ -309,9 +325,9 @@ public class PropertyObservable<M> implements Supplier<M> {
      *         function any time either observables' value changes.
      */
     public static <T1, T2, R> PropertyObservable<R> combine(PropertyObservable<T1> observable1, PropertyObservable<T2> observable2, BiFunction<T1, T2, R> combiner) {
-        List<PropertyObservable<?>> observables =Arrays.asList(observable1, observable2);
+        List<PropertyObservable<?>> observables = Arrays.asList(observable1, observable2);
         Supplier<R> combineSupplier = () -> combiner.apply(observable1.get(), observable2.get());
         
-        return new PropertyObservable<R>(new CombinePropertyPublisher<R>(combineSupplier, observables), ThreadChecker.create());
+        return new PropertyObservable<R>(new CombinePropertyPublisher<R>(combineSupplier, observables));
     }
 }
