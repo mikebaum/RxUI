@@ -28,9 +28,12 @@ import java.util.function.Supplier;
 import mb.rxui.Preconditions;
 import mb.rxui.ThreadChecker;
 import mb.rxui.property.operator.OperatorFilter;
+import mb.rxui.property.operator.OperatorFilterToOptional;
+import mb.rxui.property.operator.OperatorIs;
 import mb.rxui.property.operator.OperatorIsDirty;
 import mb.rxui.property.operator.OperatorMap;
 import mb.rxui.property.operator.OperatorTake;
+import mb.rxui.property.operator.PropertyConditionBuilder;
 import mb.rxui.property.operator.PropertyOperator;
 import rx.Observable;
 import rx.subscriptions.Subscriptions;
@@ -161,7 +164,7 @@ public class PropertyObservable<M> implements Supplier<M> {
     
     /**
      * Filters out the values emitted by this property that do not satisfy the
-     * provided predicate. If the current value of this property observable do
+     * provided predicate. If the current value of this property observable does
      * not satisfy the predicate the current value of the filtered property will
      * become {@link Optional#empty()}.
      * 
@@ -171,8 +174,33 @@ public class PropertyObservable<M> implements Supplier<M> {
      *         current value or empty if the current value does not satisfy the
      *         predicate.
      */
-    public final PropertyObservable<Optional<M>> filter(Predicate<M> predicate) {
+    public final PropertyObservable<Optional<M>> filterToOptional(Predicate<M> predicate) {
+        return lift(new OperatorFilterToOptional<>(predicate));
+    }
+    
+    /**
+     * Filters out the values emitted by this property that do not satisfy the
+     * provided predicate.
+     * 
+     * @param predicate
+     *            some predicate to use to filter this property observable.
+     * @return a new {@link PropertyObservable} that only emits values that satisfy the predicate.
+     */
+    public final PropertyObservable<M> filter(Predicate<M> predicate) {
         return lift(new OperatorFilter<>(predicate));
+    }
+    
+    /**
+     * Creates a new {@link PropertyObservable} that checks if the current value
+     * of this property observable equals the provided value.
+     * 
+     * @param value
+     *            some value to compare the current value to.
+     * @return true if the current value matches the provided value to compare
+     *         to, false otherwise.
+     */
+    public final PropertyConditionBuilder<M> is(M value) {
+        return new PropertyConditionBuilder<M>(this, value);
     }
     
     /**

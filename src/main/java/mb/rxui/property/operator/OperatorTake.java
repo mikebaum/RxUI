@@ -13,7 +13,6 @@
  */
 package mb.rxui.property.operator;
 
-import mb.rxui.Preconditions;
 import mb.rxui.property.PropertyObservable;
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertyPublisher;
