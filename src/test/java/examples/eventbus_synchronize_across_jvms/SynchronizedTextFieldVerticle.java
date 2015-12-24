@@ -53,7 +53,7 @@ public class SynchronizedTextFieldVerticle extends AbstractVerticle {
     private static void startSync(EventBus eventBus, Property<String> textProperty, UUID appInstanceId) {
         AtomicBoolean isReceiving = new AtomicBoolean(false);
 
-        SwingUtilities.invokeLater(() -> textProperty.getChangeEvents().subscribe(changeEvent -> { 
+        SwingUtilities.invokeLater(() -> textProperty.changeEvents().subscribe(changeEvent -> { 
             if (isReceiving.get())
                 return;
 

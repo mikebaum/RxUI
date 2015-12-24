@@ -1,12 +1,12 @@
 package examples.eventbus_synchronize_across_jvms;
 
-import io.vertx.core.DeploymentOptions;
-import io.vertx.core.Vertx;
-import io.vertx.core.VertxOptions;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.function.Consumer;
+
+import io.vertx.core.DeploymentOptions;
+import io.vertx.core.VertxOptions;
+import io.vertx.rxjava.core.Vertx;
 
 /*
  * @author <a href="http://tfox.org">Tim Fox</a>
