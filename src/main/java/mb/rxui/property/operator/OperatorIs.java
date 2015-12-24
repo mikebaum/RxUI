@@ -38,6 +38,7 @@ public class OperatorIs<M> implements PropertyOperator<M, Boolean> {
         this.values = new ArrayList<>(requireNonNull(values));
     }
     
+    @SuppressWarnings("unchecked")
     public OperatorIs(M value, M... additionalValues) {
         this(createList(value, additionalValues));
     }
@@ -71,6 +72,7 @@ public class OperatorIs<M> implements PropertyOperator<M, Boolean> {
         };
     }
 
+    @SuppressWarnings("unchecked")
     private static <M> List<M> createList(M value, M... additionalValues) {
         List<M> values = new ArrayList<>();
         values.add(value);

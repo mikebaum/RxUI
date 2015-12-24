@@ -13,8 +13,6 @@
  */
 package mb.rxui.examples.synchronized_text_field;
 
-import static mb.rxui.examples.synchronized_text_field.TextView.defaultSwingTextView;
-
 import java.awt.GridLayout;
 
 import javax.swing.JComponent;
@@ -22,36 +20,39 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import mb.rxui.property.Property;
+
 /**
  * Simple Swing application to demonstrate how to use properties.
  */
 public class SwingSynchronizedTextFieldApp {
-
-    private static void buildAndShowSwingView() {
-        TextComponent<JComponent> textComponent1 = new TextComponent<>(defaultSwingTextView(), "tacos");
-        TextComponent<JComponent> textComponent2 = new TextComponent<>(defaultSwingTextView(), "");
-        textComponent2.getModel().getTextProperty().synchronize(textComponent1.getModel().getTextProperty());
-        
-        initUI(textComponent1, textComponent2);
+    
+    private final SynchronizedTextFieldView synchronizedTextView;
+    
+    public SwingSynchronizedTextFieldApp(String initialTextValue) {
+        synchronizedTextView = new SynchronizedTextFieldView(initialTextValue);
+    }
+    
+    public Property<String> getTextProperty() {
+        return synchronizedTextView.getTextProperty();
     }
 
-    private static void initUI(TextComponent<JComponent> textComponent1, 
-                               TextComponent<JComponent> textComponent2) {
+    public void show() {
+        buildFrame(synchronizedTextView.getComponent());
+    }
+
+    private static void buildFrame(JComponent view) {
         
         JFrame frame = new JFrame("Synchronized Text Field Test App");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        JPanel panel = new JPanel(new GridLayout(2, 1));
-        
-        panel.add(textComponent1.getView());
-        panel.add(textComponent2.getView());
-        
-        frame.setContentPane(panel);
+
+        frame.setContentPane(view);
         
         frame.pack();
         frame.setVisible(true);
     }
     
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(SwingSynchronizedTextFieldApp::buildAndShowSwingView );
+        SwingUtilities.invokeLater(() -> new SwingSynchronizedTextFieldApp("tacos").show());
     }
 }
