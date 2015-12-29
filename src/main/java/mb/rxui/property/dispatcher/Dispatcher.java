@@ -57,9 +57,9 @@ public interface Dispatcher<V> extends Disposable {
     boolean isDisposed();
 
     /**
-     * @return true if this dispatcher currently has any subscribers
+     * @return the number of subscribers to this dispatcher.
      */
-    boolean hasSubscribers();
+    int getSubscriberCount();
 
     /**
      * Adds an observer to this dispatcher.

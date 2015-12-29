@@ -36,7 +36,7 @@ public class PropertyChangeEvent<M> {
     }
     
     public PropertyChangeEvent(M oldValue, M newValue) {
-        this(oldValue, newValue, EventSequenceGenerator.getInstance().next());
+        this(oldValue, newValue, EventSequenceGenerator.getInstance().nextSequenceNumber());
     }
     
     /**

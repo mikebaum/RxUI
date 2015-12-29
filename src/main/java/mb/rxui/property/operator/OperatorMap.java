@@ -16,8 +16,8 @@ package mb.rxui.property.operator;
 import java.util.function.Function;
 
 import mb.rxui.property.PropertyObserver;
-import mb.rxui.property.PropertyPublisher;
 import mb.rxui.property.PropertySubscriber;
+import mb.rxui.property.publisher.PropertyPublisher;
 
 public class OperatorMap<Downstream, Upstream> implements PropertyOperator<Downstream, Upstream>{
 

@@ -74,8 +74,8 @@ public final class PropertyDispatcher<M> implements Dispatcher<M> {
     }
     
     @Override
-    public boolean hasSubscribers() {
-        return ! subscribers.isEmpty();
+    public int getSubscriberCount() {
+        return subscribers.size();
     }
     
     @Override

@@ -16,8 +16,8 @@ package mb.rxui.property.operator;
 import java.util.function.Predicate;
 
 import mb.rxui.property.PropertyObserver;
-import mb.rxui.property.PropertyPublisher;
 import mb.rxui.property.PropertySubscriber;
+import mb.rxui.property.publisher.PropertyPublisher;
 
 /**
  * Operator that filters the values emitted by the source property observable

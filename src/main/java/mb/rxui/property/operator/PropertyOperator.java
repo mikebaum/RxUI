@@ -15,7 +15,7 @@ package mb.rxui.property.operator;
 
 import java.util.function.Function;
 
-import mb.rxui.property.PropertyPublisher;
+import mb.rxui.property.publisher.PropertyPublisher;
 
 /**
  * A {@link PropertyOperator} is some function that can convert a property

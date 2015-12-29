@@ -11,13 +11,19 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package mb.rxui.property;
+package mb.rxui.property.publisher;
 
 import static java.util.Objects.requireNonNull;
 
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
+import mb.rxui.property.CompositeSubscription;
+import mb.rxui.property.PropertyObservable;
+import mb.rxui.property.PropertyObserver;
+import mb.rxui.property.PropertySubscriber;
+import mb.rxui.property.Subscription;
 
 /**
  * A {@link PropertyPublisher} that will combine the values of the provided
@@ -62,7 +68,7 @@ public class CombinePropertyPublisher<R> implements PropertyPublisher<R> {
                                                                  if (incrementDisposeCount())
                                                                      combineSubscriber.onDisposed();
                                                              }))
-                  .collect(Collectors.toList());
+                       .collect(Collectors.toList());
         
         CompositeSubscription subscription = new CompositeSubscription(subscriptions);
         

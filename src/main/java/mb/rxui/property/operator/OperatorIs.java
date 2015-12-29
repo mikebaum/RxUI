@@ -20,8 +20,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import mb.rxui.property.PropertyObserver;
-import mb.rxui.property.PropertyPublisher;
 import mb.rxui.property.PropertySubscriber;
+import mb.rxui.property.publisher.PropertyPublisher;
 
 /**
  * A {@link PropertyOperator} that transforms the property observable into a

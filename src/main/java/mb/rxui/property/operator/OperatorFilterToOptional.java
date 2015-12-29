@@ -17,8 +17,8 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 import mb.rxui.property.PropertyObserver;
-import mb.rxui.property.PropertyPublisher;
 import mb.rxui.property.PropertySubscriber;
+import mb.rxui.property.publisher.PropertyPublisher;
 
 /**
  * Filters values based on some predicate. Emits an Optional empty if the
@@ -38,8 +38,8 @@ public class OperatorFilterToOptional<M> implements PropertyOperator<M, Optional
      */
     public OperatorFilterToOptional(Predicate<M> predicate) {
         this.predicate = predicate;
-        
     }
+    
     @Override
     public PropertyPublisher<Optional<M>> apply(PropertyPublisher<M> source) {
         

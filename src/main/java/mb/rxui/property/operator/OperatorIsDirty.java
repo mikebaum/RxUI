@@ -14,8 +14,8 @@
 package mb.rxui.property.operator;
 
 import mb.rxui.property.PropertyObserver;
-import mb.rxui.property.PropertyPublisher;
 import mb.rxui.property.PropertySubscriber;
+import mb.rxui.property.publisher.PropertyPublisher;
 
 public class OperatorIsDirty<M> implements PropertyOperator<M, Boolean> {
 

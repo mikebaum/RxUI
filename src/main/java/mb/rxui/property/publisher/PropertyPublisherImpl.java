@@ -11,13 +11,15 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package mb.rxui.property;
+package mb.rxui.property.publisher;
 
 import static java.util.Objects.requireNonNull;
-import static mb.rxui.Preconditions.checkArgument;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
+import mb.rxui.property.PropertyObserver;
+import mb.rxui.property.PropertySubscriber;
 import mb.rxui.property.dispatcher.Dispatcher;
 
 /**
@@ -46,7 +48,7 @@ final class PropertyPublisherImpl<T> implements PropertyPublisher<T> {
     public PropertyPublisherImpl(Supplier<T> propertySupplier, Dispatcher<T> dispatcher) {
         this.propertySupplier = requireNonNull(propertySupplier);
         this.dispatcher = requireNonNull(dispatcher);
-        checkArgument(propertySupplier.get() != null, "A property publisher must be initialized with a value");
+        Objects.requireNonNull(propertySupplier.get(), "A property publisher must be initialized with a value");
     }
     
     

@@ -13,11 +13,25 @@
  */
 package mb.rxui.property;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.verify;
 
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
+
+import rx.functions.Action0;
+import rx.functions.Action1;
 
 public class TestPropertyObservable {
+    
+    @Before
+    public void setup() {
+        EventSequenceGenerator.getInstance().reset();
+    }
     
     @Test
     public void testUnsubscribe() throws Exception {
@@ -46,5 +60,59 @@ public class TestPropertyObservable {
         
         stringProperty2.setValue("tacos");
         assertTrue(stringProperty.equals(stringProperty2));
+    }
+    
+    @Test
+    public void testAsObservable() throws Exception {
+        Property<String> property = Property.create("tacos");
+        
+        Assert.assertFalse(property.hasObservers());
+        
+        Action1<String> onNext = Mockito.mock(Action1.class);
+        Action1<Throwable> error = Mockito.mock(Action1.class);
+        Action0 onComplete = Mockito.mock(Action0.class);
+        property.asObservable().subscribe(onNext, error, onComplete);
+        
+        Assert.assertTrue(property.hasObservers());
+        
+        verify(onNext).call("tacos");
+        
+        property.setValue("burritos");
+        verify(onNext).call("burritos");
+        Mockito.verifyNoMoreInteractions(onNext, error, onComplete);
+        
+        property.dispose();
+        verify(onComplete).call();
+        Assert.assertFalse(property.hasObservers());
+    }
+    
+    @Test
+    public void testUnsubscribeObservable() throws Exception {
+        Property<String> property = Property.create("tacos");
+        
+        Assert.assertFalse(property.hasObservers());
+        
+        Action1<String> onNext = Mockito.mock(Action1.class);
+        Action1<Throwable> error = Mockito.mock(Action1.class);
+        Action0 onComplete = Mockito.mock(Action0.class);
+        rx.Subscription subscription = property.asObservable().subscribe(onNext, error, onComplete);
+        
+        Assert.assertTrue(property.hasObservers());
+        
+        verify(onNext).call("tacos");
+        
+        subscription.unsubscribe();
+        
+        Assert.assertFalse(property.hasObservers());
+    }
+    
+    @Test
+    public void testNoReentryThroughObservable() throws Exception {
+        Property<String> property = Property.create("tacos");
+        
+        Action1<String> onNext = value -> property.setValue("changed");
+        rx.Subscription subscription = property.asObservable().subscribe(onNext);
+        
+        assertEquals("tacos", property.get());
     }
 }
