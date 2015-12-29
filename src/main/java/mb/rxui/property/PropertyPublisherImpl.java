@@ -14,13 +14,14 @@
 package mb.rxui.property;
 
 import static java.util.Objects.requireNonNull;
+import static mb.rxui.Preconditions.checkArgument;
 
 import java.util.function.Supplier;
 
 import mb.rxui.property.dispatcher.Dispatcher;
 
 /**
- * Base implementation of a property publisher.
+ * Default implementation of a property publisher.
  *
  * @param <T>
  *            the type of value the property provides
@@ -30,9 +31,22 @@ final class PropertyPublisherImpl<T> implements PropertyPublisher<T> {
     private final Supplier<T> propertySupplier;
     private final Dispatcher<T> dispatcher;
     
+    /**
+     * Creates a new property publisher.
+     * 
+     * @param propertySupplier
+     *            some supplier that provides this publisher with it's values.
+     * @param dispatcher
+     *            some dispatcher that can be used to dispatch Property ->
+     *            onChanged events. This is only used during subscription to
+     *            send the first value to the subscriber.
+     * @throws IllegalArgumentException
+     *             if the provided supplier does not provide an initial value.
+     */
     public PropertyPublisherImpl(Supplier<T> propertySupplier, Dispatcher<T> dispatcher) {
         this.propertySupplier = requireNonNull(propertySupplier);
         this.dispatcher = requireNonNull(dispatcher);
+        checkArgument(propertySupplier.get() != null, "A property publisher must be initialized with a value");
     }
     
     

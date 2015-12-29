@@ -142,7 +142,7 @@ public class Property<M> extends PropertyObservable<M> implements PropertySource
      * NOTE:<br>
      * When initializing the synchronization the properties will take the value
      * of the propertyToSynchronize with. For example, consider propA = "taco"
-     * and propB = "burrito", if propA.synchronize( propB ) is called both
+     * and propB = "burrito", if propA.synchronize(propB) is called both
      * properties will have the value "burrito" after establishing
      * synchronization.<br>
      * <br>
