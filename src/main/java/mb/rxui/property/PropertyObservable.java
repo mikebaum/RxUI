@@ -34,6 +34,9 @@ import mb.rxui.property.operator.OperatorMap;
 import mb.rxui.property.operator.OperatorTake;
 import mb.rxui.property.operator.PropertyConditionBuilder;
 import mb.rxui.property.operator.PropertyOperator;
+import mb.rxui.property.publisher.CombinePropertyPublisher;
+import mb.rxui.property.publisher.MergePropertyPublisher;
+import mb.rxui.property.publisher.PropertyPublisher;
 import rx.Observable;
 import rx.subscriptions.Subscriptions;
 
@@ -242,6 +245,10 @@ public class PropertyObservable<M> implements Supplier<M> {
         return lift(new OperatorTake<>(amount));
     }
     
+    public final PropertyObservable<M> mergeWith(PropertyObservable<M> observableToMergeWith) {
+        return PropertyObservable.merge(this, observableToMergeWith);
+    }
+    
     /**
      * Using the provided operator creates a new, converted property observable.
      * 
@@ -270,13 +277,6 @@ public class PropertyObservable<M> implements Supplier<M> {
             Subscription subscription = observe(subscriber::onNext, subscriber::onCompleted);
             subscriber.add(Subscriptions.create(subscription::dispose));
         });
-    }
-    
-    public final Observable<PropertyChangeEvent<M>> getChangeEvents() {
-        return asObservable().scan(Optional.<PropertyChangeEvent<M>>empty(),
-                                   (lastEvent, newValue)  -> PropertyChangeEvent.next(lastEvent, newValue))
-                             .filter(Optional::isPresent)
-                             .map(Optional::get);
     }
     
     @Override
@@ -324,10 +324,30 @@ public class PropertyObservable<M> implements Supplier<M> {
      *         the values of the provided observables using the provided
      *         function any time either observables' value changes.
      */
-    public static <T1, T2, R> PropertyObservable<R> combine(PropertyObservable<T1> observable1, PropertyObservable<T2> observable2, BiFunction<T1, T2, R> combiner) {
+    public static <T1, T2, R> PropertyObservable<R> combine(PropertyObservable<T1> observable1, 
+                                                            PropertyObservable<T2> observable2, 
+                                                            BiFunction<T1, T2, R> combiner) {
         List<PropertyObservable<?>> observables = Arrays.asList(observable1, observable2);
         Supplier<R> combineSupplier = () -> combiner.apply(observable1.get(), observable2.get());
         
         return new PropertyObservable<R>(new CombinePropertyPublisher<R>(combineSupplier, observables));
+    }
+    
+    /**
+     * Merges the provided property observables into one property observable.
+     * When initializing the subscriber will be called back with the current
+     * value of each stream in the order the observables where provided. After
+     * which, any time any of the provided property observables values change
+     * the subscriber will be called back with that value.
+     * 
+     * @param observables
+     *            the observables to be merged
+     * @return a new {@link PropertyObservable} that will fire onChanged any
+     *         time one of the provided property observables values change.
+     */
+    @SafeVarargs
+    public static <R> PropertyObservable<R> merge(PropertyObservable<R>... observables) {
+        List<PropertyObservable<R>> observableList = Arrays.asList(observables);
+        return new PropertyObservable<>(new MergePropertyPublisher<>(observableList));
     }
 }

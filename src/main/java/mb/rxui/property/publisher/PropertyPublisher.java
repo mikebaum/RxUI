@@ -11,15 +11,19 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package mb.rxui.property;
+package mb.rxui.property.publisher;
 
 import java.util.function.Supplier;
+
+import mb.rxui.property.PropertyObserver;
+import mb.rxui.property.PropertySubscriber;
+import mb.rxui.property.dispatcher.Dispatcher;
 
 /**
  * A {@link PropertyPublisher} represents some source of property updates.
  * 
  * @param <T>
- *            the type of the valie this publisher provides
+ *            the type of the value this publisher provides
  */
 public interface PropertyPublisher<T> extends Supplier<T> {
     /**
@@ -31,4 +35,14 @@ public interface PropertyPublisher<T> extends Supplier<T> {
      *         subscription
      */
     PropertySubscriber<T> subscribe(PropertyObserver<T> observer);
+    
+    /**
+     * Creates a default {@link PropertyPublisher}.
+     * @param propertySupplier some supplier that provides property values.
+     * @param dispatcher some dispatcher to dispatch property events.
+     * @return a new {@link PropertyPublisher}
+     */
+    static <T> PropertyPublisher<T> create(Supplier<T> propertySupplier, Dispatcher<T> dispatcher) {
+        return new PropertyPublisherImpl<>(propertySupplier, dispatcher);
+    }
 }

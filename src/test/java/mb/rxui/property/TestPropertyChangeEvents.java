@@ -15,37 +15,69 @@ package mb.rxui.property;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import rx.Observer;
+import rx.Subscription;
 
 public class TestPropertyChangeEvents {
+    
+    @Before
+    public void setup() {
+        EventSequenceGenerator.getInstance().reset();
+    }
+    
     @Test
     public void testPropertyChangeEvents() throws Exception {
         Property<String> property = Property.create("tacos");
         Property<Integer> property2 = Property.create(10);
         
+        // subscribing to property change events should not emit a change event until the value changes from the initial value.
         Observer<PropertyChangeEvent<String>> changeEventsObserver = Mockito.mock(Observer.class);
-        property.getChangeEvents().subscribe(changeEventsObserver);
-        verify(changeEventsObserver).onNext(new PropertyChangeEvent<>(null, "tacos", 0));
+        property.changeEvents().subscribe(changeEventsObserver);
+        verifyNoMoreInteractions(changeEventsObserver);
 
+        // subscribing to property change events should not emit a change event until the value changes from the initial value.
         Observer<PropertyChangeEvent<Integer>> changeEventsObserver2 = Mockito.mock(Observer.class);
-        property2.getChangeEvents().subscribe(changeEventsObserver2);
-        verify(changeEventsObserver2).onNext(new PropertyChangeEvent<>(null, 10, 1));
+        property2.changeEvents().subscribe(changeEventsObserver2);
+        verifyNoMoreInteractions(changeEventsObserver2);
         
         property.setValue("burritos");
         verify(changeEventsObserver).onNext(new PropertyChangeEvent<>("tacos", "burritos", 2));
-        Mockito.verifyNoMoreInteractions(changeEventsObserver);
+        verifyNoMoreInteractions(changeEventsObserver);
         
         property2.setValue(20);
         verify(changeEventsObserver2).onNext(new PropertyChangeEvent<>(10, 20, 3));
-        Mockito.verifyNoMoreInteractions(changeEventsObserver2);
+        verifyNoMoreInteractions(changeEventsObserver2);
         
         property.dispose();
         property2.dispose();
         verify(changeEventsObserver).onCompleted();
         verify(changeEventsObserver2).onCompleted();
+    }
+    
+    @Test
+    public void testUnsubscribePropertyChangeEvents() throws Exception {
+        Property<String> property = Property.create("tacos");
+        
+        Observer<PropertyChangeEvent<String>> changeEventsObserver = Mockito.mock(Observer.class);
+        Subscription subscription = property.changeEvents().subscribe(changeEventsObserver);
+        verifyNoMoreInteractions(changeEventsObserver);
+        
+        property.setValue("burritos");
+        verify(changeEventsObserver).onNext(new PropertyChangeEvent<>("tacos", "burritos", 1));
+        
+        // verify that unsubscribing and re-subscribing does not cancel the property changed event stream
+        subscription.unsubscribe();
+        Observer<PropertyChangeEvent<String>> changeEventsObserver2 = Mockito.mock(Observer.class);
+        property.changeEvents().subscribe(changeEventsObserver2);
+        verifyNoMoreInteractions(changeEventsObserver2);
+        
+        property.setValue("tacos");
+        verify(changeEventsObserver2).onNext(new PropertyChangeEvent<>("burritos", "tacos", 3));
     }
 }

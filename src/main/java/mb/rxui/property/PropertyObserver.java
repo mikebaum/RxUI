@@ -40,6 +40,11 @@ public interface PropertyObserver<M> {
      */
     void onDisposed();
     
+    /**
+     * @return true if this observer is represents a binding, false otherwise.
+     */
+    boolean isBinding();
+    
     // Factory methods
 
     /**
@@ -86,6 +91,11 @@ public interface PropertyObserver<M> {
             @Override
             public void onDisposed() {
                 onDisposed.run();
+            }
+            
+            @Override
+            public boolean isBinding() {
+                return false;
             }
         };
     }

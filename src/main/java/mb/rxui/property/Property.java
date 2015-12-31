@@ -23,6 +23,8 @@ import javax.security.auth.Subject;
 import mb.rxui.ThreadChecker;
 import mb.rxui.disposables.Disposable;
 import mb.rxui.property.dispatcher.Dispatcher;
+import mb.rxui.property.publisher.PropertyPublisher;
+import rx.Observable;
 import rx.subjects.BehaviorSubject;
 
 /**
@@ -69,7 +71,7 @@ public class Property<M> extends PropertyObservable<M> implements PropertySource
     private final ThreadChecker threadChecker;
 
     private Property(PropertySource<M> propertySource, Dispatcher<M> dispatcher) {
-        super(new PropertyPublisherImpl<>(propertySource, dispatcher));
+        super(PropertyPublisher.create(propertySource, dispatcher));
         this.propertySource = requireNonNull(propertySource);
         this.dispatcher = requireNonNull(dispatcher);
         this.initialValue = requireNonNull(get(), "A Property must be initialized with a value");
@@ -131,7 +133,7 @@ public class Property<M> extends PropertyObservable<M> implements PropertySource
      *             allow it since it will not cause any harm (I think).
      */
     public final Subscription bind(PropertyObservable<M> propertyToBindTo) {
-        return propertyToBindTo.onChanged(this);
+        return propertyToBindTo.observe(new Binding<>(this));
     }
     
     /**
@@ -173,7 +175,18 @@ public class Property<M> extends PropertyObservable<M> implements PropertySource
 
     public final boolean hasObservers() {
         threadChecker.checkThread();
-        return dispatcher.hasSubscribers();
+        return dispatcher.getSubscriberCount() > 0;
+    }
+    
+    /**
+     * @return an {@link Observable} stream of property change events for this property.
+     */
+    public final Observable<PropertyChangeEvent<M>> changeEvents() {
+        return asObservable().scan(Optional.<PropertyChangeEvent<M>>empty(),
+                                   (lastEvent, newValue)  -> PropertyChangeEvent.next(lastEvent, newValue))
+                             .filter(Optional::isPresent)
+                             .filter(optional -> optional.get().getOldValue() != null)
+                             .map(Optional::get);
     }
     
     // Factory methods

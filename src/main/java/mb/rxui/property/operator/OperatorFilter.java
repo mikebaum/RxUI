@@ -16,8 +16,8 @@ package mb.rxui.property.operator;
 import java.util.function.Predicate;
 
 import mb.rxui.property.PropertyObserver;
-import mb.rxui.property.PropertyPublisher;
 import mb.rxui.property.PropertySubscriber;
+import mb.rxui.property.publisher.PropertyPublisher;
 
 /**
  * Operator that filters the values emitted by the source property observable
@@ -54,8 +54,8 @@ public class OperatorFilter<M> implements PropertyOperator<M, M> {
                 
                 PropertySubscriber<M> sourceSubscriber = 
                         source.subscribe(PropertyObserver.<M>create(value -> { 
-                            if (predicate.test(value))
-                                subscriber.onChanged(value); 
+                            if (predicate.test(get()))
+                                subscriber.onChanged(get()); 
                             },
                             subscriber::onDisposed));
                 

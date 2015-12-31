@@ -39,10 +39,19 @@ class EventSequenceGenerator {
      * 
      * @return a sequence number that is guaranteed not to be unique.
      */
-    long next() {
+    long nextSequenceNumber() {
         long nextSequence = lastSequenceNumber++;
         sequenceMap.put(nextSequence, System.currentTimeMillis());
         return nextSequence;
+    }
+    
+    /**
+     * @deprecated this will be removed once an interface for Event Sequencer is
+     *             created. Should only be used by tests
+     */
+    void reset() {
+        lastSequenceNumber = 0;
+        sequenceMap.clear();
     }
     
     /**

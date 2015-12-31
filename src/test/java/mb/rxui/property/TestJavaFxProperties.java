@@ -16,8 +16,8 @@ package mb.rxui.property;
 import static mb.rxui.property.javafx.JavaFxProperties.fromFxProperty;
 import static mb.rxui.property.javafx.JavaFxProperties.fromObservableValue;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import org.junit.After;
 import org.junit.Before;
@@ -61,12 +61,12 @@ public class TestJavaFxProperties {
             
             property.observe(observer);
             verify(observer).onChanged("tacos");
-            verifyNoMoreInteractions(observer);
+            verify(observer, never()).onDisposed();
             
             fxStringProperty.setValue("burritos");
             verify(observer).onChanged("burritos");
             assertEquals("burritos", property.get());
-            verifyNoMoreInteractions(observer);
+            verify(observer, never()).onDisposed();
         });
     }
     
@@ -77,13 +77,13 @@ public class TestJavaFxProperties {
             
             property.observe(observer);
             verify(observer).onChanged("tacos");
-            verifyNoMoreInteractions(observer);
+            verify(observer, never()).onDisposed();
             
             property.setValue("burritos");
             verify(fxStringProperty).setValue("burritos");
             assertEquals("burritos", fxStringProperty.getValue());
             verify(observer).onChanged("burritos");
-            verifyNoMoreInteractions(observer);
+            verify(observer, never()).onDisposed();
         } );
     }
     

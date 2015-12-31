@@ -18,8 +18,8 @@ import static java.util.Objects.requireNonNull;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import mb.rxui.property.PropertyObserver;
-import mb.rxui.property.PropertyPublisher;
 import mb.rxui.property.PropertySubscriber;
+import mb.rxui.property.publisher.PropertyPublisher;
 
 public class ObservableValuePropertyPublisher<T> implements PropertyPublisher<T> {
 
