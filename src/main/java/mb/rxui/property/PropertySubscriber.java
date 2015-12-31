@@ -97,4 +97,9 @@ public class PropertySubscriber<M> implements PropertyObserver<M>, Subscription 
             }
         };
     }
+
+    @Override
+    public boolean isBinding() {
+        return observer.isBinding();
+    }
 }

@@ -279,14 +279,6 @@ public class PropertyObservable<M> implements Supplier<M> {
         });
     }
     
-    public final Observable<PropertyChangeEvent<M>> getChangeEvents() {
-        return asObservable().scan(Optional.<PropertyChangeEvent<M>>empty(),
-                                   (lastEvent, newValue)  -> PropertyChangeEvent.next(lastEvent, newValue))
-                             .filter(Optional::isPresent)
-                             .filter(optional -> optional.get().getOldValue() != null)
-                             .map(Optional::get);
-    }
-    
     @Override
     public int hashCode() {
         final int prime = 31;

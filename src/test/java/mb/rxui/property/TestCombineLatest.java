@@ -37,7 +37,7 @@ public class TestCombineLatest {
         assertFalse(property2.hasObservers());
         
         Subscription subscription = observable.observe(observer);
-        verify(observer, times(2)).onChanged("I ate [15] tacos");
+        verify(observer).onChanged("I ate [15] tacos");
         verifyNoMoreInteractions(observer);
         
         assertTrue(property.hasObservers());

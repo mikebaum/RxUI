@@ -392,33 +392,51 @@ public class TestProperty {
 
         InOrder inOrder = Mockito.inOrder(consumer1, consumer2, consumer3);
 
-        Subscription consumerSubscription1 = property1.onChanged(consumer1);
-        Subscription consumerSubscription2 = property2.onChanged(consumer2);
-        Subscription consumerSubscription3 = property3.onChanged(consumer3);
+        Subscription subscription1 = property1.onChanged(consumer1);
+        property1.onChanged(System.out::println);
+        inOrder.verify(consumer1).accept("tacos");
+        
+        
+        Subscription subscription2 = property2.onChanged(consumer2);
+        inOrder.verify(consumer2).accept("burritos");
+        
+        
+        Subscription subscription3 = property3.onChanged(consumer3);
+        inOrder.verify(consumer3).accept("fajitas");
 
+        
         Subscription bindSubscription1 = property1.bind(property2);
-        Subscription bindSubscription2 = property2.bind(property3);
-        Subscription bindSubscription3 = property3.bind(property1);
-
         inOrder.verify(consumer1).accept("burritos");
-        inOrder.verify(consumer2).accept("fajitas");
+        
+        
+        Subscription bindSubscription2 = property2.bind(property3);
         inOrder.verify(consumer1).accept("fajitas");
+        inOrder.verify(consumer2).accept("fajitas");
+        
+        Subscription bindSubscription3 = property3.bind(property1);
+        
+        assertEquals("fajitas", property1.get());
+        assertEquals("fajitas", property2.get());
+        assertEquals("fajitas", property3.get());
+
         inOrder.verifyNoMoreInteractions();
 
         property2.setValue("nachos");
-        inOrder.verify(consumer1).accept("nachos"); // accept the nachos, or
-                                                    // accept death
         inOrder.verify(consumer3).accept("nachos");
+        inOrder.verify(consumer1).accept("nachos"); // accept the nachos, or accept death
+        inOrder.verify(consumer2).accept("nachos");
         inOrder.verifyNoMoreInteractions();
 
         property3.setValue("tacos");
-        inOrder.verify(consumer2).accept("tacos");
         inOrder.verify(consumer1).accept("tacos");
+        inOrder.verify(consumer2).accept("tacos");
+        inOrder.verify(consumer3).accept("tacos");
         inOrder.verifyNoMoreInteractions();
 
         property1.setValue("burritos");
-        inOrder.verify(consumer3).accept("burritos");
         inOrder.verify(consumer2).accept("burritos");
+        inOrder.verify(consumer3).accept("burritos");
+        inOrder.verify(consumer1).accept("burritos");
         inOrder.verifyNoMoreInteractions();
     }
 
@@ -443,26 +461,29 @@ public class TestProperty {
         inOrder.verifyNoMoreInteractions();
 
         Subscription synchronize2Sub = property2.synchronize(property3);
-        inOrder.verify(consumer2).accept("fajitas");
         inOrder.verify(consumer1).accept("fajitas");
+        inOrder.verify(consumer2).accept("fajitas");
         inOrder.verifyNoMoreInteractions();
 
         Subscription synchronize3Sub = property3.synchronize(property1);
         inOrder.verifyNoMoreInteractions();
 
         property2.setValue("burritos");
-        inOrder.verify(consumer1).accept("burritos");
         inOrder.verify(consumer3).accept("burritos");
+        inOrder.verify(consumer1).accept("burritos");
+        inOrder.verify(consumer2).accept("burritos");
         inOrder.verifyNoMoreInteractions();
 
         property3.setValue("tacos");
-        inOrder.verify(consumer2).accept("tacos");
         inOrder.verify(consumer1).accept("tacos");
+        inOrder.verify(consumer2).accept("tacos");
+        inOrder.verify(consumer3).accept("tacos");
         inOrder.verifyNoMoreInteractions();
 
         property1.setValue("nachos");
-        inOrder.verify(consumer2).accept("nachos");
         inOrder.verify(consumer3).accept("nachos");
+        inOrder.verify(consumer2).accept("nachos");
+        inOrder.verify(consumer1).accept("nachos");
         inOrder.verifyNoMoreInteractions();
     }
 

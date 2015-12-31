@@ -133,7 +133,7 @@ public class Property<M> extends PropertyObservable<M> implements PropertySource
      *             allow it since it will not cause any harm (I think).
      */
     public final Subscription bind(PropertyObservable<M> propertyToBindTo) {
-        return propertyToBindTo.onChanged(this);
+        return propertyToBindTo.observe(new Binding<>(this));
     }
     
     /**
@@ -176,6 +176,17 @@ public class Property<M> extends PropertyObservable<M> implements PropertySource
     public final boolean hasObservers() {
         threadChecker.checkThread();
         return dispatcher.getSubscriberCount() > 0;
+    }
+    
+    /**
+     * @return an {@link Observable} stream of property change events for this property.
+     */
+    public final Observable<PropertyChangeEvent<M>> changeEvents() {
+        return asObservable().scan(Optional.<PropertyChangeEvent<M>>empty(),
+                                   (lastEvent, newValue)  -> PropertyChangeEvent.next(lastEvent, newValue))
+                             .filter(Optional::isPresent)
+                             .filter(optional -> optional.get().getOldValue() != null)
+                             .map(Optional::get);
     }
     
     // Factory methods

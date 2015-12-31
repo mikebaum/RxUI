@@ -43,7 +43,7 @@ public class OperatorIsDirty<M> implements PropertyOperator<M, Boolean> {
                 PropertySubscriber<Boolean> isDirtySubscriber = new PropertySubscriber<>(observer);
                 
                 PropertySubscriber<M> sourceSubscriber = 
-                        sourcePublisher.subscribe(PropertyObserver.<M>create(value -> isDirtySubscriber.onChanged(isDirty(value)),
+                        sourcePublisher.subscribe(PropertyObserver.<M>create(value -> isDirtySubscriber.onChanged(get()),
                                                   isDirtySubscriber::onDisposed));
                 
                 isDirtySubscriber.doOnUnsubscribe(sourceSubscriber::dispose);

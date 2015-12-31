@@ -19,40 +19,31 @@ import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertySubscriber;
 import mb.rxui.property.publisher.PropertyPublisher;
 
-public class OperatorMap<Downstream, Upstream> implements PropertyOperator<Downstream, Upstream>{
+public class OperatorMap<S, R> implements PropertyOperator<S, R>{
 
-    private final Function<Downstream, Upstream> mapper;
+    private final Function<S, R> mapper;
     
-    public OperatorMap(Function<Downstream, Upstream> mapper) {
+    public OperatorMap(Function<S, R> mapper) {
         this.mapper = mapper;
     }
     
     @Override
-    public PropertyPublisher<Upstream> apply(PropertyPublisher<Downstream> source) {
+    public PropertyPublisher<R> apply(PropertyPublisher<S> source) {
         
-        return new PropertyPublisher<Upstream>() {
+        return new PropertyPublisher<R>() {
             @Override
-            public Upstream get() {
+            public R get() {
                 return mapper.apply(source.get());
             }
 
             @Override
-            public PropertySubscriber<Upstream> subscribe(PropertyObserver<Upstream> observer) {
+            public PropertySubscriber<R> subscribe(PropertyObserver<R> observer) {
                 
-                PropertySubscriber<Upstream> subscriber = new PropertySubscriber<>(observer);
+                PropertySubscriber<R> subscriber = new PropertySubscriber<>(observer);
                 
-                PropertySubscriber<Downstream> sourceSubscriber = 
-                        source.subscribe(new PropertyObserver<Downstream>() {
-                            @Override
-                            public void onChanged(Downstream newValue) {
-                                subscriber.onChanged(mapper.apply(newValue));
-                            }
-
-                            @Override
-                            public void onDisposed() {
-                                subscriber.onDisposed();
-                            }
-                        });
+                PropertySubscriber<S> sourceSubscriber = 
+                        source.subscribe(PropertyObserver.create(newValue -> subscriber.onChanged(get()),
+                                                                 subscriber::onDisposed));
                 
                 subscriber.doOnUnsubscribe(sourceSubscriber::dispose);
                 

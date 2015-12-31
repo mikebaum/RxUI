@@ -54,8 +54,8 @@ public class OperatorFilter<M> implements PropertyOperator<M, M> {
                 
                 PropertySubscriber<M> sourceSubscriber = 
                         source.subscribe(PropertyObserver.<M>create(value -> { 
-                            if (predicate.test(value))
-                                subscriber.onChanged(value); 
+                            if (predicate.test(get()))
+                                subscriber.onChanged(get()); 
                             },
                             subscriber::onDisposed));
                 

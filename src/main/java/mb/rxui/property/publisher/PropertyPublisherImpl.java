@@ -57,8 +57,10 @@ final class PropertyPublisherImpl<T> implements PropertyPublisher<T> {
      * 
      * @param observer
      *            some property subscriber.
-     * @return TODO
-     * @throws IllegalStateException if called when the dispatcher has already been disposed.
+     * @return A {@link PropertySubscriber} that wraps the provided observer.
+     *         The subscriber ensures that the contract of property is upheld,
+     *         i.e. blocks reentrancy and prevents an exception from stopping
+     *         other callbacks from executing.
      */
     @Override
     public PropertySubscriber<T> subscribe(PropertyObserver<T> observer) {

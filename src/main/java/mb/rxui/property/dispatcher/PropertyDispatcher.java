@@ -16,6 +16,7 @@ package mb.rxui.property.dispatcher;
 import static mb.rxui.Preconditions.checkState;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import mb.rxui.annotations.RequiresTest;
@@ -33,6 +34,7 @@ public final class PropertyDispatcher<M> implements Dispatcher<M> {
 
     private final List<PropertySubscriber<M>> subscribers = new ArrayList<>();
     private final IsDispatching isDispatching = new IsDispatching();
+    private static Comparator<? super PropertySubscriber<?>> SUBSCRIBER_COMPARATOR = createComparator();
     
     private boolean isDisposed = false;
     
@@ -85,11 +87,24 @@ public final class PropertyDispatcher<M> implements Dispatcher<M> {
         
         subscriber.doOnUnsubscribe(() -> subscribers.remove(subscriber));
         subscribers.add(subscriber);
+        subscribers.sort(SUBSCRIBER_COMPARATOR);
         
         return subscriber;
     }
     
-    private static <M> PropertyObserver<M> wrapObserver( PropertyObserver<M> observer, IsDispatching isDispatching ) {
+    private static Comparator<? super PropertySubscriber<?>> createComparator() {
+        return (subscriber1, subscriber2) -> {
+            if (subscriber1.isBinding() && !subscriber2.isBinding())
+                return -1;
+            
+            if (!subscriber1.isBinding() && subscriber2.isBinding())
+                return 1;
+            
+            return 0;
+        };
+    }
+
+    private static <M> PropertyObserver<M> wrapObserver(PropertyObserver<M> observer, IsDispatching isDispatching) {
         return new PropertyObserver<M>() {
 
             @Override
@@ -105,6 +120,11 @@ public final class PropertyDispatcher<M> implements Dispatcher<M> {
             @Override
             public void onDisposed() {
                 observer.onDisposed();
+            }
+
+            @Override
+            public boolean isBinding() {
+                return observer.isBinding();
             }
         };
     }

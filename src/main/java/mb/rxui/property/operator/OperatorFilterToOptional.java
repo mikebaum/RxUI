@@ -60,7 +60,7 @@ public class OperatorFilterToOptional<M> implements PropertyOperator<M, Optional
                 PropertySubscriber<Optional<M>> subscriber = new PropertySubscriber<>(observer);
                 
                 PropertySubscriber<M> sourceSubscriber = 
-                        source.subscribe(PropertyObserver.<M>create(value -> subscriber.onChanged(filteredValue(value)),
+                        source.subscribe(PropertyObserver.<M>create(value -> subscriber.onChanged(get()),
                                                                     subscriber::onDisposed));
                 
                 subscriber.doOnUnsubscribe(sourceSubscriber::dispose);

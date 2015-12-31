@@ -62,7 +62,7 @@ public class OperatorIs<M> implements PropertyOperator<M, Boolean> {
                 PropertySubscriber<Boolean> isSubscriber = new PropertySubscriber<>(observer);
                 
                 PropertySubscriber<M> sourceSubscriber = 
-                        source.subscribe(PropertyObserver.<M>create(value -> isSubscriber.onChanged(is(value)),
+                        source.subscribe(PropertyObserver.<M>create(value -> isSubscriber.onChanged(get()),
                                                                     isSubscriber::onDisposed));
                 
                 isSubscriber.doOnUnsubscribe(sourceSubscriber::dispose);
