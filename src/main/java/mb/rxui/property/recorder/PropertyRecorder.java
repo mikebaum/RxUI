@@ -16,6 +16,7 @@ package mb.rxui.property.recorder;
 import javax.swing.JComponent;
 
 import mb.rxui.disposables.Disposable;
+import mb.rxui.property.CompositeSubscription;
 import mb.rxui.property.Property;
 
 public class PropertyRecorder<M> implements Disposable {
@@ -24,19 +25,21 @@ public class PropertyRecorder<M> implements Disposable {
     private final Disposable disposer;
     
     public PropertyRecorder(Property<M> property) {
-        this.view = new PropertyRecorderView();
-        this.model = new PropertyRecorderModel<>(property);
+        view = new PropertyRecorderView();
+        model = new PropertyRecorderModel<>(property);
         disposer = bind(model, view);
     }
     
     private static <M> Disposable bind(PropertyRecorderModel<M> model, PropertyRecorderView view) {
         
-        model.getRecorderState().bind(view.recorderState());
-        model.canPlay().onChanged(view::canPlay);
-        model.canRecord().onChanged(view::canRecord);
-        model.canStop().onChanged(view::canStop);
+        CompositeSubscription subscriptions = new CompositeSubscription();
         
-        return () -> {};
+        subscriptions.add(model.getRecorderState().bind(view.recorderState()));
+        subscriptions.add(model.canPlay().onChanged(view::canPlay));
+        subscriptions.add(model.canRecord().onChanged(view::canRecord));
+        subscriptions.add(model.canStop().onChanged(view::canStop));
+        
+        return subscriptions;
     }
     
     @Override

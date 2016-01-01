@@ -111,6 +111,8 @@ public class PropertyRecorderModel<M> implements Disposable {
 
         if (!timedEvents.isEmpty()) {
             worker.schedule(() -> setValue(timedEvents, worker), timedEvents.peekFirst().timeSinceLast, TimeUnit.MILLISECONDS);
+        } else {
+            recorderState.setValue(STOPPED);
         }
     }
 
