@@ -14,6 +14,7 @@
 package mb.rxui.property;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import mb.rxui.annotations.RequiresTest;
@@ -27,6 +28,10 @@ public class CompositeSubscription implements Subscription {
     
     public CompositeSubscription(List<Subscription> subscriptions) {
         this.subscriptions.addAll(subscriptions);
+    }
+    
+    public CompositeSubscription(Subscription... subscriptions) {
+        this(Arrays.asList(subscriptions));
     }
     
     public CompositeSubscription() {}

@@ -13,6 +13,7 @@
  */
 package mb.rxui.disposables;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -30,7 +31,7 @@ public interface Disposable {
     
     @RequiresTest
     static Disposable create(Disposable... disposables) {
-        List<Disposable> toDispose = Arrays.asList(disposables);
+        List<Disposable> toDispose = new ArrayList<>(Arrays.asList(disposables));
         
         return () -> {
             toDispose.forEach(Disposable::dispose);

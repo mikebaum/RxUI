@@ -13,9 +13,7 @@
  */
 package mb.rxui.property.opertator;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.verify;
 
 import org.junit.Test;
@@ -97,5 +95,10 @@ public class TestOperatorTake {
         
         assertFalse(property.hasObservers());
         assertTrue(subscription.isDisposed());
+    }
+    
+    @Test(expected=IllegalArgumentException.class)
+    public void testCannotTake0Elements() throws Exception {
+        Property.create(10).take(0);
     }
 }

@@ -45,7 +45,7 @@ final class PropertyPublisherImpl<T> implements PropertyPublisher<T> {
      * @throws IllegalArgumentException
      *             if the provided supplier does not provide an initial value.
      */
-    public PropertyPublisherImpl(Supplier<T> propertySupplier, Dispatcher<T> dispatcher) {
+    PropertyPublisherImpl(Supplier<T> propertySupplier, Dispatcher<T> dispatcher) {
         this.propertySupplier = requireNonNull(propertySupplier);
         this.dispatcher = requireNonNull(dispatcher);
         Objects.requireNonNull(propertySupplier.get(), "A property publisher must be initialized with a value");
