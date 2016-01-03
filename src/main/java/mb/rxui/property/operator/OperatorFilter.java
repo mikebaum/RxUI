@@ -13,6 +13,7 @@
  */
 package mb.rxui.property.operator;
 
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import mb.rxui.property.PropertyObserver;
@@ -43,6 +44,9 @@ public class OperatorFilter<M> implements PropertyOperator<M, M> {
     @Override
     public PropertyPublisher<M> apply(PropertyPublisher<M> source) {
         return new PropertyPublisher<M>() {
+            
+            private Optional<M> lastValue = Optional.empty();
+            
             @Override
             public M get() {
                 return source.get();
@@ -53,15 +57,23 @@ public class OperatorFilter<M> implements PropertyOperator<M, M> {
                 PropertySubscriber<M> subscriber = new PropertySubscriber<>(observer);
                 
                 PropertySubscriber<M> sourceSubscriber = 
-                        source.subscribe(PropertyObserver.<M>create(value -> { 
-                            if (predicate.test(get()))
-                                subscriber.onChanged(get()); 
-                            },
-                            subscriber::onDisposed));
+                        source.subscribe(PropertyObserver.<M>create(value -> fireOnChangedIfNecessary(subscriber),
+                                                                    subscriber::onDisposed));
                 
-                subscriber.doOnUnsubscribe(sourceSubscriber::dispose);
+                subscriber.doOnDispose(sourceSubscriber::dispose);
                 
                 return subscriber;
+            }
+            
+            private void fireOnChangedIfNecessary(PropertySubscriber<M> subscriber) {
+                if (!predicate.test(get()))
+                    return;
+                    
+                if (lastValue.isPresent() && get().equals(lastValue.get()))
+                    return;
+                
+                lastValue = Optional.of(get());
+                subscriber.onChanged(lastValue.get());
             }
         };
     }

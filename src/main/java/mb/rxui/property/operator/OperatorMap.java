@@ -13,6 +13,7 @@
  */
 package mb.rxui.property.operator;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 import mb.rxui.property.PropertyObserver;
@@ -31,6 +32,9 @@ public class OperatorMap<S, R> implements PropertyOperator<S, R>{
     public PropertyPublisher<R> apply(PropertyPublisher<S> source) {
         
         return new PropertyPublisher<R>() {
+            
+            private R lastValue = get();
+            
             @Override
             public R get() {
                 return mapper.apply(source.get());
@@ -41,13 +45,23 @@ public class OperatorMap<S, R> implements PropertyOperator<S, R>{
                 
                 PropertySubscriber<R> subscriber = new PropertySubscriber<>(observer);
                 
+                AtomicBoolean hasEmittedFirstValue = new AtomicBoolean(false);
+                
                 PropertySubscriber<S> sourceSubscriber = 
-                        source.subscribe(PropertyObserver.create(newValue -> subscriber.onChanged(get()),
+                        source.subscribe(PropertyObserver.create(newValue -> fireOnChangedIfNecessary(subscriber, hasEmittedFirstValue),
                                                                  subscriber::onDisposed));
                 
-                subscriber.doOnUnsubscribe(sourceSubscriber::dispose);
+                subscriber.doOnDispose(sourceSubscriber::dispose);
                 
                 return subscriber;
+            }
+
+            private void fireOnChangedIfNecessary(PropertySubscriber<R> subscriber, AtomicBoolean hasEmitted) {
+                if(get().equals(lastValue) && !hasEmitted.compareAndSet(false, true))
+                    return;
+                
+                lastValue = get(); 
+                subscriber.onChanged(get());
             }
         };
     }

@@ -75,7 +75,7 @@ public class CombinePropertyPublisher<R> implements PropertyPublisher<R> {
 
         CompositeSubscription subscription = new CompositeSubscription(subscriptions);
 
-        combineSubscriber.doOnUnsubscribe(subscription::dispose);
+        combineSubscriber.doOnDispose(subscription::dispose);
 
         return combineSubscriber;
     }

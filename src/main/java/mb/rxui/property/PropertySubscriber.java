@@ -18,8 +18,6 @@ import static java.util.Objects.requireNonNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import mb.rxui.annotations.RequiresTest;
-
 /**
  * A subscriber of Property events. A property can emit one or many
  * {@link #onChanged(Object)} events followed by one {@link #onDisposed()}
@@ -33,48 +31,53 @@ import mb.rxui.annotations.RequiresTest;
  * @param <M>
  *            the type of value the property manages.
  */
-@RequiresTest
 public class PropertySubscriber<M> implements PropertyObserver<M>, Subscription {
     private final PropertyObserver<M> observer;
-    private final List<Runnable> onUnsubscribedActions;
-    private boolean isUnsubscribed = false;
+    private final List<Runnable> onDisposedActions;
+    private boolean isDisposed = false;
 
     public PropertySubscriber(PropertyObserver<M> observer) {
         this.observer = requireNonNull(observer);
-        onUnsubscribedActions = new ArrayList<>();
+        onDisposedActions = new ArrayList<>();
     }
 
     @Override
     public void dispose() {
-        isUnsubscribed = true;
-        onUnsubscribedActions.stream().map(PropertySubscriber::createSafeCallback).forEach(Runnable::run);
-        onUnsubscribedActions.clear();
+        isDisposed = true;
+        onDisposedActions.stream().map(PropertySubscriber::createSafeCallback).forEach(Runnable::run);
+        onDisposedActions.clear();
     }
 
     @Override
     public boolean isDisposed() {
-        return isUnsubscribed;
+        return isDisposed;
     }
 
     /**
      * Adds some action to perform when this property subscription is
-     * unsubscribed.
+     * disposed.
      * 
-     * @param onUnsubscribedAction
+     * @param onDisposedAction
      *            some action to run when this property subscription is
-     *            unsubscribed.
+     *            disposed.
      */
-    public void doOnUnsubscribe(Runnable onUnsubscribedAction) {
-        onUnsubscribedActions.add(onUnsubscribedAction);
+    public void doOnDispose(Runnable onDisposedAction) {
+        onDisposedActions.add(onDisposedAction);
     }
 
     @Override
     public void onChanged(M newValue) {
+        if(isDisposed)
+            return;
+        
         runSafeCallback(() -> observer.onChanged(newValue));
     }
 
     @Override
     public void onDisposed() {
+        if(isDisposed)
+            return;
+        
         runSafeCallback(observer::onDisposed);
         dispose();
     }

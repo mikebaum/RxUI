@@ -44,7 +44,7 @@ public class ObservableValuePropertyPublisher<T> implements PropertyPublisher<T>
 
         // push the latest value to the subscriber and add unsubscribe action
         subscriber.onChanged(get());
-        subscriber.doOnUnsubscribe(() -> observableValue.removeListener(listener));
+        subscriber.doOnDispose(() -> observableValue.removeListener(listener));
         
         return subscriber;
     }

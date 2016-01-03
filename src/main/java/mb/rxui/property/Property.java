@@ -63,7 +63,7 @@ import rx.subjects.BehaviorSubject;
  * @param <T>
  *            the type of object that this property emits.
  */
-public class Property<M> extends PropertyObservable<M> implements PropertySource<M>, Disposable {
+public final class Property<M> extends PropertyObservable<M> implements PropertySource<M>, Disposable {
 
     private final PropertySource<M> propertySource;
     private final Dispatcher<M> dispatcher;
