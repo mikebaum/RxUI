@@ -13,9 +13,12 @@
  */
 package mb.rxui.property;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Optional;
 
 import mb.rxui.annotations.VisibleForTesting;
+import mb.rxui.event.EventSequenceGenerator;
 
 /**
  * A property change event captures the change of a property value.
@@ -31,10 +34,22 @@ public class PropertyChangeEvent<M> {
     @VisibleForTesting
     PropertyChangeEvent(M oldValue, M newValue, long eventSequence) {
         this.oldValue = oldValue;
-        this.newValue = newValue;
+        this.newValue = requireNonNull(newValue);
         this.eventSequence = eventSequence;
     }
     
+    /**
+     * Creates a new {@link PropertyChangeEvent}. The event sequence number will
+     * be set to the next sequence number supplied by the
+     * {@link EventSequenceGenerator}.
+     * 
+     * @param oldValue
+     *            the old value for the property, can be null.
+     * @param newValue
+     *            the new value for the property, cannot be null.
+     * @throws NullPointerException
+     *             if the provided new value is null.
+     */
     public PropertyChangeEvent(M oldValue, M newValue) {
         this(oldValue, newValue, EventSequenceGenerator.getInstance().nextSequenceNumber());
     }
@@ -72,7 +87,7 @@ public class PropertyChangeEvent<M> {
     
     public Optional<PropertyChangeEvent<M>> next(M newValue) {
         if (newValue.equals(this.newValue))
-            Optional.empty();
+            return Optional.empty();
         
         return Optional.of(new PropertyChangeEvent<M>(this.newValue, newValue));
     }

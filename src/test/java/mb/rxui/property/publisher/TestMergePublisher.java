@@ -13,9 +13,14 @@
  */
 package mb.rxui.property.publisher;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
+import java.util.function.Consumer;
+
+import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
@@ -123,5 +128,48 @@ public class TestMergePublisher {
         assertFalse(property1.hasObservers());
         assertFalse(property2.hasObservers());
         assertFalse(property3.hasObservers());
+    }
+    
+    @Test
+    public void testMergeWith() throws Exception {
+        Property<Integer> property1 = Property.create(10);
+        Property<Integer> property2 = Property.create(20);
+        
+        PropertyObservable<Integer> mergedProperties = property1.mergeWith(property2);
+        Assert.assertEquals(new Integer(10), mergedProperties.get());
+        
+        Consumer<Integer> onChanged = Mockito.mock(Consumer.class);
+        Runnable onDisposed = Mockito.mock(Runnable.class);
+        InOrder inOrder = Mockito.inOrder(onChanged, onDisposed);
+
+        Subscription subscription = mergedProperties.observe(PropertyObserver.create(onChanged, onDisposed));
+        
+        inOrder.verify(onChanged).accept(10);
+        inOrder.verify(onChanged).accept(20);
+        inOrder.verifyNoMoreInteractions();
+        
+        property1.setValue(30);
+        Assert.assertEquals(new Integer(30), mergedProperties.get());
+        inOrder.verify(onChanged).accept(30);
+        inOrder.verifyNoMoreInteractions();
+        
+        property2.setValue(40);
+        Assert.assertEquals(new Integer(40), mergedProperties.get());
+        inOrder.verify(onChanged).accept(40);
+        inOrder.verifyNoMoreInteractions();
+        
+        // this should not trigger an onChangedEvent.
+        property1.setValue(40);
+        inOrder.verifyNoMoreInteractions();
+        
+        property2.dispose();
+        assertFalse(subscription.isDisposed());
+        
+        property2.setValue(50);
+        Assert.assertEquals(new Integer(40), mergedProperties.get());
+        inOrder.verifyNoMoreInteractions();
+        
+        property1.dispose();
+        assertTrue(subscription.isDisposed());
     }
 }

@@ -13,9 +13,7 @@
  */
 package mb.rxui.property.opertator;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.verify;
 
 import org.junit.Test;
@@ -90,5 +88,21 @@ public class TestOperatorIsDirty {
         
         assertFalse(property.hasObservers());
         assertTrue(subscription.isDisposed());
+    }
+    
+    @Test
+    public void testEmtisOnlyIfValueChanged() throws Exception {
+        Property<String> property = Property.create("tacos");
+        PropertyObserver<Boolean> observer = Mockito.mock(PropertyObserver.class);
+        
+        property.isDirty().observe(observer);
+        
+        Mockito.verify(observer).onChanged(false);
+        
+        property.setValue("burritos");
+        Mockito.verify(observer).onChanged(true);
+        
+        property.setValue("fajitas");
+        Mockito.verifyNoMoreInteractions(observer);
     }
 }

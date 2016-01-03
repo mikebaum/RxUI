@@ -13,6 +13,8 @@
  */
 package mb.rxui.property.operator;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertySubscriber;
 import mb.rxui.property.publisher.PropertyPublisher;
@@ -28,6 +30,9 @@ public class OperatorIsDirty<M> implements PropertyOperator<M, Boolean> {
     @Override
     public PropertyPublisher<Boolean> apply(PropertyPublisher<M> sourcePublisher) {
         return new PropertyPublisher<Boolean>() {
+            
+            private boolean lastValue = get();
+            
             @Override
             public Boolean get() {
                 return isDirty(sourcePublisher.get());
@@ -42,13 +47,23 @@ public class OperatorIsDirty<M> implements PropertyOperator<M, Boolean> {
                 
                 PropertySubscriber<Boolean> isDirtySubscriber = new PropertySubscriber<>(observer);
                 
+                AtomicBoolean hasEmittedFirstValue = new AtomicBoolean(false);
+                
                 PropertySubscriber<M> sourceSubscriber = 
-                        sourcePublisher.subscribe(PropertyObserver.<M>create(value -> isDirtySubscriber.onChanged(get()),
+                        sourcePublisher.subscribe(PropertyObserver.<M>create(value -> fireOnChangedIfNecessary(isDirtySubscriber, hasEmittedFirstValue),
                                                   isDirtySubscriber::onDisposed));
                 
-                isDirtySubscriber.doOnUnsubscribe(sourceSubscriber::dispose);
+                isDirtySubscriber.doOnDispose(sourceSubscriber::dispose);
                 
                 return isDirtySubscriber;
+            }
+
+            private void fireOnChangedIfNecessary(PropertySubscriber<Boolean> subscriber, AtomicBoolean hasEmitted) {
+                if(get().equals(lastValue) && !hasEmitted.compareAndSet(false, true))
+                    return;
+                
+                lastValue = get(); 
+                subscriber.onChanged(get());
             }
         };
     }

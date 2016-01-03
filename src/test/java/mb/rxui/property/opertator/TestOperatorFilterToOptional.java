@@ -94,4 +94,21 @@ public class TestOperatorFilterToOptional {
         assertFalse(property.hasObservers());
         assertTrue(subscription.isDisposed());
     }
+    
+    @Test
+    public void testOnlyEmitsIfChanged() throws Exception {
+        Property<String> property = Property.create("taco");
+        
+        PropertyObservable<Optional<String>> observable = property.filterToOptional(value -> value.equals("taco"));
+        PropertyObserver<Optional<String>> observer = Mockito.mock(PropertyObserver.class);
+        
+        observable.observe(observer);
+        Mockito.verify(observer).onChanged(Optional.of("taco"));
+        
+        property.setValue("burrito");
+        Mockito.verify(observer).onChanged(Optional.empty());
+        
+        property.setValue("fajita");
+        Mockito.verifyNoMoreInteractions(observer);
+    }
 }

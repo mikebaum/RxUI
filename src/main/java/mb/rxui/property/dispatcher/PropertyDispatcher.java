@@ -85,7 +85,7 @@ public final class PropertyDispatcher<M> implements Dispatcher<M> {
         
         PropertySubscriber<M> subscriber = new PropertySubscriber<>(wrapObserver(observer, isDispatching));
         
-        subscriber.doOnUnsubscribe(() -> subscribers.remove(subscriber));
+        subscriber.doOnDispose(() -> subscribers.remove(subscriber));
         subscribers.add(subscriber);
         subscribers.sort(SUBSCRIBER_COMPARATOR);
         

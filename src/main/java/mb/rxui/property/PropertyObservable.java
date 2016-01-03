@@ -238,10 +238,10 @@ public class PropertyObservable<M> implements Supplier<M> {
      *            the amount of values to emit
      * @return a new {@link PropertyObservable} that only emits as many items as
      *         specified in the amount parameter
-     * @throws IllegalStateException if zero elements is requested
+     * @throws IllegalArgumentException if zero elements is requested
      */
     public final PropertyObservable<M> take(int amount) {
-        Preconditions.checkState(amount > 0, "Cannot take zero elements");
+        Preconditions.checkArgument(amount > 0, "Cannot take zero elements");
         return lift(new OperatorTake<>(amount));
     }
     

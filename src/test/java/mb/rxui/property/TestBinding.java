@@ -11,37 +11,30 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package mb.rxui.property.opertator;
+package mb.rxui.property;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import mb.rxui.property.Property;
-import mb.rxui.property.Subscription;
-
-public class TestPropertyConditionBuilder {
+public class TestBinding {
     @Test
-    public void testConditionBuilder() throws Exception {
+    public void testBinding() throws Exception {
         Property<String> property = Property.create("tacos");
         
-        Runnable action = Mockito.mock(Runnable.class);
+        PropertyObserver<String> observer = Mockito.mock(PropertyObserver.class);
+        property.observe(observer);
+        verify(observer).onChanged("tacos");
         
-        Subscription subscription = property.is("tacos").or("burritos").then(action);
+        PropertyObserver<String> binding = new Binding<>(property);
+        assertTrue(binding.isBinding());
         
-        verify(action).run();
-        verifyNoMoreInteractions(action);
+        binding.onChanged("burritos");
+        verify(observer).onChanged("burritos");
         
-        property.setValue("burritos");
-        verifyNoMoreInteractions(action);
-        
-        property.setValue("fajitas");
-        verifyNoMoreInteractions(action);
-        
-        property.dispose();
-        assertTrue(subscription.isDisposed());
+        binding.onDisposed();
+        Mockito.verifyNoMoreInteractions(observer);
     }
 }

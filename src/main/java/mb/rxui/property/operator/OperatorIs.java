@@ -18,6 +18,7 @@ import static java.util.Objects.requireNonNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertySubscriber;
@@ -46,6 +47,8 @@ public class OperatorIs<M> implements PropertyOperator<M, Boolean> {
     @Override
     public PropertyPublisher<Boolean> apply(PropertyPublisher<M> source) {
         return new PropertyPublisher<Boolean>() {
+            
+            private Optional<Boolean> lastValue = Optional.empty();
 
             @Override
             public Boolean get() {
@@ -62,12 +65,20 @@ public class OperatorIs<M> implements PropertyOperator<M, Boolean> {
                 PropertySubscriber<Boolean> isSubscriber = new PropertySubscriber<>(observer);
                 
                 PropertySubscriber<M> sourceSubscriber = 
-                        source.subscribe(PropertyObserver.<M>create(value -> isSubscriber.onChanged(get()),
+                        source.subscribe(PropertyObserver.<M>create(value -> fireOnChangedIfNecessary(isSubscriber),
                                                                     isSubscriber::onDisposed));
                 
-                isSubscriber.doOnUnsubscribe(sourceSubscriber::dispose);
+                isSubscriber.doOnDispose(sourceSubscriber::dispose);
                 
                 return isSubscriber;
+            }
+
+            private void fireOnChangedIfNecessary(PropertySubscriber<Boolean> isSubscriber) {
+                if (lastValue.isPresent() && get().equals(lastValue.get()))
+                    return;
+                
+                lastValue = Optional.of(get());
+                isSubscriber.onChanged(lastValue.get());
             }
         };
     }

@@ -53,7 +53,7 @@ public class OperatorTake<M> implements PropertyOperator<M, M> {
                 PropertySubscriber<M> sourceSubscriber = 
                         source.subscribe(PropertyObserver.<M>create(takesubscriber::onChanged, takesubscriber::onDisposed));
                 
-                takesubscriber.doOnUnsubscribe(sourceSubscriber::dispose);
+                takesubscriber.doOnDispose(sourceSubscriber::dispose);
                 
                 return takesubscriber;
             }

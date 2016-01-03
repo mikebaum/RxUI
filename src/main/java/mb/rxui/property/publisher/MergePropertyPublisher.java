@@ -63,7 +63,7 @@ public class MergePropertyPublisher<R> implements PropertyPublisher<R> {
         
         CompositeSubscription subscription = new CompositeSubscription(subscriptions);
         
-        mergeSubscriber.doOnUnsubscribe(subscription::dispose);
+        mergeSubscriber.doOnDispose(subscription::dispose);
         
         return mergeSubscriber;
     }

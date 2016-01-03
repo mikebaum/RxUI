@@ -68,8 +68,7 @@ public interface PropertyObserver<M> {
      *         events.
      */
     static <M> PropertyObserver<M> create(Runnable onDestroy) {
-        return create(newValue -> {
-        } , onDestroy);
+        return create(newValue -> {} , onDestroy);
     }
 
     /**

@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package mb.rxui.property;
+package mb.rxui.event;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,7 +22,7 @@ import java.util.Optional;
  * numbers. The sequence numbers can be used to order events from different
  * sources into a canonical ordering.
  */
-class EventSequenceGenerator {
+public final class EventSequenceGenerator {
     private long lastSequenceNumber = 0;
     private final Map<Long, Long> sequenceMap = new HashMap<>();
     
@@ -39,7 +39,7 @@ class EventSequenceGenerator {
      * 
      * @return a sequence number that is guaranteed not to be unique.
      */
-    long nextSequenceNumber() {
+    public final long nextSequenceNumber() {
         long nextSequence = lastSequenceNumber++;
         sequenceMap.put(nextSequence, System.currentTimeMillis());
         return nextSequence;
@@ -49,7 +49,7 @@ class EventSequenceGenerator {
      * @deprecated this will be removed once an interface for Event Sequencer is
      *             created. Should only be used by tests
      */
-    void reset() {
+    public final void reset() {
         lastSequenceNumber = 0;
         sequenceMap.clear();
     }
@@ -63,7 +63,7 @@ class EventSequenceGenerator {
      *         sequence number. This will be empty if a time for the sequence
      *         number does not exist.
      */
-    Optional<Long> getTimeForSequence(long sequenceNumber) {
+    public final Optional<Long> getTimeForSequence(long sequenceNumber) {
         return Optional.ofNullable(sequenceMap.get(sequenceNumber));
     }
 }
