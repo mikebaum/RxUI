@@ -20,12 +20,10 @@ import static mb.rxui.Preconditions.checkState;
 import javax.swing.SwingUtilities;
 
 import javafx.application.Platform;
-import mb.rxui.annotations.RequiresTest;
 
 /**
  * Validates the current thread against some criteria.
  */
-@RequiresTest
 @FunctionalInterface
 public interface ThreadChecker extends Runnable {
     /**
@@ -52,8 +50,6 @@ public interface ThreadChecker extends Runnable {
                                 "Method should have been called from Thread with id, [" + threadId + "]" + 
                                 " but instead it was called from: " + Thread.currentThread());
     }
-
-    static final ThreadChecker NOOP_THREAD_CHECKER = () -> {};
 
     static final ThreadChecker EDT_THREAD_CHECKER = () -> {
         checkState(SwingUtilities.isEventDispatchThread(),

@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import mb.rxui.annotations.RequiresTest;
 import mb.rxui.disposables.Disposable;
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertySubscriber;
@@ -29,7 +28,6 @@ import mb.rxui.property.PropertySubscriber;
  * 
  * @param <M> the type of value this dispatcher dispatches.
  */
-@RequiresTest
 public final class PropertyDispatcher<M> implements Dispatcher<M> {
 
     private final List<PropertySubscriber<M>> subscribers = new ArrayList<>();

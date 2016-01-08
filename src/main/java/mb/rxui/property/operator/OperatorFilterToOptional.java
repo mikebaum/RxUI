@@ -14,6 +14,7 @@
 package mb.rxui.property.operator;
 
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
 import mb.rxui.property.PropertyObserver;
@@ -61,8 +62,10 @@ public class OperatorFilterToOptional<M> implements PropertyOperator<M, Optional
                 
                 PropertySubscriber<Optional<M>> subscriber = new PropertySubscriber<>(observer);
                 
+                AtomicBoolean hasEmittedFirstValue = new AtomicBoolean(false);
+                
                 PropertySubscriber<M> sourceSubscriber = 
-                        source.subscribe(PropertyObserver.<M>create(value -> fireOnChangedIfNecessary(subscriber),
+                        source.subscribe(PropertyObserver.<M>create(value -> fireOnChangedIfNecessary(subscriber, hasEmittedFirstValue),
                                                                     subscriber::onDisposed));
                 
                 subscriber.doOnDispose(sourceSubscriber::dispose);
@@ -70,8 +73,8 @@ public class OperatorFilterToOptional<M> implements PropertyOperator<M, Optional
                 return subscriber;
             }
 
-            private void fireOnChangedIfNecessary(PropertySubscriber<Optional<M>> subscriber) {
-                if (get().equals(lastValue.get()))
+            private void fireOnChangedIfNecessary(PropertySubscriber<Optional<M>> subscriber, AtomicBoolean hasEmitted) {
+                if(get().equals(lastValue) && !hasEmitted.compareAndSet(false, true))
                     return;
                 
                 lastValue = get();

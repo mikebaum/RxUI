@@ -15,7 +15,6 @@ package mb.rxui.property;
 
 import static java.util.Objects.requireNonNull;
 
-import mb.rxui.annotations.RequiresTest;
 import mb.rxui.property.dispatcher.Dispatcher;
 
 /**
@@ -24,7 +23,6 @@ import mb.rxui.property.dispatcher.Dispatcher;
  * @param <M>
  *            the type of value this property supplies
  */
-@RequiresTest
 public class ModelPropertySource<M> implements PropertySource<M> {
     
     private M value;

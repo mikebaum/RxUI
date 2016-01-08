@@ -393,7 +393,6 @@ public class TestProperty {
         InOrder inOrder = Mockito.inOrder(consumer1, consumer2, consumer3);
 
         Subscription subscription1 = property1.onChanged(consumer1);
-        property1.onChanged(System.out::println);
         inOrder.verify(consumer1).accept("tacos");
         
         

@@ -13,9 +13,7 @@
  */
 package mb.rxui.property;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.verify;
 
 import org.junit.Assert;
@@ -55,6 +53,9 @@ public class TestPropertyObservable {
         Property<String> stringProperty2 = Property.create("burritos");
         Property<Integer> integerProperty = Property.create(10);
         
+        assertTrue(stringProperty.equals(stringProperty));
+        assertFalse(stringProperty.equals(null));
+        
         assertFalse(stringProperty.equals(stringProperty2));
         assertFalse(stringProperty.equals(integerProperty));
         assertFalse(stringProperty.equals(new Double(20)));
@@ -85,6 +86,17 @@ public class TestPropertyObservable {
         property.dispose();
         verify(onComplete).call();
         Assert.assertFalse(property.hasObservers());
+    }
+    
+    @Test
+    public void testHashCode() {
+        Property<String> stringProperty = Property.create("tacos");
+        Property<String> stringProperty2 = Property.create("burritos");
+        
+        assertFalse(stringProperty.hashCode() == stringProperty2.hashCode());
+        
+        stringProperty2.setValue("tacos");
+        assertTrue(stringProperty.hashCode() == stringProperty2.hashCode());
     }
     
     @Test

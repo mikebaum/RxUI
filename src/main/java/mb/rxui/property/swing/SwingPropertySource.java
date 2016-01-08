@@ -18,7 +18,6 @@ import static mb.rxui.ThreadChecker.EDT_THREAD_CHECKER;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import mb.rxui.annotations.RequiresTest;
 import mb.rxui.disposables.Disposable;
 import mb.rxui.property.PropertySource;
 import mb.rxui.property.dispatcher.Dispatcher;
@@ -28,7 +27,6 @@ import mb.rxui.property.dispatcher.Dispatcher;
  * <br>
  * @param <M> the type of values this source provides
  */
-@RequiresTest
 public abstract class SwingPropertySource<M, L, C> implements PropertySource<M> {
     
     private final Supplier<M> getter;

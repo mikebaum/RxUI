@@ -18,7 +18,6 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 
-import mb.rxui.annotations.RequiresTest;
 import mb.rxui.disposables.Disposable;
 import mb.rxui.property.Property;
 import mb.rxui.property.dispatcher.Dispatcher;
@@ -26,7 +25,6 @@ import mb.rxui.property.dispatcher.Dispatcher;
 /**
  * A Swing text property source.
  */
-@RequiresTest
 public class TextPropertySource extends SwingPropertySource<String, DocumentListener, Document> {
 
     private TextPropertySource(JTextComponent textComponent, Dispatcher<String> dispatcher) {

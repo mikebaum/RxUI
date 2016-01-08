@@ -13,15 +13,11 @@
  */
 package mb.rxui;
 
-import mb.rxui.annotations.RequiresTest;
-
 /**
  * Helper classes for various preconditions
  */
-@RequiresTest
-public class Preconditions {
-    private Preconditions() {
-    } // no instances
+public enum Preconditions {
+    ; // no instance, helper class
 
     /**
      * Checks that the provided condition is met and if not throws an {@link IllegalArgumentException}

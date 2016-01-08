@@ -17,10 +17,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import mb.rxui.annotations.RequiresTest;
 import mb.rxui.disposables.Disposable;
 
-@RequiresTest
 public class CompositeSubscription implements Subscription {
 
     private final List<Subscription> subscriptions = new ArrayList<>();

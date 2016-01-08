@@ -11,11 +11,11 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package mb.rxui.property;
+package mb.rxui.property.javafx;
 
 import static mb.rxui.property.javafx.JavaFxProperties.fromFxProperty;
 import static mb.rxui.property.javafx.JavaFxProperties.fromObservableValue;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -29,6 +29,10 @@ import org.mockito.Mockito;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.concurrent.Task;
+import mb.rxui.property.Property;
+import mb.rxui.property.PropertyObservable;
+import mb.rxui.property.PropertyObserver;
+import mb.rxui.property.Subscription;
 import mb.rxui.property.javafx.JavaFxProperties;
 
 public class TestJavaFxProperties {
@@ -85,6 +89,22 @@ public class TestJavaFxProperties {
             verify(observer).onChanged("burritos");
             verify(observer, never()).onDisposed();
         } );
+    }
+    
+    @Test
+    public void testUnsubscribeRemovesListener() throws Exception {
+        javaFxTestHelper.runTest(() -> {
+            SimpleStringProperty observableValue = Mockito.spy(new SimpleStringProperty("tacos"));
+            PropertyObservable<String> observable = fromObservableValue(observableValue);
+            
+            PropertyObserver<String> mock = Mockito.mock(PropertyObserver.class);
+            
+            Subscription subscription = observable.observe(mock);
+            Mockito.verify(observableValue).addListener(Matchers.any(ChangeListener.class));
+            
+            subscription.dispose();            
+            Mockito.verify(observableValue).removeListener(Matchers.any(ChangeListener.class));
+        });
     }
     
     @Test(expected=IllegalStateException.class)

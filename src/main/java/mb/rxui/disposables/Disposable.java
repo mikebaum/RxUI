@@ -17,8 +17,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import mb.rxui.annotations.RequiresTest;
-
 /**
  * Represents a disposable resource.
  */
@@ -29,7 +27,6 @@ public interface Disposable {
      */
     void dispose();
     
-    @RequiresTest
     static Disposable create(Disposable... disposables) {
         List<Disposable> toDispose = new ArrayList<>(Arrays.asList(disposables));
         

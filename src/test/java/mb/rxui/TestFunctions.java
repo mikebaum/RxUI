@@ -13,10 +13,15 @@
  */
 package mb.rxui;
 
-import java.util.function.Predicate;
+import static mb.rxui.Functions.TRUE;
+import static org.junit.Assert.*;
 
-public enum Functions {
-    ; // no instance,  helper class
-    
-    public static final Predicate<Boolean> TRUE = value -> value;
+import org.junit.Test;
+
+public class TestFunctions {
+    @Test
+    public void testTrue() throws Exception {
+        assertTrue(TRUE.test(true));
+        assertFalse(TRUE.test(false));
+    }
 }
