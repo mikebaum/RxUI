@@ -21,6 +21,8 @@ import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 
+import mb.rxui.Subscription;
+
 public class TestCompositeSubscription {
     
     @Test

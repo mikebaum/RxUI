@@ -22,10 +22,10 @@ import java.util.Optional;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import mb.rxui.Subscription;
 import mb.rxui.property.Property;
 import mb.rxui.property.PropertyObservable;
 import mb.rxui.property.PropertyObserver;
-import mb.rxui.property.Subscription;
 
 public class TestOperatorFilterToOptional {
     @Test

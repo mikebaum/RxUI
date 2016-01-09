@@ -15,6 +15,7 @@ package mb.rxui.property.operator;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import mb.rxui.Subscription;
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertySubscriber;
 import mb.rxui.property.publisher.PropertyPublisher;
@@ -43,13 +44,13 @@ public class OperatorIsDirty<M> implements PropertyOperator<M, Boolean> {
             }
 
             @Override
-            public PropertySubscriber<Boolean> subscribe(PropertyObserver<Boolean> observer) {
+            public Subscription subscribe(PropertyObserver<Boolean> observer) {
                 
                 PropertySubscriber<Boolean> isDirtySubscriber = new PropertySubscriber<>(observer);
                 
                 AtomicBoolean hasEmittedFirstValue = new AtomicBoolean(false);
                 
-                PropertySubscriber<M> sourceSubscriber = 
+                Subscription sourceSubscriber = 
                         sourcePublisher.subscribe(PropertyObserver.<M>create(value -> fireOnChangedIfNecessary(isDirtySubscriber, hasEmittedFirstValue),
                                                   isDirtySubscriber::onDisposed));
                 

@@ -21,6 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import mb.rxui.Subscription;
 import mb.rxui.event.EventSequenceGenerator;
 import rx.functions.Action0;
 import rx.functions.Action1;

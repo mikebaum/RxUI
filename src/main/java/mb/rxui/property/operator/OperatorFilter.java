@@ -16,6 +16,7 @@ package mb.rxui.property.operator;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+import mb.rxui.Subscription;
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertySubscriber;
 import mb.rxui.property.publisher.PropertyPublisher;
@@ -53,10 +54,10 @@ public class OperatorFilter<M> implements PropertyOperator<M, M> {
             }
 
             @Override
-            public PropertySubscriber<M> subscribe(PropertyObserver<M> observer) {
+            public Subscription subscribe(PropertyObserver<M> observer) {
                 PropertySubscriber<M> subscriber = new PropertySubscriber<>(observer);
                 
-                PropertySubscriber<M> sourceSubscriber = 
+                Subscription sourceSubscriber = 
                         source.subscribe(PropertyObserver.<M>create(value -> fireOnChangedIfNecessary(subscriber),
                                                                     subscriber::onDisposed));
                 

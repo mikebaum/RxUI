@@ -11,12 +11,12 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package mb.rxui.property;
+package mb.rxui;
 
 import mb.rxui.disposables.Disposable;
 
 /**
- * A subscription can be used to stop observing a property observable.
+ * A subscription can be used to stop observing some property or stream.
  */
 public interface Subscription extends Disposable {
     /**

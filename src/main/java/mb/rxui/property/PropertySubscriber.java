@@ -18,6 +18,8 @@ import static java.util.Objects.requireNonNull;
 import java.util.ArrayList;
 import java.util.List;
 
+import mb.rxui.Subscription;
+
 /**
  * A subscriber of Property events. A property can emit one or many
  * {@link #onChanged(Object)} events followed by one {@link #onDisposed()}

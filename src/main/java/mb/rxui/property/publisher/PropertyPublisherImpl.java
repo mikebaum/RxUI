@@ -18,6 +18,7 @@ import static java.util.Objects.requireNonNull;
 import java.util.Objects;
 import java.util.function.Supplier;
 
+import mb.rxui.Subscription;
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertySubscriber;
 import mb.rxui.property.dispatcher.Dispatcher;
@@ -63,7 +64,7 @@ final class PropertyPublisherImpl<T> implements PropertyPublisher<T> {
      *         other callbacks from executing.
      */
     @Override
-    public PropertySubscriber<T> subscribe(PropertyObserver<T> observer) {
+    public Subscription subscribe(PropertyObserver<T> observer) {
 
         PropertySubscriber<T> subscriber = dispatcher.subscribe(observer);
         

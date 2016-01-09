@@ -17,6 +17,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
+import mb.rxui.Subscription;
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertySubscriber;
 import mb.rxui.property.publisher.PropertyPublisher;
@@ -58,13 +59,13 @@ public class OperatorFilterToOptional<M> implements PropertyOperator<M, Optional
             }
 
             @Override
-            public PropertySubscriber<Optional<M>> subscribe(PropertyObserver<Optional<M>> observer) {
+            public Subscription subscribe(PropertyObserver<Optional<M>> observer) {
                 
                 PropertySubscriber<Optional<M>> subscriber = new PropertySubscriber<>(observer);
                 
                 AtomicBoolean hasEmittedFirstValue = new AtomicBoolean(false);
                 
-                PropertySubscriber<M> sourceSubscriber = 
+                Subscription sourceSubscriber = 
                         source.subscribe(PropertyObserver.<M>create(value -> fireOnChangedIfNecessary(subscriber, hasEmittedFirstValue),
                                                                     subscriber::onDisposed));
                 

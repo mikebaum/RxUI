@@ -26,6 +26,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import mb.rxui.Preconditions;
+import mb.rxui.Subscription;
 import mb.rxui.ThreadChecker;
 import mb.rxui.property.operator.OperatorFilter;
 import mb.rxui.property.operator.OperatorFilterToOptional;

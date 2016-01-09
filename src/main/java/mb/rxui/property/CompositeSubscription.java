@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import mb.rxui.Subscription;
 import mb.rxui.disposables.Disposable;
 
 public class CompositeSubscription implements Subscription {

@@ -21,11 +21,11 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import mb.rxui.Subscription;
 import mb.rxui.property.CompositeSubscription;
 import mb.rxui.property.PropertyObservable;
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertySubscriber;
-import mb.rxui.property.Subscription;
 
 /**
  * A {@link PropertyPublisher} that will combine the values of the provided
@@ -62,7 +62,7 @@ public class CombinePropertyPublisher<R> implements PropertyPublisher<R> {
     }
 
     @Override
-    public PropertySubscriber<R> subscribe(PropertyObserver<R> observer) {
+    public Subscription subscribe(PropertyObserver<R> observer) {
 
         PropertySubscriber<R> combineSubscriber = new PropertySubscriber<>(observer);
 
