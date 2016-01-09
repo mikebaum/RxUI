@@ -14,10 +14,12 @@
 package mb.rxui.property;
 
 import static java.util.Objects.requireNonNull;
+import static mb.rxui.Callbacks.runSafeCallback;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import mb.rxui.Callbacks;
 import mb.rxui.Subscription;
 
 /**
@@ -46,7 +48,7 @@ public class PropertySubscriber<M> implements PropertyObserver<M>, Subscription 
     @Override
     public void dispose() {
         isDisposed = true;
-        onDisposedActions.stream().map(PropertySubscriber::createSafeCallback).forEach(Runnable::run);
+        onDisposedActions.stream().map(Callbacks::createSafeCallback).forEach(Runnable::run);
         onDisposedActions.clear();
     }
 
@@ -82,25 +84,6 @@ public class PropertySubscriber<M> implements PropertyObserver<M>, Subscription 
         
         runSafeCallback(observer::onDisposed);
         dispose();
-    }
-
-    private static void runSafeCallback(Runnable runnable) {
-        createSafeCallback(runnable).run();
-    }
-
-    private static Runnable createSafeCallback(Runnable runnable) {
-        return () -> {
-            try {
-                runnable.run();
-            } catch (Throwable throwable) {
-                // TODO: clearly not the right solution, perhaps we need to have
-                // the exception relayed to some contextual handler. Some
-                // component that is
-                // capable of displaying an error dialog if need be.
-                System.err.println("An exception was caught during a callback");
-                throwable.printStackTrace();
-            }
-        };
     }
 
     @Override
