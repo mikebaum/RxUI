@@ -17,6 +17,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
+import mb.rxui.Subscription;
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertySubscriber;
 import mb.rxui.property.publisher.PropertyPublisher;
@@ -46,8 +47,6 @@ public class OperatorFilterToOptional<M> implements PropertyOperator<M, Optional
         
         return new PropertyPublisher<Optional<M>>() {
             
-            private Optional<M> lastValue = filteredValue(source.get());
-
             @Override
             public Optional<M> get() {
                 return filteredValue(source.get());
@@ -58,27 +57,17 @@ public class OperatorFilterToOptional<M> implements PropertyOperator<M, Optional
             }
 
             @Override
-            public PropertySubscriber<Optional<M>> subscribe(PropertyObserver<Optional<M>> observer) {
+            public Subscription subscribe(PropertyObserver<Optional<M>> observer) {
                 
                 PropertySubscriber<Optional<M>> subscriber = new PropertySubscriber<>(observer);
                 
-                AtomicBoolean hasEmittedFirstValue = new AtomicBoolean(false);
-                
-                PropertySubscriber<M> sourceSubscriber = 
-                        source.subscribe(PropertyObserver.<M>create(value -> fireOnChangedIfNecessary(subscriber, hasEmittedFirstValue),
+                Subscription sourceSubscriber = 
+                        source.subscribe(PropertyObserver.<M>create(value -> subscriber.onChanged(get()),
                                                                     subscriber::onDisposed));
                 
                 subscriber.doOnDispose(sourceSubscriber::dispose);
                 
                 return subscriber;
-            }
-
-            private void fireOnChangedIfNecessary(PropertySubscriber<Optional<M>> subscriber, AtomicBoolean hasEmitted) {
-                if(get().equals(lastValue) && !hasEmitted.compareAndSet(false, true))
-                    return;
-                
-                lastValue = get();
-                subscriber.onChanged(lastValue);
             }
         };
     }

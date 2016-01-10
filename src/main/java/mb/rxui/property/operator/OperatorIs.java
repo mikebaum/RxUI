@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import mb.rxui.Subscription;
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertySubscriber;
 import mb.rxui.property.publisher.PropertyPublisher;
@@ -48,8 +49,6 @@ public class OperatorIs<M> implements PropertyOperator<M, Boolean> {
     public PropertyPublisher<Boolean> apply(PropertyPublisher<M> source) {
         return new PropertyPublisher<Boolean>() {
             
-            private Optional<Boolean> lastValue = Optional.empty();
-
             @Override
             public Boolean get() {
                 return is(source.get());
@@ -60,25 +59,17 @@ public class OperatorIs<M> implements PropertyOperator<M, Boolean> {
             }
 
             @Override
-            public PropertySubscriber<Boolean> subscribe(PropertyObserver<Boolean> observer) {
+            public Subscription subscribe(PropertyObserver<Boolean> observer) {
                 
                 PropertySubscriber<Boolean> isSubscriber = new PropertySubscriber<>(observer);
                 
-                PropertySubscriber<M> sourceSubscriber = 
-                        source.subscribe(PropertyObserver.<M>create(value -> fireOnChangedIfNecessary(isSubscriber),
+                Subscription sourceSubscriber = 
+                        source.subscribe(PropertyObserver.<M>create(value -> isSubscriber.onChanged(get()),
                                                                     isSubscriber::onDisposed));
                 
                 isSubscriber.doOnDispose(sourceSubscriber::dispose);
                 
                 return isSubscriber;
-            }
-
-            private void fireOnChangedIfNecessary(PropertySubscriber<Boolean> isSubscriber) {
-                if (lastValue.isPresent() && get().equals(lastValue.get()))
-                    return;
-                
-                lastValue = Optional.of(get());
-                isSubscriber.onChanged(lastValue.get());
             }
         };
     }

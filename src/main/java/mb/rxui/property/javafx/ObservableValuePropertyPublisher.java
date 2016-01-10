@@ -17,6 +17,7 @@ import static java.util.Objects.requireNonNull;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import mb.rxui.Subscription;
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertySubscriber;
 import mb.rxui.property.publisher.PropertyPublisher;
@@ -35,7 +36,7 @@ public class ObservableValuePropertyPublisher<T> implements PropertyPublisher<T>
     }
 
     @Override
-    public PropertySubscriber<T> subscribe(PropertyObserver<T> observer) {
+    public Subscription subscribe(PropertyObserver<T> observer) {
         PropertySubscriber<T> subscriber = new PropertySubscriber<>(observer);
         
         // adds a listener to the observable value

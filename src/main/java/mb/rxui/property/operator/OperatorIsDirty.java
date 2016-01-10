@@ -15,6 +15,7 @@ package mb.rxui.property.operator;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import mb.rxui.Subscription;
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertySubscriber;
 import mb.rxui.property.publisher.PropertyPublisher;
@@ -30,9 +31,6 @@ public class OperatorIsDirty<M> implements PropertyOperator<M, Boolean> {
     @Override
     public PropertyPublisher<Boolean> apply(PropertyPublisher<M> sourcePublisher) {
         return new PropertyPublisher<Boolean>() {
-            
-            private boolean lastValue = get();
-            
             @Override
             public Boolean get() {
                 return isDirty(sourcePublisher.get());
@@ -43,27 +41,17 @@ public class OperatorIsDirty<M> implements PropertyOperator<M, Boolean> {
             }
 
             @Override
-            public PropertySubscriber<Boolean> subscribe(PropertyObserver<Boolean> observer) {
+            public Subscription subscribe(PropertyObserver<Boolean> observer) {
                 
                 PropertySubscriber<Boolean> isDirtySubscriber = new PropertySubscriber<>(observer);
                 
-                AtomicBoolean hasEmittedFirstValue = new AtomicBoolean(false);
-                
-                PropertySubscriber<M> sourceSubscriber = 
-                        sourcePublisher.subscribe(PropertyObserver.<M>create(value -> fireOnChangedIfNecessary(isDirtySubscriber, hasEmittedFirstValue),
+                Subscription sourceSubscriber = 
+                        sourcePublisher.subscribe(PropertyObserver.create(value -> isDirtySubscriber.onChanged(get()),
                                                   isDirtySubscriber::onDisposed));
                 
                 isDirtySubscriber.doOnDispose(sourceSubscriber::dispose);
                 
                 return isDirtySubscriber;
-            }
-
-            private void fireOnChangedIfNecessary(PropertySubscriber<Boolean> subscriber, AtomicBoolean hasEmitted) {
-                if(get().equals(lastValue) && !hasEmitted.compareAndSet(false, true))
-                    return;
-                
-                lastValue = get(); 
-                subscriber.onChanged(get());
             }
         };
     }

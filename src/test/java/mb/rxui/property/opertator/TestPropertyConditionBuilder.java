@@ -20,8 +20,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import mb.rxui.Subscription;
 import mb.rxui.property.Property;
-import mb.rxui.property.Subscription;
 
 public class TestPropertyConditionBuilder {
     @Test

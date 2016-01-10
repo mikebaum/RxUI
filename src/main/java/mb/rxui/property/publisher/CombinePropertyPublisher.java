@@ -16,16 +16,15 @@ package mb.rxui.property.publisher;
 import static java.util.Objects.requireNonNull;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import mb.rxui.Subscription;
 import mb.rxui.property.CompositeSubscription;
 import mb.rxui.property.PropertyObservable;
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertySubscriber;
-import mb.rxui.property.Subscription;
 
 /**
  * A {@link PropertyPublisher} that will combine the values of the provided
@@ -38,13 +37,11 @@ public class CombinePropertyPublisher<R> implements PropertyPublisher<R> {
 
     private final List<PropertyObservable<?>> observables;
     private Supplier<R> combineSupplier;
-    private R lastValue;
     private int disposeCount = 0;
 
     public CombinePropertyPublisher(Supplier<R> combineSupplier, List<PropertyObservable<?>> observables) {
         this.combineSupplier = requireNonNull(combineSupplier);
         this.observables = requireNonNull(observables);
-        lastValue = combineSupplier.get();
     }
 
     /**
@@ -62,15 +59,13 @@ public class CombinePropertyPublisher<R> implements PropertyPublisher<R> {
     }
 
     @Override
-    public PropertySubscriber<R> subscribe(PropertyObserver<R> observer) {
+    public Subscription subscribe(PropertyObserver<R> observer) {
 
         PropertySubscriber<R> combineSubscriber = new PropertySubscriber<>(observer);
 
-        AtomicBoolean hasEmittedFirstValue = new AtomicBoolean(false);
-
         List<Subscription> subscriptions =
             observables.stream()
-                       .map(subscribe(combineSubscriber, hasEmittedFirstValue))
+                       .map(subscribe(combineSubscriber))
                        .collect(Collectors.toList());
 
         CompositeSubscription subscription = new CompositeSubscription(subscriptions);
@@ -80,17 +75,12 @@ public class CombinePropertyPublisher<R> implements PropertyPublisher<R> {
         return combineSubscriber;
     }
 
-    private Function<? super PropertyObservable<?>, ? extends Subscription> subscribe(
-            PropertySubscriber<R> combineSubscriber, AtomicBoolean hasEmittedFirstValue) {
+    private Function<? super PropertyObservable<?>, ? extends Subscription> subscribe(PropertySubscriber<R> combineSubscriber) {
 
-        return observable -> observable.observe(value -> {
-            if (!get().equals(lastValue) || hasEmittedFirstValue.compareAndSet(false, true)) {
-                CombinePropertyPublisher.this.lastValue = get();
-                combineSubscriber.onChanged(get());
-            }
-        } , () -> {
-            if (incrementDisposeCount())
-                combineSubscriber.onDisposed();
-        });
+        return observable -> observable.observe(value -> combineSubscriber.onChanged(get()), 
+                                                () -> {
+                                                    if (incrementDisposeCount())
+                                                        combineSubscriber.onDisposed();
+                                                });
     }
 }

@@ -19,10 +19,10 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import mb.rxui.Subscription;
 import mb.rxui.property.Property;
 import mb.rxui.property.PropertyObservable;
 import mb.rxui.property.PropertyObserver;
-import mb.rxui.property.Subscription;
 import mb.rxui.property.operator.OperatorIs;
 
 public class TestOperatorIs {

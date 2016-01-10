@@ -15,6 +15,7 @@ package mb.rxui.property.publisher;
 
 import java.util.function.Supplier;
 
+import mb.rxui.Subscription;
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertySubscriber;
 import mb.rxui.property.dispatcher.Dispatcher;
@@ -34,7 +35,7 @@ public interface PropertyPublisher<T> extends Supplier<T> {
      * @return a {@link PropertySubscriber} that can be used to cancel the
      *         subscription
      */
-    PropertySubscriber<T> subscribe(PropertyObserver<T> observer);
+    Subscription subscribe(PropertyObserver<T> observer);
     
     /**
      * Creates a default {@link PropertyPublisher}.

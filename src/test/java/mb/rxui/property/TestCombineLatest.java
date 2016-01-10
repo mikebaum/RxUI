@@ -22,6 +22,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import mb.rxui.Subscription;
+
 public class TestCombineLatest {
     @Test
     public void testCombineLatest2() throws Exception {

@@ -13,6 +13,7 @@
  */
 package mb.rxui.property.operator;
 
+import mb.rxui.Subscription;
 import mb.rxui.property.PropertyObservable;
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertySubscriber;
@@ -47,10 +48,10 @@ public class OperatorTake<M> implements PropertyOperator<M, M> {
             }
             
             @Override
-            public PropertySubscriber<M> subscribe(PropertyObserver<M> observer) {
+            public Subscription subscribe(PropertyObserver<M> observer) {
                 PropertySubscriber<M> takesubscriber = new TakeSubscriber<>(observer, takeTotal);
                 
-                PropertySubscriber<M> sourceSubscriber = 
+                Subscription sourceSubscriber = 
                         source.subscribe(PropertyObserver.<M>create(takesubscriber::onChanged, takesubscriber::onDisposed));
                 
                 takesubscriber.doOnDispose(sourceSubscriber::dispose);

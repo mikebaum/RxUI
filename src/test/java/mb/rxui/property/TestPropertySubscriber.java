@@ -156,4 +156,15 @@ public class TestPropertySubscriber {
         inOrder.verify(onDisposedAction).run();
         inOrder.verifyNoMoreInteractions();
     }
+    
+    @Test
+    public void testDoesNotEmitDuplicates() throws Exception {
+        PropertyObserver<String> observer = Mockito.mock(PropertyObserver.class);
+        PropertySubscriber<String> subscriber = new PropertySubscriber<>(observer);
+        
+        subscriber.onChanged("tacos");
+        subscriber.onChanged("tacos");
+        
+        Mockito.verify(observer).onChanged("tacos");
+    }
 }
