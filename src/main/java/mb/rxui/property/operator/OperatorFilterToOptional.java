@@ -47,8 +47,6 @@ public class OperatorFilterToOptional<M> implements PropertyOperator<M, Optional
         
         return new PropertyPublisher<Optional<M>>() {
             
-            private Optional<M> lastValue = filteredValue(source.get());
-
             @Override
             public Optional<M> get() {
                 return filteredValue(source.get());
@@ -63,23 +61,13 @@ public class OperatorFilterToOptional<M> implements PropertyOperator<M, Optional
                 
                 PropertySubscriber<Optional<M>> subscriber = new PropertySubscriber<>(observer);
                 
-                AtomicBoolean hasEmittedFirstValue = new AtomicBoolean(false);
-                
                 Subscription sourceSubscriber = 
-                        source.subscribe(PropertyObserver.<M>create(value -> fireOnChangedIfNecessary(subscriber, hasEmittedFirstValue),
+                        source.subscribe(PropertyObserver.<M>create(value -> subscriber.onChanged(get()),
                                                                     subscriber::onDisposed));
                 
                 subscriber.doOnDispose(sourceSubscriber::dispose);
                 
                 return subscriber;
-            }
-
-            private void fireOnChangedIfNecessary(PropertySubscriber<Optional<M>> subscriber, AtomicBoolean hasEmitted) {
-                if(get().equals(lastValue) && !hasEmitted.compareAndSet(false, true))
-                    return;
-                
-                lastValue = get();
-                subscriber.onChanged(lastValue);
             }
         };
     }

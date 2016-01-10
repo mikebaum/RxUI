@@ -46,8 +46,6 @@ public class OperatorFilter<M> implements PropertyOperator<M, M> {
     public PropertyPublisher<M> apply(PropertyPublisher<M> source) {
         return new PropertyPublisher<M>() {
             
-            private Optional<M> lastValue = Optional.empty();
-            
             @Override
             public M get() {
                 return source.get();
@@ -70,11 +68,7 @@ public class OperatorFilter<M> implements PropertyOperator<M, M> {
                 if (!predicate.test(get()))
                     return;
                     
-                if (lastValue.isPresent() && get().equals(lastValue.get()))
-                    return;
-                
-                lastValue = Optional.of(get());
-                subscriber.onChanged(lastValue.get());
+                subscriber.onChanged(get());
             }
         };
     }

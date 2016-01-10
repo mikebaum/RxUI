@@ -13,8 +13,9 @@
  */
 package mb.rxui.property.dispatcher;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.times;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 
 import java.util.function.Consumer;
@@ -53,11 +54,15 @@ public class TestPropertyDispatcher {
         dispatcher.dispatchValue("tacos");
         verify(onChanged).accept("tacos");
         
+        PropertyObserver<String> observer = Mockito.mock(PropertyObserver.class);
+        dispatcher.subscribe(observer);
+        
         dispatcher.dispatchValue("tacos");
-        verify(onChanged, times(2)).accept("tacos");
+        verify(observer).onChanged("tacos");
         
         dispatcher.dispatchValue("burritos");
         verify(onChanged).accept("burritos");
+        verify(observer).onChanged("burritos");
     }
     
     @Test

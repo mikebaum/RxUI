@@ -13,9 +13,17 @@
  */
 package mb.rxui;
 
+/**
+ * Helper class for Callbacks 
+ */
 public enum Callbacks {
     ; // no instances, helper class
 
+    /**
+     * Creates a callback that catches and logs any exception that is thrown.
+     * @param runnable some {@link Runnable} to execute
+     * @return a {@link Runnable} that is guaranteed not to throw any exceptions.
+     */
     public static Runnable createSafeCallback(Runnable runnable) {
         return () -> {
             try {
@@ -31,6 +39,10 @@ public enum Callbacks {
         };
     } 
 
+    /**
+     * Creates and executes a safe callback, see {@link #createSafeCallback(Runnable)}.
+     * @param runnable some {@link Runnable} to execute safely.
+     */
     public static void runSafeCallback(Runnable runnable) {
         createSafeCallback(runnable).run();
     }
