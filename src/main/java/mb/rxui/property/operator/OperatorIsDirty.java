@@ -13,8 +13,6 @@
  */
 package mb.rxui.property.operator;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import mb.rxui.Subscription;
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertySubscriber;

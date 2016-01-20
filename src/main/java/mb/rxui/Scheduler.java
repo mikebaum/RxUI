@@ -11,20 +11,15 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package mb.rxui.property.operator;
-
-import java.util.function.Function;
-
-import mb.rxui.property.publisher.PropertyPublisher;
+package mb.rxui;
 
 /**
- * A {@link PropertyOperator} is some function that can convert a property
- * publish of one kind to another
- * 
- * @param <Child>
- *            the source property publisher (the one that is being converted)
- * @param <Parent>
- *            the target property publisher (the result of converting the source
- *            publisher)
+ * A scheduler can be used to <i>schedule</i> some runnable for execution.
  */
-public interface PropertyOperator<Child, Parent> extends Function<PropertyPublisher<Child>, PropertyPublisher<Parent>> {}
+public interface Scheduler {
+    /**
+     * Schedule some runnable to execute now.
+     * @param runnable some runnable to execute.
+     */
+    void schedule(Runnable runnable);
+}

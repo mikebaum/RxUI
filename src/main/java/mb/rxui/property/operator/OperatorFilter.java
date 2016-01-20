@@ -13,7 +13,6 @@
  */
 package mb.rxui.property.operator;
 
-import java.util.Optional;
 import java.util.function.Predicate;
 
 import mb.rxui.Subscription;

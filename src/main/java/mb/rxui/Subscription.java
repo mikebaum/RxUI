@@ -23,4 +23,43 @@ public interface Subscription extends Disposable {
      * @return true if this subscription is disposed, false otherwise
      */
     boolean isDisposed();
+    
+    
+    public static Subscription DISPOSED_SUBSCRIPTION = new Subscription() {
+        @Override
+        public void dispose() {}
+        
+        @Override
+        public boolean isDisposed() {
+            return true;
+        }
+    };
+    
+    /**
+     * Creates a Subscription from a disposable.
+     * 
+     * @param disposable
+     *            some {@link Disposable} that should be run when terminating
+     *            the subscription.
+     * @return A new {@link Subscription}
+     */
+    static Subscription fromDisposable(Disposable disposable) {
+        return new Subscription() {
+            private boolean isDisposed = false;
+
+            @Override
+            public void dispose() {
+                if (isDisposed)
+                    return;
+
+                isDisposed = true;
+                disposable.dispose();
+            }
+
+            @Override
+            public boolean isDisposed() {
+                return isDisposed;
+            }
+        };
+    }
 }

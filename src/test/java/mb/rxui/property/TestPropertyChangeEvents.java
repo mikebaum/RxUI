@@ -13,7 +13,6 @@
  */
 package mb.rxui.property;
 
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -21,9 +20,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import mb.rxui.Subscription;
 import mb.rxui.event.EventSequenceGenerator;
-import rx.Observer;
-import rx.Subscription;
+import mb.rxui.event.EventStreamObserver;
 
 public class TestPropertyChangeEvents {
     
@@ -38,21 +37,21 @@ public class TestPropertyChangeEvents {
         Property<Integer> property2 = Property.create(10);
         
         // subscribing to property change events should not emit a change event until the value changes from the initial value.
-        Observer<PropertyChangeEvent<String>> changeEventsObserver = Mockito.mock(Observer.class);
-        property.changeEvents().subscribe(changeEventsObserver);
+        EventStreamObserver<PropertyChangeEvent<String>> changeEventsObserver = Mockito.mock(EventStreamObserver.class);
+        property.changeEvents().observe(changeEventsObserver);
         verifyNoMoreInteractions(changeEventsObserver);
 
         // subscribing to property change events should not emit a change event until the value changes from the initial value.
-        Observer<PropertyChangeEvent<Integer>> changeEventsObserver2 = Mockito.mock(Observer.class);
-        property2.changeEvents().subscribe(changeEventsObserver2);
+        EventStreamObserver<PropertyChangeEvent<Integer>> changeEventsObserver2 = Mockito.mock(EventStreamObserver.class);
+        property2.changeEvents().observe(changeEventsObserver2);
         verifyNoMoreInteractions(changeEventsObserver2);
         
         property.setValue("burritos");
-        verify(changeEventsObserver).onNext(new PropertyChangeEvent<>("tacos", "burritos", 2));
+        verify(changeEventsObserver).onEvent(new PropertyChangeEvent<>("tacos", "burritos", 0));
         verifyNoMoreInteractions(changeEventsObserver);
         
         property2.setValue(20);
-        verify(changeEventsObserver2).onNext(new PropertyChangeEvent<>(10, 20, 3));
+        verify(changeEventsObserver2).onEvent(new PropertyChangeEvent<>(10, 20, 1));
         verifyNoMoreInteractions(changeEventsObserver2);
         
         property.dispose();
@@ -65,20 +64,20 @@ public class TestPropertyChangeEvents {
     public void testUnsubscribePropertyChangeEvents() throws Exception {
         Property<String> property = Property.create("tacos");
         
-        Observer<PropertyChangeEvent<String>> changeEventsObserver = Mockito.mock(Observer.class);
-        Subscription subscription = property.changeEvents().subscribe(changeEventsObserver);
+        EventStreamObserver<PropertyChangeEvent<String>> changeEventsObserver = Mockito.mock(EventStreamObserver.class);
+        Subscription subscription = property.changeEvents().observe(changeEventsObserver);
         verifyNoMoreInteractions(changeEventsObserver);
         
         property.setValue("burritos");
-        verify(changeEventsObserver).onNext(new PropertyChangeEvent<>("tacos", "burritos", 1));
+        verify(changeEventsObserver).onEvent(new PropertyChangeEvent<>("tacos", "burritos", 0));
         
         // verify that unsubscribing and re-subscribing does not cancel the property changed event stream
-        subscription.unsubscribe();
-        Observer<PropertyChangeEvent<String>> changeEventsObserver2 = Mockito.mock(Observer.class);
-        property.changeEvents().subscribe(changeEventsObserver2);
+        subscription.dispose();
+        EventStreamObserver<PropertyChangeEvent<String>> changeEventsObserver2 = Mockito.mock(EventStreamObserver.class);
+        property.changeEvents().observe(changeEventsObserver2);
         verifyNoMoreInteractions(changeEventsObserver2);
         
         property.setValue("tacos");
-        verify(changeEventsObserver2).onNext(new PropertyChangeEvent<>("burritos", "tacos", 3));
+        verify(changeEventsObserver2).onEvent(new PropertyChangeEvent<>("burritos", "tacos", 1));
     }
 }

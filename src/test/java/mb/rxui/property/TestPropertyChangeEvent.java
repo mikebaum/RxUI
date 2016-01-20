@@ -15,8 +15,6 @@ package mb.rxui.property;
 
 import static org.junit.Assert.*;
 
-import java.util.Optional;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -39,26 +37,15 @@ public class TestPropertyChangeEvent {
     
     @Test
     public void testNext() throws Exception {
-        Optional<PropertyChangeEvent<Integer>> event0 = PropertyChangeEvent.next(Optional.empty(), 15);
-        assertTrue(event0.isPresent());
-        assertEquals(0, event0.get().getEventSequence());
-        assertEquals(null, event0.get().getOldValue());
-        assertEquals(new Integer(15), event0.get().getNewValue());
+        PropertyChangeEvent<Integer> event0 = new PropertyChangeEvent<>(10, 15);
+        assertEquals(0, event0.getEventSequence());
+        assertEquals(new Integer(10), event0.getOldValue());
+        assertEquals(new Integer(15), event0.getNewValue());
         
-        Optional<PropertyChangeEvent<Integer>> event1 = event0.get().next(20);
-        assertTrue(event1.isPresent());
-        assertEquals(1, event1.get().getEventSequence());
-        assertEquals(new Integer(15), event1.get().getOldValue());
-        assertEquals(new Integer(20), event1.get().getNewValue());
-        
-        Optional<PropertyChangeEvent<Integer>> event2 = PropertyChangeEvent.next(event1, 30);
-        assertTrue(event2.isPresent());
-        assertEquals(2, event2.get().getEventSequence());
-        assertEquals(new Integer(20), event2.get().getOldValue());
-        assertEquals(new Integer(30), event2.get().getNewValue());
-        
-        Optional<PropertyChangeEvent<Integer>> event3 = PropertyChangeEvent.next(event2, 30);
-        assertFalse(event3.isPresent());
+        PropertyChangeEvent<Integer> event1 = event0.next(20);
+        assertEquals(1, event1.getEventSequence());
+        assertEquals(new Integer(15), event1.getOldValue());
+        assertEquals(new Integer(20), event1.getNewValue());
     }
     
     @Test
@@ -82,15 +69,20 @@ public class TestPropertyChangeEvent {
         // events should not be equal if the new value is different
         PropertyChangeEvent<Integer> event4 = new PropertyChangeEvent<>(0, 16, 0);
         assertFalse(event0.equals(event4));
-        
-        // events should be equal if the old values are null
-        PropertyChangeEvent<Integer> event5 = new PropertyChangeEvent<>(null, 15, 0);
-        PropertyChangeEvent<Integer> event6 = new PropertyChangeEvent<>(null, 15, 0);
-        assertTrue(event5.equals(event6));
-        
-        // events should not be equal if one of the old values is null
-        PropertyChangeEvent<Integer> event7 = new PropertyChangeEvent<>(null, 15, 0);
-        assertFalse(event0.equals(event7));
-        assertFalse(event7.equals(event0));
+    }
+    
+    @Test(expected=IllegalArgumentException.class)
+    public void testNewAndOldValueCannotBeTheSame() throws Exception {
+        new PropertyChangeEvent<>(10, 10);
+    }
+    
+    @Test(expected=NullPointerException.class)
+    public void testOldValueCannotBeNull() throws Exception {
+        new PropertyChangeEvent<>(null, 10);
+    }
+    
+    @Test(expected=NullPointerException.class)
+    public void testNewValueCannotBeNull() throws Exception {
+        new PropertyChangeEvent<>(10, null);
     }
 }

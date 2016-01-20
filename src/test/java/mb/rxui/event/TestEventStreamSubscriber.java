@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package mb.rxui.property;
+package mb.rxui.event;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -23,24 +23,29 @@ import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 
-public class TestPropertySubscriber {
-    private PropertySubscriber<String> subscriber;
-    private PropertyObserver<String> observer;
+import mb.rxui.property.Binding;
+import mb.rxui.property.Property;
+import mb.rxui.property.PropertyObserver;
+import mb.rxui.property.PropertySubscriber;
+
+public class TestEventStreamSubscriber {
+    private EventStreamSubscriber<String> subscriber;
+    private EventStreamObserver<String> observer;
     
     @Before
     public void setup() {
-        observer = Mockito.mock(PropertyObserver.class);
-        subscriber = new PropertySubscriber<>(observer);
+        observer = Mockito.mock(EventStreamObserver.class);
+        subscriber = new EventStreamSubscriber<>(observer);
     }
 
     @Test
-    public void testOnChanged() throws Exception {
-        subscriber.onChanged("tacos");
-        Mockito.verify(observer).onChanged("tacos");
+    public void testOnEvent() throws Exception {
+        subscriber.onEvent("tacos");
+        Mockito.verify(observer).onEvent("tacos");
     }
     
     @Test
-    public void testOnDispose() throws Exception {
+    public void testOnCompleted() throws Exception {
         
         Runnable onUnsubscribedAction = Mockito.mock(Runnable.class);
         InOrder inOrder = Mockito.inOrder(onUnsubscribedAction, observer);
@@ -49,8 +54,8 @@ public class TestPropertySubscriber {
         
         assertFalse(subscriber.isDisposed());
         
-        subscriber.onDisposed();
-        inOrder.verify(observer).onDisposed();
+        subscriber.onCompleted();
+        inOrder.verify(observer).onCompleted();
         inOrder.verify(onUnsubscribedAction).run();
         inOrder.verifyNoMoreInteractions();
         
@@ -67,7 +72,7 @@ public class TestPropertySubscriber {
         assertFalse(subscriber.isDisposed());
         
         subscriber.dispose();
-        inOrder.verify(observer, never()).onDisposed();
+        inOrder.verify(observer, never()).onCompleted();
         inOrder.verify(onUnsubscribedAction).run();
         inOrder.verifyNoMoreInteractions();
         
@@ -77,45 +82,32 @@ public class TestPropertySubscriber {
     @Test
     public void testReceiveNoEventsAfterDispose() throws Exception {
         subscriber.dispose();
-        Mockito.verify(observer, never()).onDisposed();
+        Mockito.verify(observer, never()).onCompleted();
         
-        subscriber.onChanged("tacos");
-        Mockito.verify(observer, never()).onChanged(Mockito.anyString());
+        subscriber.onEvent("tacos");
+        Mockito.verify(observer, never()).onEvent(Mockito.anyString());
     }
     
     @Test
-    public void testReceiveNoEventsAfterOnDisposed() throws Exception {
-        subscriber.onDisposed();
-        Mockito.verify(observer).onDisposed();
+    public void testReceiveNoEventsAfterOnCompleted() throws Exception {
+        subscriber.onCompleted();
+        Mockito.verify(observer).onCompleted();
         
-        subscriber.onChanged("tacos");
-        Mockito.verify(observer, never()).onChanged(Mockito.anyString());
+        subscriber.onEvent("tacos");
+        Mockito.verify(observer, never()).onEvent(Mockito.anyString());
         
-        subscriber.onDisposed();
+        subscriber.onCompleted();
         Mockito.verifyNoMoreInteractions(observer);
     }
     
     @Test
-    public void testBindingSubscriber() throws Exception {
-        Binding<String> binding = new Binding<>(Property.create("tacos"));
-        PropertySubscriber<String> propertySubscriber = new PropertySubscriber<>(binding);
-        assertTrue(propertySubscriber.isBinding());
-    }
-    
-    @Test
-    public void testNotBindingSubscriber() throws Exception {
-        PropertySubscriber<String> propertySubscriber = new PropertySubscriber<>(Mockito.mock(PropertyObserver.class));
-        assertFalse(propertySubscriber.isBinding());
-    }
-    
-    @Test
-    public void testOnChangedThrows() throws Exception {
-        PropertyObserver<String> propertyObserver = Mockito.mock(PropertyObserver.class);
-        Mockito.doThrow(new RuntimeException()).when(propertyObserver).onChanged(Mockito.anyString());
-        PropertySubscriber<String> propertySubscriber = new PropertySubscriber<>(propertyObserver);
+    public void testOnEventThrows() throws Exception {
+        EventStreamObserver<String> observer = Mockito.mock(EventStreamObserver.class);
+        Mockito.doThrow(new RuntimeException()).when(observer).onEvent(Mockito.anyString());
+        EventStreamSubscriber<String> subscriber = new EventStreamSubscriber<>(observer);
         
         try {
-            propertySubscriber.onChanged("tacos");
+            subscriber.onEvent("tacos");
         } catch(RuntimeException exception) {
             exception.printStackTrace();
             fail("should not have thrown an exception");
@@ -123,13 +115,13 @@ public class TestPropertySubscriber {
     }
     
     @Test
-    public void testOnDisposedThrows() throws Exception {
-        PropertyObserver<String> propertyObserver = Mockito.mock(PropertyObserver.class);
-        Mockito.doThrow(new RuntimeException()).when(propertyObserver).onDisposed();
-        PropertySubscriber<String> propertySubscriber = new PropertySubscriber<>(propertyObserver);
+    public void testOnCompletedThrows() throws Exception {
+        EventStreamObserver<String> observer = Mockito.mock(EventStreamObserver.class);
+        Mockito.doThrow(new RuntimeException()).when(observer).onCompleted();
+        EventStreamSubscriber<String> subscriber = new EventStreamSubscriber<>(observer);
         
         try {
-            propertySubscriber.onDisposed();
+            subscriber.onCompleted();
         } catch(RuntimeException exception) {
             fail("should not have thrown an exception");
         }
@@ -137,20 +129,20 @@ public class TestPropertySubscriber {
     
     @Test
     public void testDoOnDisposedThrows() throws Exception {
-        PropertyObserver<String> propertyObserver = Mockito.mock(PropertyObserver.class);
-        PropertySubscriber<String> propertySubscriber = new PropertySubscriber<>(propertyObserver);
+        EventStreamObserver<String> observer = Mockito.mock(EventStreamObserver.class);
+        EventStreamSubscriber<String> subscriber = new EventStreamSubscriber<>(observer);
         
         Runnable onDisposedActionThatThrows = Mockito.mock(Runnable.class);
         Mockito.doThrow(new RuntimeException()).when(onDisposedActionThatThrows).run();
-        propertySubscriber.doOnDispose(onDisposedActionThatThrows);
+        subscriber.doOnDispose(onDisposedActionThatThrows);
 
         Runnable onDisposedAction = Mockito.mock(Runnable.class);
-        propertySubscriber.doOnDispose(onDisposedAction);
+        subscriber.doOnDispose(onDisposedAction);
         
         InOrder inOrder = Mockito.inOrder(onDisposedActionThatThrows, onDisposedAction);
         
         try {
-            propertySubscriber.dispose();
+            subscriber.dispose();
         } catch(RuntimeException exception) {
             fail("should not have thrown an exception");
         }
@@ -158,16 +150,5 @@ public class TestPropertySubscriber {
         inOrder.verify(onDisposedActionThatThrows).run();
         inOrder.verify(onDisposedAction).run();
         inOrder.verifyNoMoreInteractions();
-    }
-    
-    @Test
-    public void testDoesNotEmitDuplicates() throws Exception {
-        PropertyObserver<String> observer = Mockito.mock(PropertyObserver.class);
-        PropertySubscriber<String> subscriber = new PropertySubscriber<>(observer);
-        
-        subscriber.onChanged("tacos");
-        subscriber.onChanged("tacos");
-        
-        Mockito.verify(observer).onChanged("tacos");
     }
 }

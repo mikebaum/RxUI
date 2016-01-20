@@ -19,8 +19,8 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import mb.rxui.disposables.Disposable;
+import mb.rxui.property.PropertyDispatcher;
 import mb.rxui.property.PropertySource;
-import mb.rxui.property.dispatcher.Dispatcher;
 
 /**
  * A property source for Swing components.<br>
@@ -35,7 +35,7 @@ public abstract class SwingPropertySource<M, L, C> implements PropertySource<M> 
     protected SwingPropertySource(Supplier<M> getter, 
                                   Consumer<M> setter, 
                                   C component,
-                                  Dispatcher<M> dispatcher) {
+                                  PropertyDispatcher<M> dispatcher) {
         this.getter = getter;
         this.setter = setter;
         EDT_THREAD_CHECKER.checkThread();
@@ -52,7 +52,7 @@ public abstract class SwingPropertySource<M, L, C> implements PropertySource<M> 
         return getter.get();
     }
     
-    protected abstract L createListener(Dispatcher<M> dispatcher);
+    protected abstract L createListener(PropertyDispatcher<M> dispatcher);
     
     protected abstract Disposable addListener(C component, L listener);
 }

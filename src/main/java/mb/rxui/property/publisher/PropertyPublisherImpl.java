@@ -19,9 +19,9 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 import mb.rxui.Subscription;
+import mb.rxui.property.PropertyDispatcher;
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertySubscriber;
-import mb.rxui.property.dispatcher.Dispatcher;
 
 /**
  * Default implementation of a property publisher.
@@ -32,7 +32,7 @@ import mb.rxui.property.dispatcher.Dispatcher;
 final class PropertyPublisherImpl<T> implements PropertyPublisher<T> {
     
     private final Supplier<T> propertySupplier;
-    private final Dispatcher<T> dispatcher;
+    private final PropertyDispatcher<T> dispatcher;
     
     /**
      * Creates a new property publisher.
@@ -46,7 +46,7 @@ final class PropertyPublisherImpl<T> implements PropertyPublisher<T> {
      * @throws IllegalArgumentException
      *             if the provided supplier does not provide an initial value.
      */
-    PropertyPublisherImpl(Supplier<T> propertySupplier, Dispatcher<T> dispatcher) {
+    PropertyPublisherImpl(Supplier<T> propertySupplier, PropertyDispatcher<T> dispatcher) {
         this.propertySupplier = requireNonNull(propertySupplier);
         this.dispatcher = requireNonNull(dispatcher);
         Objects.requireNonNull(propertySupplier.get(), "A property publisher must be initialized with a value");

@@ -11,20 +11,19 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package mb.rxui.property.operator;
+package mb.rxui.event.operator;
 
 import java.util.function.Function;
 
-import mb.rxui.property.publisher.PropertyPublisher;
+import mb.rxui.event.EventStreamSubscriber;
 
 /**
- * A {@link PropertyOperator} is some function that can convert a property
- * publish of one kind to another
+ * An operator converts a subscriber from a child type to a parent type. This is
+ * used whenever a stream is transformed, i.e. map.
  * 
- * @param <Child>
- *            the source property publisher (the one that is being converted)
  * @param <Parent>
- *            the target property publisher (the result of converting the source
- *            publisher)
+ *            parent stream data type (original stream)
+ * @param <Child>
+ *            child stream data type (new stream)
  */
-public interface PropertyOperator<Child, Parent> extends Function<PropertyPublisher<Child>, PropertyPublisher<Parent>> {}
+public interface Operator<Parent, Child> extends Function<EventStreamSubscriber<Child>, EventStreamSubscriber<Parent>> {}

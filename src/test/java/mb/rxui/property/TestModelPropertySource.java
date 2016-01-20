@@ -18,19 +18,23 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import mb.rxui.property.dispatcher.Dispatcher;
-import mb.rxui.property.dispatcher.PropertyDispatcher;
+import mb.rxui.dispatcher.Dispatcher;
 
 public class TestModelPropertySource {
     @Test
     public void testSetValue() throws Exception {
-        Dispatcher<String> dispatcher = Mockito.mock(Dispatcher.class);
         
-        PropertySource<String> source = ModelPropertySource.createFactory("tacos").apply(dispatcher);
+        PropertyDispatcher<String> propertyDispatcher = Dispatcher.createPropertyDispatcher();
+        PropertyObserver<String> observer = Mockito.mock(PropertyObserver.class);
+        propertyDispatcher.subscribe(observer);
+        
+        PropertySource<String> source = ModelPropertySource.createFactory("tacos").apply(propertyDispatcher);
+        
         assertEquals("tacos", source.get());
         
         source.setValue("burritos");
         assertEquals("burritos", source.get());
-        Mockito.verify(dispatcher).dispatchValue("burritos");
+        Mockito.verify(observer).onChanged("burritos");
+        Mockito.verifyNoMoreInteractions(observer);
     }
 }

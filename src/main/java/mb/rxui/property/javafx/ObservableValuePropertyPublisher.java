@@ -22,7 +22,7 @@ import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertySubscriber;
 import mb.rxui.property.publisher.PropertyPublisher;
 
-public class ObservableValuePropertyPublisher<T> implements PropertyPublisher<T> {
+public final class ObservableValuePropertyPublisher<T> implements PropertyPublisher<T> {
 
     private final ObservableValue<T> observableValue;
     

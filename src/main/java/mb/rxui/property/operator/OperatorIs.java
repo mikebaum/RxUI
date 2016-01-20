@@ -18,7 +18,6 @@ import static java.util.Objects.requireNonNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import mb.rxui.Subscription;
 import mb.rxui.property.PropertyObserver;

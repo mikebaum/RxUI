@@ -25,14 +25,16 @@ import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 
+import mb.rxui.dispatcher.Dispatcher;
 import mb.rxui.disposables.Disposable;
 import mb.rxui.property.Binding;
 import mb.rxui.property.Property;
+import mb.rxui.property.PropertyDispatcher;
 import mb.rxui.property.PropertyObserver;
 
 public class TestPropertyDispatcher {
     
-    private Dispatcher<String> dispatcher;
+    private PropertyDispatcher<String> dispatcher;
     private Consumer<String> onChanged;
     private Runnable onDisposed;
 
@@ -51,16 +53,16 @@ public class TestPropertyDispatcher {
     @Test
     public void testDispatch() {
         assertFalse(dispatcher.isDispatching());
-        dispatcher.dispatchValue("tacos");
+        dispatcher.dispatch("tacos");
         verify(onChanged).accept("tacos");
         
         PropertyObserver<String> observer = Mockito.mock(PropertyObserver.class);
         dispatcher.subscribe(observer);
         
-        dispatcher.dispatchValue("tacos");
+        dispatcher.dispatch("tacos");
         verify(observer).onChanged("tacos");
         
-        dispatcher.dispatchValue("burritos");
+        dispatcher.dispatch("burritos");
         verify(onChanged).accept("burritos");
         verify(observer).onChanged("burritos");
     }
@@ -103,14 +105,14 @@ public class TestPropertyDispatcher {
     @Test(expected=IllegalStateException.class)
     public void testDispatchAfterDisposedThrows() throws Exception {
         dispatcher.dispose();
-        dispatcher.dispatchValue("tacos");
+        dispatcher.dispatch("tacos");
     }
     
     @Test
     public void testOnChangedThrowsDoesNotAffectIsDispatching() throws Exception {
         dispatcher.subscribe(PropertyObserver.create(value -> { throw new RuntimeException(); }));
         
-        dispatcher.dispatchValue("tacos");
+        dispatcher.dispatch("tacos");
         assertFalse(dispatcher.isDispatching());
     }
     
@@ -125,7 +127,7 @@ public class TestPropertyDispatcher {
         
         InOrder inOrder = Mockito.inOrder(onChanged, onDisposed, binding, observer);
         
-        dispatcher.dispatchValue("fajitas");
+        dispatcher.dispatch("fajitas");
         
         inOrder.verify(binding).onChanged("fajitas");
         inOrder.verify(onChanged).accept("fajitas");
@@ -153,7 +155,7 @@ public class TestPropertyDispatcher {
         
         InOrder inOrder = Mockito.inOrder(onChanged, observer, binding1, binding2);
         
-        dispatcher.dispatchValue("tacos");
+        dispatcher.dispatch("tacos");
         
         inOrder.verify(binding1).onChanged("tacos");
         inOrder.verify(binding2).onChanged("tacos");

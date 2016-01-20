@@ -33,7 +33,7 @@ import mb.rxui.property.PropertySubscriber;
  * @param <R>
  *            the type of the combined result
  */
-public class CombinePropertyPublisher<R> implements PropertyPublisher<R> {
+public final class CombinePropertyPublisher<R> implements PropertyPublisher<R> {
 
     private final List<PropertyObservable<?>> observables;
     private Supplier<R> combineSupplier;

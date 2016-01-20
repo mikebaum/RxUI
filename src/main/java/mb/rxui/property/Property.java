@@ -14,7 +14,7 @@
 package mb.rxui.property;
 
 import static java.util.Objects.requireNonNull;
-import static mb.rxui.property.dispatcher.Dispatcher.createPropertyDispatcher;
+import static mb.rxui.dispatcher.Dispatcher.createPropertyDispatcher;
 
 import java.util.Optional;
 
@@ -23,7 +23,8 @@ import javax.security.auth.Subject;
 import mb.rxui.Subscription;
 import mb.rxui.ThreadChecker;
 import mb.rxui.disposables.Disposable;
-import mb.rxui.property.dispatcher.Dispatcher;
+import mb.rxui.event.EventStream;
+import mb.rxui.event.EventSubject;
 import mb.rxui.property.publisher.PropertyPublisher;
 import rx.Observable;
 import rx.subjects.BehaviorSubject;
@@ -67,22 +68,25 @@ import rx.subjects.BehaviorSubject;
 public final class Property<M> extends PropertyObservable<M> implements PropertySource<M>, Disposable {
 
     private final PropertySource<M> propertySource;
-    private final Dispatcher<M> dispatcher;
+    private final PropertyDispatcher<M> dispatcher;
     private final M initialValue;
     private final ThreadChecker threadChecker;
+    private final EventSubject<PropertyChangeEvent<M>> changeEvents;
 
-    private Property(PropertySource<M> propertySource, Dispatcher<M> dispatcher) {
+    private Property(PropertySource<M> propertySource, PropertyDispatcher<M> dispatcher) {
         super(PropertyPublisher.create(propertySource, dispatcher));
         this.propertySource = requireNonNull(propertySource);
         this.dispatcher = requireNonNull(dispatcher);
         this.initialValue = requireNonNull(get(), "A Property must be initialized with a value");
         this.threadChecker = ThreadChecker.create();
+        this.changeEvents = EventSubject.create();
     }
     
     @Override
     public void dispose() {
         threadChecker.checkThread();
         dispatcher.dispose();
+        changeEvents.dispose();
     }
 
     @Override
@@ -100,8 +104,10 @@ public final class Property<M> extends PropertyObservable<M> implements Property
         // don't update the value if it's the same as the current value
         if (get().equals(value))
             return;
-    
+        
+        M oldValue = get();
         propertySource.setValue(requireNonNull(value));
+        dispatcher.schedule(() -> changeEvents.publish(new PropertyChangeEvent<M>(oldValue, value)));
     }
 
     /**
@@ -182,12 +188,8 @@ public final class Property<M> extends PropertyObservable<M> implements Property
     /**
      * @return an {@link Observable} stream of property change events for this property.
      */
-    public final Observable<PropertyChangeEvent<M>> changeEvents() {
-        return asObservable().scan(Optional.<PropertyChangeEvent<M>>empty(),
-                                   (lastEvent, newValue)  -> PropertyChangeEvent.next(lastEvent, newValue))
-                             .filter(Optional::isPresent)
-                             .filter(optional -> optional.get().getOldValue() != null)
-                             .map(Optional::get);
+    public final EventStream<PropertyChangeEvent<M>> changeEvents() {
+        return changeEvents;
     }
     
     // Factory methods
@@ -204,7 +206,7 @@ public final class Property<M> extends PropertyObservable<M> implements Property
      * @return a new {@link Property}
      */
     public static final <M> Property<M> create(PropertySourceFactory<M> propertySourceFactory) {
-        Dispatcher<M> dispatcher = createPropertyDispatcher();
+        PropertyDispatcher<M> dispatcher = createPropertyDispatcher();
         return new Property<>(propertySourceFactory.apply(dispatcher), dispatcher);
     }
     

@@ -16,11 +16,9 @@ package mb.rxui.property;
 import static java.util.Objects.requireNonNull;
 import static mb.rxui.Callbacks.runSafeCallback;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 
-import mb.rxui.Callbacks;
-import mb.rxui.Subscription;
+import mb.rxui.Subscriber;
 
 /**
  * A subscriber of Property events. A property can emit one or many
@@ -35,51 +33,32 @@ import mb.rxui.Subscription;
  * @param <M>
  *            the type of value the property manages.
  */
-public class PropertySubscriber<M> implements PropertyObserver<M>, Subscription {
+public class PropertySubscriber<M> extends Subscriber implements PropertyObserver<M> {
+    
     private final PropertyObserver<M> observer;
-    private final List<Runnable> onDisposedActions;
-    private boolean isDisposed = false;
-
+    
+    private Optional<M> lastValue = Optional.empty();
+    
     public PropertySubscriber(PropertyObserver<M> observer) {
         this.observer = requireNonNull(observer);
-        onDisposedActions = new ArrayList<>();
-    }
-
-    @Override
-    public void dispose() {
-        isDisposed = true;
-        onDisposedActions.stream().map(Callbacks::createSafeCallback).forEach(Runnable::run);
-        onDisposedActions.clear();
-    }
-
-    @Override
-    public boolean isDisposed() {
-        return isDisposed;
-    }
-
-    /**
-     * Adds some action to perform when this property subscription is
-     * disposed.
-     * 
-     * @param onDisposedAction
-     *            some action to run when this property subscription is
-     *            disposed.
-     */
-    public void doOnDispose(Runnable onDisposedAction) {
-        onDisposedActions.add(onDisposedAction);
     }
 
     @Override
     public void onChanged(M newValue) {
-        if(isDisposed)
+        if(isDisposed())
             return;
+        
+        if(lastValue.isPresent() && lastValue.get().equals(newValue))
+            return;
+        
+        lastValue = Optional.of(newValue);
         
         runSafeCallback(() -> observer.onChanged(newValue));
     }
-
+    
     @Override
     public void onDisposed() {
-        if(isDisposed)
+        if(isDisposed())
             return;
         
         runSafeCallback(observer::onDisposed);

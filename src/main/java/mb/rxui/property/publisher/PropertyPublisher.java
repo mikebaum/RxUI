@@ -15,10 +15,11 @@ package mb.rxui.property.publisher;
 
 import java.util.function.Supplier;
 
+import mb.rxui.Publisher;
 import mb.rxui.Subscription;
+import mb.rxui.property.PropertyDispatcher;
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertySubscriber;
-import mb.rxui.property.dispatcher.Dispatcher;
 
 /**
  * A {@link PropertyPublisher} represents some source of property updates.
@@ -26,7 +27,7 @@ import mb.rxui.property.dispatcher.Dispatcher;
  * @param <T>
  *            the type of the value this publisher provides
  */
-public interface PropertyPublisher<T> extends Supplier<T> {
+public interface PropertyPublisher<T> extends Publisher<T, PropertyObserver<T>>, Supplier<T> {
     /**
      * Subscribes to this property publisher.
      * 
@@ -43,7 +44,7 @@ public interface PropertyPublisher<T> extends Supplier<T> {
      * @param dispatcher some dispatcher to dispatch property events.
      * @return a new {@link PropertyPublisher}
      */
-    static <T> PropertyPublisher<T> create(Supplier<T> propertySupplier, Dispatcher<T> dispatcher) {
+    static <T> PropertyPublisher<T> create(Supplier<T> propertySupplier, PropertyDispatcher<T> dispatcher) {
         return new PropertyPublisherImpl<>(propertySupplier, dispatcher);
     }
 }

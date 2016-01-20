@@ -11,20 +11,20 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package mb.rxui.property.operator;
-
-import java.util.function.Function;
-
-import mb.rxui.property.publisher.PropertyPublisher;
+package mb.rxui.event;
 
 /**
- * A {@link PropertyOperator} is some function that can convert a property
- * publish of one kind to another
+ * A source of events for an {@link EventStream}.
  * 
- * @param <Child>
- *            the source property publisher (the one that is being converted)
- * @param <Parent>
- *            the target property publisher (the result of converting the source
- *            publisher)
+ * @param <E>
+ *            the type of data published by this {@link EventSource}
  */
-public interface PropertyOperator<Child, Parent> extends Function<PropertyPublisher<Child>, PropertyPublisher<Parent>> {}
+public interface EventSource<E> {
+    /**
+     * Publishes a new event into the {@link EventStream}
+     * 
+     * @param event
+     *            some event to publish.
+     */
+    void publish(E event);
+}

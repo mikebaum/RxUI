@@ -15,8 +15,9 @@ package mb.rxui.property;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.Optional;
+import java.util.Objects;
 
+import mb.rxui.Preconditions;
 import mb.rxui.annotations.VisibleForTesting;
 import mb.rxui.event.EventSequenceGenerator;
 
@@ -33,7 +34,8 @@ public class PropertyChangeEvent<M> {
 
     @VisibleForTesting
     PropertyChangeEvent(M oldValue, M newValue, long eventSequence) {
-        this.oldValue = oldValue;
+        Preconditions.checkArgument(!Objects.equals(oldValue, newValue), "Old value and new value must be different.!");
+        this.oldValue = requireNonNull(oldValue);
         this.newValue = requireNonNull(newValue);
         this.eventSequence = eventSequence;
     }
@@ -77,19 +79,9 @@ public class PropertyChangeEvent<M> {
     public long getEventSequence() {
         return eventSequence;
     }
-    
-    public static <M> Optional<PropertyChangeEvent<M>> next(Optional<PropertyChangeEvent<M>> last, M newValue) {
-        if (!last.isPresent())
-            return Optional.of(new PropertyChangeEvent<M>(null, newValue));
-        
-        return last.get().next(newValue);
-    }
-    
-    public Optional<PropertyChangeEvent<M>> next(M newValue) {
-        if (newValue.equals(this.newValue))
-            return Optional.empty();
-        
-        return Optional.of(new PropertyChangeEvent<M>(this.newValue, newValue));
+  
+    public PropertyChangeEvent<M> next(M newValue) {
+        return new PropertyChangeEvent<M>(this.newValue, newValue);
     }
 
     @Override
@@ -111,15 +103,9 @@ public class PropertyChangeEvent<M> {
         if (getClass() != obj.getClass())
             return false;
         PropertyChangeEvent<?> other = (PropertyChangeEvent<?>) obj;
-        if (newValue == null) {
-            if (other.newValue != null)
-                return false;
-        } else if (!newValue.equals(other.newValue))
+        if (!newValue.equals(other.newValue))
             return false;
-        if (oldValue == null) {
-            if (other.oldValue != null)
-                return false;
-        } else if (!oldValue.equals(other.oldValue))
+        if (!oldValue.equals(other.oldValue))
             return false;
         if (eventSequence != other.eventSequence)
             return false;
