@@ -17,8 +17,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import mb.rxui.property.dispatcher.Dispatcher;
-
 /**
  * A source of property values.
  * 
@@ -55,8 +53,11 @@ public interface PropertySource<M> extends Consumer<M>, Supplier<M> {
     M get();
     
     /**
-     * Simple Factory interface for creating a {@link PropertySource} 
-     * @param <M> The type of the values the created property source will provide.
+     * Simple Factory interface for creating a {@link PropertySource}
+     * 
+     * @param <M>
+     *            The type of the values the created property source will
+     *            provide.
      */
-    static interface PropertySourceFactory<M> extends Function<Dispatcher<M>, PropertySource<M>> {}
+    static interface PropertySourceFactory<M> extends Function<PropertyDispatcher<M>, PropertySource<M>> {}
 }

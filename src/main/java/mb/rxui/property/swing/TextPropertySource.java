@@ -20,14 +20,14 @@ import javax.swing.text.JTextComponent;
 
 import mb.rxui.disposables.Disposable;
 import mb.rxui.property.Property;
-import mb.rxui.property.dispatcher.Dispatcher;
+import mb.rxui.property.PropertyDispatcher;
 
 /**
  * A Swing text property source.
  */
 public class TextPropertySource extends SwingPropertySource<String, DocumentListener, Document> {
 
-    private TextPropertySource(JTextComponent textComponent, Dispatcher<String> dispatcher) {
+    private TextPropertySource(JTextComponent textComponent, PropertyDispatcher<String> dispatcher) {
         super(textComponent::getText, textComponent::setText, textComponent.getDocument(), dispatcher);
     }
     
@@ -42,16 +42,16 @@ public class TextPropertySource extends SwingPropertySource<String, DocumentList
     }
     
     @Override
-    protected DocumentListener createListener(Dispatcher<String> dispatcher) {
+    protected DocumentListener createListener(PropertyDispatcher<String> dispatcher) {
         return new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                dispatcher.dispatchValue(get());
+                dispatcher.dispatch(get());
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                dispatcher.dispatchValue(get());
+                dispatcher.dispatch(get());
             }
 
             @Override

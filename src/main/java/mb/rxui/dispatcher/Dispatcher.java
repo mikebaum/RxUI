@@ -11,10 +11,13 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package mb.rxui.property.dispatcher;
+package mb.rxui.dispatcher;
 
+import mb.rxui.Observer;
+import mb.rxui.Scheduler;
+import mb.rxui.Subscriber;
 import mb.rxui.disposables.Disposable;
-import mb.rxui.property.PropertyObserver;
+import mb.rxui.property.PropertyDispatcher;
 import mb.rxui.property.PropertySubscriber;
 
 /**
@@ -24,19 +27,20 @@ import mb.rxui.property.PropertySubscriber;
  * @param <V>
  *            the type of values this dispatcher can dispatch
  */
-public interface Dispatcher<V> extends Disposable {
+public interface Dispatcher<V, S extends Subscriber, O extends Observer<V>> extends Disposable, Scheduler {
 
     /**
      * Dispatches the new value.<br>
      * <br>
      * NOTES:<br>
-     * 1. Before dispatching the isDispatching flag will be set to true
-     * 2. After dispatching the isDispatching flag will be set to false
+     * 1. Before dispatching the isDispatching flag will be set to true 2. After
+     * dispatching the isDispatching flag will be set to false
      * 
      * @param newValue
-     * @throws IllegalStateException if called when the dispatcher is disposed.
+     * @throws IllegalStateException
+     *             if called when the dispatcher is disposed.
      */
-    void dispatchValue(V newValue);
+    void dispatch(V newValue);
 
     /**
      * Adds some disposable to dispose when this dispatcher is disposed.
@@ -47,7 +51,8 @@ public interface Dispatcher<V> extends Disposable {
     void onDisposed(Disposable toDispose);
 
     /**
-     * @return true if this dispatcher is currently dispatching a value, false otherwise
+     * @return true if this dispatcher is currently dispatching a value, false
+     *         otherwise
      */
     boolean isDispatching();
 
@@ -67,18 +72,17 @@ public interface Dispatcher<V> extends Disposable {
      * @param observer
      *            some property subscriber.
      * @return A {@link PropertySubscriber} created from the observer that will
-     *         guarantee to toggle disptaching on this dispatcher whenever it
+     *         guarantee to toggle dispatching on this dispatcher whenever it
      *         handles the onChanged callback.
-     * @throws IllegalStateException
-     *             if called when the dispatcher has already been disposed.
      */
-    PropertySubscriber<V> subscribe(PropertyObserver<V> observer);
-    
+    S subscribe(O observer);
+
     /**
      * Creates a {@link Dispatcher} to be used to dispatch property events.
+     * 
      * @return a new {@link Dispatcher} to be used to dispatch property events.
      */
-    static <V> Dispatcher<V> createPropertyDispatcher() {
-        return new PropertyDispatcher<>();
+    static <V> PropertyDispatcher<V> createPropertyDispatcher() {
+        return PropertyDispatcher.create();
     }
 }

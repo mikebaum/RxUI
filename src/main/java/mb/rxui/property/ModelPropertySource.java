@@ -15,8 +15,6 @@ package mb.rxui.property;
 
 import static java.util.Objects.requireNonNull;
 
-import mb.rxui.property.dispatcher.Dispatcher;
-
 /**
  * A property source for model properties.
  * 
@@ -26,9 +24,9 @@ import mb.rxui.property.dispatcher.Dispatcher;
 public class ModelPropertySource<M> implements PropertySource<M> {
     
     private M value;
-    private final Dispatcher<M> dispatcher;
+    private final PropertyDispatcher<M> dispatcher;
 
-    private ModelPropertySource(M initialValue, Dispatcher<M> dispatcher) {
+    private ModelPropertySource(M initialValue, PropertyDispatcher<M> dispatcher) {
         this.value = requireNonNull(initialValue);
         this.dispatcher = requireNonNull(dispatcher);
     }
@@ -36,7 +34,7 @@ public class ModelPropertySource<M> implements PropertySource<M> {
     @Override
     public void setValue(M newValue) {
         value = newValue;
-        dispatcher.dispatchValue(value);
+        dispatcher.dispatch(value);
     }
 
     @Override

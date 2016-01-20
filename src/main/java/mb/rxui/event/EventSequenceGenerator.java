@@ -21,12 +21,16 @@ import java.util.Optional;
  * A Generator that can be used to generate globally consistent event sequence
  * numbers. The sequence numbers can be used to order events from different
  * sources into a canonical ordering.
+ * 
+ * <p>
+ * TODO: Consider adding a TimeProvider interface or something to abstract the
+ * way the current time is acquired.
  */
 public final class EventSequenceGenerator {
+    private static final EventSequenceGenerator instance = new EventSequenceGenerator();
+
     private long lastSequenceNumber = 0;
     private final Map<Long, Long> sequenceMap = new HashMap<>();
-    
-    private static final EventSequenceGenerator instance = new EventSequenceGenerator();
     
     private EventSequenceGenerator() {}
     

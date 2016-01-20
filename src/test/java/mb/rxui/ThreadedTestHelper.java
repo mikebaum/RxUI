@@ -17,12 +17,14 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 import javax.swing.SwingUtilities;
 
 import org.junit.Assert;
 
-import javafx.application.Platform;
+import mb.rxui.event.EventStream;
+import mb.rxui.event.TestEventStream;
 
 public class ThreadedTestHelper {
     
@@ -103,4 +105,14 @@ public class ThreadedTestHelper {
             }
         }
     }
+
+    public static <T> T createOnEDT(Supplier<T> factory) throws Exception {
+        Object[] result = new Object[1];
+    
+        SwingUtilities.invokeAndWait(() -> result[0] = factory.get());
+    
+        return (T) result[0];
+    }
+    
+    
 }

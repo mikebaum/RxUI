@@ -18,9 +18,10 @@ import static mb.rxui.ThreadChecker.PLATFORM_THREAD_CHECKER;
 
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
+import mb.rxui.dispatcher.Dispatcher;
 import mb.rxui.disposables.Disposable;
+import mb.rxui.property.PropertyDispatcher;
 import mb.rxui.property.PropertySource;
-import mb.rxui.property.dispatcher.Dispatcher;
 
 /**
  * A property source for JavaFx properties
@@ -38,7 +39,7 @@ public class JavaFxPropertySource<M> implements PropertySource<M> {
      * @param dispatcher a {@link Dispatcher} that will be used to dispatch the values
      * @throws IllegalStateException if called outside of the Platform thread.
      */
-    JavaFxPropertySource(Property<M> fxProperty, Dispatcher<M> dispatcher) {
+    JavaFxPropertySource(Property<M> fxProperty, PropertyDispatcher<M> dispatcher) {
         PLATFORM_THREAD_CHECKER.checkThread();
         this.fxProperty = requireNonNull(fxProperty);
         dispatcher.onDisposed(addPropertyListener(dispatcher, fxProperty));
@@ -54,8 +55,8 @@ public class JavaFxPropertySource<M> implements PropertySource<M> {
         return fxProperty.getValue();
     }
     
-    private static <M> Disposable addPropertyListener(Dispatcher<M> dispatcher, Property<M> property) {
-        ChangeListener<M> listener = (observable, oldValue, newValue) -> dispatcher.dispatchValue(newValue);
+    private static <M> Disposable addPropertyListener(PropertyDispatcher<M> dispatcher, Property<M> property) {
+        ChangeListener<M> listener = (observable, oldValue, newValue) -> dispatcher.dispatch(newValue);
         property.addListener(listener);
         return () -> property.removeListener(listener);
     }

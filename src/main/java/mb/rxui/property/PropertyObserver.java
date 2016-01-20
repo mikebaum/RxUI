@@ -16,13 +16,15 @@ package mb.rxui.property;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import mb.rxui.Observer;
+
 /**
  * An observer of property events.
  * 
  * @param <M>
  *            the type of the values emitted by the observed property.
  */
-public interface PropertyObserver<M> {
+public interface PropertyObserver<M> extends Observer<M> {
     /**
      * Called whenever the value of the property that this observer observes
      * changes.
