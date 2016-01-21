@@ -13,36 +13,38 @@
  */
 package mb.rxui.property.opertator;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import mb.rxui.Subscription;
+import mb.rxui.event.EventStream;
+import mb.rxui.event.EventStreamObserver;
 import mb.rxui.property.Property;
-import mb.rxui.property.PropertyObservable;
-import mb.rxui.property.PropertyObserver;
 
-public class TestOperatorFilter {
+public class TestFilterProperty {
     @Test
     public void testFilter() throws Exception {
         Property<String> property = Property.create("tacos");
         
         assertFalse(property.hasObservers());
         
-        PropertyObservable<String> observable = property.filter(value -> value.equals("tacos"));
+        EventStream<String> observable = property.filter(value -> value.equals("tacos"));
         
-        PropertyObserver<String> observer = Mockito.mock(PropertyObserver.class);
+        EventStreamObserver<String> observer = Mockito.mock(EventStreamObserver.class);
         Subscription subscription = observable.observe(observer);
         
         assertTrue(property.hasObservers());
         
-        Mockito.verify(observer).onChanged("tacos");
+        Mockito.verify(observer).onEvent("tacos");
         
         property.setValue("burritos");
         Mockito.verifyNoMoreInteractions(observer);
         
         property.setValue("tacos");
+        Mockito.verify(observer, Mockito.times(2)).onEvent("tacos");
         Mockito.verifyNoMoreInteractions(observer);
         
         subscription.dispose();
@@ -56,14 +58,14 @@ public class TestOperatorFilter {
         
         assertFalse(property.hasObservers());
         
-        PropertyObservable<String> observable = property.filter(value -> value.equals("tacos"));
+        EventStream<String> observable = property.filter(value -> value.equals("tacos"));
         
-        PropertyObserver<String> observer = Mockito.mock(PropertyObserver.class);
+        EventStreamObserver<String> observer = Mockito.mock(EventStreamObserver.class);
         Subscription subscription = observable.observe(observer);
         
         assertTrue(property.hasObservers());
         
-        Mockito.verify(observer).onChanged("tacos");
+        Mockito.verify(observer).onEvent("tacos");
         
         property.dispose();
         
@@ -76,17 +78,17 @@ public class TestOperatorFilter {
         
         assertFalse(property.hasObservers());
         
-        PropertyObservable<String> observable = property.filter(value -> value.equals("tacos"));
+        EventStream<String> observable = property.filter(value -> value.equals("tacos"));
         
         property.dispose();
         
-        PropertyObserver<String> observer = Mockito.mock(PropertyObserver.class);
+        EventStreamObserver<String> observer = Mockito.mock(EventStreamObserver.class);
         Subscription subscription = observable.observe(observer);
         
         assertFalse(property.hasObservers());
         
-        Mockito.verify(observer).onChanged("tacos");
-        Mockito.verify(observer).onDisposed();
+        Mockito.verify(observer).onEvent("tacos");
+        Mockito.verify(observer).onCompleted();
         assertTrue(subscription.isDisposed());
     }
 }

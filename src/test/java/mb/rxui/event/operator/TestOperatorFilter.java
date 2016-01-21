@@ -28,39 +28,43 @@ import mb.rxui.event.EventStream;
 import mb.rxui.event.EventStreamObserver;
 import mb.rxui.event.EventSubject;
 
-public class TestOperatorMap {
+public class TestOperatorFilter {
     @Test
     public void testMap() {
         EventSubject<String> events = EventSubject.create();
-        EventStream<Integer> mappedStream = events.map(String::length);
+        EventStream<String> filteredStream = events.filter(val -> val.length() > 4);
         
-        Consumer<Integer> onEvent = Mockito.mock(Consumer.class);
+        Consumer<String> onEvent = Mockito.mock(Consumer.class);
         Runnable onCompleted = Mockito.mock(Runnable.class);
         
-        Subscription subscription = mappedStream.observe(EventStreamObserver.create(onEvent, onCompleted));
+        Subscription subscription = filteredStream.observe(EventStreamObserver.create(onEvent, onCompleted));
         assertFalse(subscription.isDisposed());
         
         events.publish("tacos");
-        Mockito.verify(onEvent).accept(5);
+        Mockito.verify(onEvent).accept("tacos");
         
         events.publish("burritos");
-        Mockito.verify(onEvent).accept(8);
+        Mockito.verify(onEvent).accept("burritos");
         
         // Just double checking that an event stream does not suppress consecutive duplicates values.
         events.publish("burritos");
-        Mockito.verify(onEvent, times(2)).accept(8);
+        Mockito.verify(onEvent, times(2)).accept("burritos");
+        Mockito.verifyNoMoreInteractions(onCompleted);
+        
+        // this should be filtered
+        events.publish("the");
         Mockito.verifyNoMoreInteractions(onCompleted);
     }
     
     @Test
     public void testDisposeUnsubscribesObserver() {
         EventSubject<String> events = EventSubject.create();
-        EventStream<Integer> mappedStream = events.map(String::length);
+        EventStream<String> filteredStream = events.filter(val -> val.contains("tac"));
         
-        Consumer<Integer> onEvent = Mockito.mock(Consumer.class);
+        Consumer<String> onEvent = Mockito.mock(Consumer.class);
         Runnable onCompleted = Mockito.mock(Runnable.class);
         
-        Subscription subscription = mappedStream.observe(EventStreamObserver.create(onEvent, onCompleted));
+        Subscription subscription = filteredStream.observe(EventStreamObserver.create(onEvent, onCompleted));
         assertFalse(subscription.isDisposed());
         
         events.dispose();
@@ -75,9 +79,9 @@ public class TestOperatorMap {
         
         assertFalse(events.hasObservers());
 
-        EventStream<Integer> mappedStream = events.map(String::length);
-        EventStreamObserver<Integer> observer = Mockito.mock(EventStreamObserver.class);
-        Subscription subscription = mappedStream.observe(observer);
+        EventStream<String> filteredStream = events.filter(val -> val.contains("tacos"));
+        EventStreamObserver<String> observer = Mockito.mock(EventStreamObserver.class);
+        Subscription subscription = filteredStream.observe(observer);
 
         assertTrue(events.hasObservers());
         
@@ -88,14 +92,14 @@ public class TestOperatorMap {
     @Test
     public void testSubscribeAfterDisposed() {
         EventSubject<String> events = EventSubject.create();
-        EventStream<Integer> mappedStream = events.map(String::length);
-        EventStreamObserver<Integer> observer = Mockito.mock(EventStreamObserver.class);
+        EventStream<String> filteredStream = events.filter(val -> val.contains("tacos"));
+        EventStreamObserver<String> observer = Mockito.mock(EventStreamObserver.class);
         
         events.dispose();
         
-        Subscription subscription = mappedStream.observe(observer);
+        Subscription subscription = filteredStream.observe(observer);
 
-        verify(observer, Mockito.never()).onEvent(Mockito.anyInt());
+        verify(observer, Mockito.never()).onEvent(Mockito.anyString());
         verify(observer).onCompleted();
         Mockito.verifyNoMoreInteractions(observer);
         

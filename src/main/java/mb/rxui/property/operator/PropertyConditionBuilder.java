@@ -67,6 +67,6 @@ public class PropertyConditionBuilder<M> {
      *         subscription.
      */
     public Subscription then(Runnable action) {
-        return observable.lift(new OperatorIs<M>(values)).filter(TRUE).onChanged(value -> action.run());
+        return observable.lift(new OperatorIs<M>(values)).filter(TRUE).onEvent(value -> action.run());
     }
 }

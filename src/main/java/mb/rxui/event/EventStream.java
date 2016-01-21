@@ -17,14 +17,18 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import mb.rxui.Subscription;
 import mb.rxui.ThreadChecker;
 import mb.rxui.event.operator.Operator;
+import mb.rxui.event.operator.OperatorFilter;
 import mb.rxui.event.operator.OperatorMap;
 import mb.rxui.event.publisher.EventPublisher;
 import mb.rxui.event.publisher.LiftEventPublisher;
 import mb.rxui.property.Property;
+import mb.rxui.property.PropertyObservable;
+import mb.rxui.property.PropertyObserver;
 import rx.Observable;
 import rx.Subscriber;
 import rx.subscriptions.Subscriptions;
@@ -137,6 +141,19 @@ public class EventStream<E> {
      */
     public final <R> EventStream<R> map(Function<E, R> mapper) {
         return lift(new OperatorMap<>(mapper));
+    }
+    
+    /**
+     * Creates a new stream that filters the events emitted by this stream, such
+     * that only those that satisfy the provided predicate are emitted.
+     * 
+     * @param predicate
+     *            some predicate to filter this stream by.
+     * @return A new {@link EventStream} that only emits values emitted by this
+     *         stream that satisfy the provided predicate.
+     */
+    public final EventStream<E> filter(Predicate<E> predicate) {
+        return lift(new OperatorFilter<>(predicate));
     }
     
     /**

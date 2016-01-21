@@ -28,7 +28,7 @@ import java.util.function.Supplier;
 import mb.rxui.Preconditions;
 import mb.rxui.Subscription;
 import mb.rxui.ThreadChecker;
-import mb.rxui.property.operator.OperatorFilter;
+import mb.rxui.event.EventStream;
 import mb.rxui.property.operator.OperatorFilterToOptional;
 import mb.rxui.property.operator.OperatorIsDirty;
 import mb.rxui.property.operator.OperatorMap;
@@ -195,10 +195,10 @@ public class PropertyObservable<M> implements Supplier<M> {
      * 
      * @param predicate
      *            some predicate to use to filter this property observable.
-     * @return a new {@link PropertyObservable} that only emits values that satisfy the predicate.
+     * @return a new {@link EventStream} that only emits values that satisfy the predicate.
      */
-    public final PropertyObservable<M> filter(Predicate<M> predicate) {
-        return lift(new OperatorFilter<>(predicate));
+    public final EventStream<M> filter(Predicate<M> predicate) {
+        return asEventStream().filter(predicate);
     }
     
     /**
@@ -303,6 +303,20 @@ public class PropertyObservable<M> implements Supplier<M> {
             return false;
             
         return get().equals(((Supplier<?>) obj).get());
+    }
+    
+    /**
+     * Creates an {@link EventStream} backed by this property observable.
+     * @return a new {@link EventStream} backed by this property observable.
+     * @throws IllegalStateException
+     *             if called from a thread other than the one that this property
+     *             was created from.
+     */
+    private EventStream<M> asEventStream() {
+        threadChecker.checkThread();
+        return new EventStream<>(observer -> {
+            return observe(PropertyObserver.create(observer::onEvent, observer::onCompleted));
+        });
     }
 
     /**
