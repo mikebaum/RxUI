@@ -15,7 +15,7 @@ package mb.rxui.event.publisher;
 
 import mb.rxui.Publisher;
 import mb.rxui.event.EventStream;
-import mb.rxui.event.EventStreamObserver;
+import mb.rxui.event.EventObserver;
 
 /**
  * A publisher that backs an {@link EventStream}.
@@ -23,4 +23,4 @@ import mb.rxui.event.EventStreamObserver;
  * @param <E>
  *            the type of data emitted by the {@link EventPublisher}.
  */
-public interface EventPublisher<E> extends Publisher<E, EventStreamObserver<E>> {}
+public interface EventPublisher<E> extends Publisher<E, EventObserver<E>> {}

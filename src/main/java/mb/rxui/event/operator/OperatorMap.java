@@ -17,8 +17,8 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.function.Function;
 
-import mb.rxui.event.EventStreamObserver;
-import mb.rxui.event.EventStreamSubscriber;
+import mb.rxui.event.EventObserver;
+import mb.rxui.event.EventSubscriber;
 
 /**
  * An {@link Operator} that transforms the emitted events of a stream by some
@@ -38,13 +38,13 @@ public class OperatorMap<I, R> implements Operator<I, R> {
     }
 
     @Override
-    public EventStreamSubscriber<I> apply(EventStreamSubscriber<R> childSubscriber) {
+    public EventSubscriber<I> apply(EventSubscriber<R> childSubscriber) {
 
-        EventStreamObserver<I> sourceObserver = 
-                EventStreamObserver.create(value -> childSubscriber.onEvent(mapper.apply(value)),
+        EventObserver<I> sourceObserver = 
+                EventObserver.create(value -> childSubscriber.onEvent(mapper.apply(value)),
                                            childSubscriber::onCompleted);
         
-        EventStreamSubscriber<I> subscriber = new EventStreamSubscriber<>(sourceObserver);
+        EventSubscriber<I> subscriber = new EventSubscriber<>(sourceObserver);
         
         childSubscriber.doOnDispose(subscriber::dispose);
         

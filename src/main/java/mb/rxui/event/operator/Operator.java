@@ -15,7 +15,7 @@ package mb.rxui.event.operator;
 
 import java.util.function.Function;
 
-import mb.rxui.event.EventStreamSubscriber;
+import mb.rxui.event.EventSubscriber;
 
 /**
  * An operator converts a subscriber from a child type to a parent type. This is
@@ -26,4 +26,4 @@ import mb.rxui.event.EventStreamSubscriber;
  * @param <Child>
  *            child stream data type (new stream)
  */
-public interface Operator<Parent, Child> extends Function<EventStreamSubscriber<Child>, EventStreamSubscriber<Parent>> {}
+public interface Operator<Parent, Child> extends Function<EventSubscriber<Child>, EventSubscriber<Parent>> {}

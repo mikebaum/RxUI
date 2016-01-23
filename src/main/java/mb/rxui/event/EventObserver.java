@@ -25,7 +25,7 @@ import mb.rxui.Observer;
  * @param <E>
  *            the type of data the event stream emits.
  */
-public interface EventStreamObserver<E> extends Observer<E> {
+public interface EventObserver<E> extends Observer<E> {
 
     /**
      * Called whenever the stream this observer observes emits a new event
@@ -43,46 +43,46 @@ public interface EventStreamObserver<E> extends Observer<E> {
     // Factory methods
 
     /**
-     * Creates an event stream observer that only observes onChanged events.
+     * Creates an event observer that only observes onChanged events.
      * 
      * @param eventHandler
      *            some consumer of onChanged events.
-     * @return a new {@link EventStreamObserver} that only observes onEvent
+     * @return a new {@link EventObserver} that only observes onEvent
      *         events.
      */
-    static <E> EventStreamObserver<E> create(Consumer<E> eventHandler) {
+    static <E> EventObserver<E> create(Consumer<E> eventHandler) {
         return create(eventHandler, () -> {});
     }
 
     /**
-     * Creates an event stream observer that only observes onCompleted events.
+     * Creates an event observer that only observes onCompleted events.
      * 
      * @param onCompleted
      *            some runnable to run when the observed property is completed.
-     * @return a new {@link EventStreamObserver} that only observes onCompleted
+     * @return a new {@link EventObserver} that only observes onCompleted
      *         events.
      */
-    static <E> EventStreamObserver<E> create(Runnable onCompleted) {
+    static <E> EventObserver<E> create(Runnable onCompleted) {
         return create(newValue -> {}, onCompleted);
     }
 
     /**
-     * Creates an event stream observer that observes, both onEvent and
+     * Creates an event observer that observes, both onEvent and
      * onCompleted events.
      * 
      * @param eventHandler
      *            some consumer of onEvent events.
      * @param onCompleted
      *            some runnable to run when the observed property is completed.
-     * @return a new {@link EventStreamObserver}
+     * @return a new {@link EventObserver}
      * @throws NullPointerException
      *             if either the eventHandler or onCompleted arguments are null.
      */
-    static <E> EventStreamObserver<E> create(Consumer<E> eventHandler, Runnable onCompleted) {
+    static <E> EventObserver<E> create(Consumer<E> eventHandler, Runnable onCompleted) {
         requireNonNull(eventHandler);
         requireNonNull(onCompleted);
 
-        return new EventStreamObserver<E>() {
+        return new EventObserver<E>() {
             @Override
             public void onEvent(E event) {
                 eventHandler.accept(event);

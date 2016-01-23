@@ -27,11 +27,11 @@ import mb.rxui.dispatcher.Dispatcher;
  * 
  * @param <V> the type of events this dispatcher dispatches.
  */
-public class EventDispatcher<V> extends AbstractDispatcher<V, EventStreamSubscriber<V>, EventStreamObserver<V>> {
+public class EventDispatcher<V> extends AbstractDispatcher<V, EventSubscriber<V>, EventObserver<V>> {
 
-    private final List<EventStreamSubscriber<V>> subscribers;
+    private final List<EventSubscriber<V>> subscribers;
 
-    private EventDispatcher(List<EventStreamSubscriber<V>> subscribers) {
+    private EventDispatcher(List<EventSubscriber<V>> subscribers) {
         super(subscribers, subscriber -> subscriber::onEvent, subscriber -> subscriber::onCompleted);
         this.subscribers = requireNonNull(subscribers);
     }
@@ -41,9 +41,9 @@ public class EventDispatcher<V> extends AbstractDispatcher<V, EventStreamSubscri
     }
 
     @Override
-    public EventStreamSubscriber<V> subscribe(EventStreamObserver<V> observer) {
+    public EventSubscriber<V> subscribe(EventObserver<V> observer) {
         
-        EventStreamSubscriber<V> subscriber = new EventStreamSubscriber<>(wrapObserver(observer));
+        EventSubscriber<V> subscriber = new EventSubscriber<>(wrapObserver(observer));
         
         if(isDisposed()) {
             subscriber.onCompleted();
@@ -56,8 +56,8 @@ public class EventDispatcher<V> extends AbstractDispatcher<V, EventStreamSubscri
         return subscriber;
     }
 
-    private EventStreamObserver<V> wrapObserver(EventStreamObserver<V> observer) {
-        return new EventStreamObserver<V>() {
+    private EventObserver<V> wrapObserver(EventObserver<V> observer) {
+        return new EventObserver<V>() {
             @Override
             public void onEvent(V event) {
                 schedule(() -> observer.onEvent(event));

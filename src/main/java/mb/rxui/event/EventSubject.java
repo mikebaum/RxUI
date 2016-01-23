@@ -96,7 +96,7 @@ public class EventSubject<E> extends EventStream<E> implements EventSource<E>, D
         }
 
         @Override
-        public Subscription subscribe(EventStreamObserver<E> observer) {
+        public Subscription subscribe(EventObserver<E> observer) {
             return dispatcher.subscribe(observer);
         }
 

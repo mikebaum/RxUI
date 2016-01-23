@@ -17,8 +17,8 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.function.Predicate;
 
-import mb.rxui.event.EventStreamObserver;
-import mb.rxui.event.EventStreamSubscriber;
+import mb.rxui.event.EventObserver;
+import mb.rxui.event.EventSubscriber;
 
 /**
  * Filters values from an event stream, such that only those values which
@@ -36,14 +36,14 @@ public final class OperatorFilter<T> implements Operator<T, T> {
     }
 
     @Override
-    public EventStreamSubscriber<T> apply(EventStreamSubscriber<T> childSubscriber) {
+    public EventSubscriber<T> apply(EventSubscriber<T> childSubscriber) {
 
-        EventStreamObserver<T> sourceObserver = EventStreamObserver.create(value -> {
+        EventObserver<T> sourceObserver = EventObserver.create(value -> {
             if (predicate.test(value))
                 childSubscriber.onEvent(value);
         } , childSubscriber::onCompleted);
 
-        EventStreamSubscriber<T> subscriber = new EventStreamSubscriber<>(sourceObserver);
+        EventSubscriber<T> subscriber = new EventSubscriber<>(sourceObserver);
 
         childSubscriber.doOnDispose(subscriber::dispose);
 

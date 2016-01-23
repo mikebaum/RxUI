@@ -18,11 +18,11 @@ import java.util.function.Consumer;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-public class TestEventStreamObserver {
+public class TestEventObserver {
     @Test
     public void testOnEventObserver() {
         Consumer<String> eventHandler = Mockito.mock(Consumer.class);
-        EventStreamObserver<String> observer = EventStreamObserver.create(eventHandler);
+        EventObserver<String> observer = EventObserver.create(eventHandler);
         
         observer.onEvent("tacos");
         Mockito.verify(eventHandler).accept("tacos");
@@ -31,7 +31,7 @@ public class TestEventStreamObserver {
     @Test
     public void testOnCompletedObserver() {
         Runnable onCompleted = Mockito.mock(Runnable.class);
-        EventStreamObserver<String> observer = EventStreamObserver.create(onCompleted);
+        EventObserver<String> observer = EventObserver.create(onCompleted);
         
         observer.onCompleted();
         Mockito.verify(onCompleted).run();
@@ -41,7 +41,7 @@ public class TestEventStreamObserver {
     public void testOnEventAndOnCompleted() {
         Consumer<String> eventHandler = Mockito.mock(Consumer.class);
         Runnable onCompleted = Mockito.mock(Runnable.class);
-        EventStreamObserver<String> observer = EventStreamObserver.create(eventHandler, onCompleted);
+        EventObserver<String> observer = EventObserver.create(eventHandler, onCompleted);
         
         observer.onEvent("tacos");
         Mockito.verify(eventHandler).accept("tacos");
@@ -52,11 +52,11 @@ public class TestEventStreamObserver {
     
     @Test(expected=NullPointerException.class)
     public void testOnEventHandlerCannotBeNull() {
-        EventStreamObserver.create((Consumer<Object>) null);
+        EventObserver.create((Consumer<Object>) null);
     }
     
     @Test(expected=NullPointerException.class)
     public void testOnCompletedHandlerCannotBeNull() {
-        EventStreamObserver.create(value -> {}, (Runnable) null);
+        EventObserver.create(value -> {}, (Runnable) null);
     }
 }

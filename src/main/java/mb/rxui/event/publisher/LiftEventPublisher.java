@@ -16,8 +16,8 @@ package mb.rxui.event.publisher;
 import static java.util.Objects.requireNonNull;
 
 import mb.rxui.Subscription;
-import mb.rxui.event.EventStreamObserver;
-import mb.rxui.event.EventStreamSubscriber;
+import mb.rxui.event.EventObserver;
+import mb.rxui.event.EventSubscriber;
 import mb.rxui.event.operator.Operator;
 
 /**
@@ -42,7 +42,7 @@ public class LiftEventPublisher<T, R> implements EventPublisher<R> {
     }
     
     @Override
-    public Subscription subscribe(EventStreamObserver<R> observer) {
-        return sourcePublisher.subscribe(operator.apply(new EventStreamSubscriber<>(observer)));
+    public Subscription subscribe(EventObserver<R> observer) {
+        return sourcePublisher.subscribe(operator.apply(new EventSubscriber<>(observer)));
     }
 }

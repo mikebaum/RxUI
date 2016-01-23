@@ -23,19 +23,14 @@ import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 
-import mb.rxui.property.Binding;
-import mb.rxui.property.Property;
-import mb.rxui.property.PropertyObserver;
-import mb.rxui.property.PropertySubscriber;
-
-public class TestEventStreamSubscriber {
-    private EventStreamSubscriber<String> subscriber;
-    private EventStreamObserver<String> observer;
+public class TestEventSubscriber {
+    private EventSubscriber<String> subscriber;
+    private EventObserver<String> observer;
     
     @Before
     public void setup() {
-        observer = Mockito.mock(EventStreamObserver.class);
-        subscriber = new EventStreamSubscriber<>(observer);
+        observer = Mockito.mock(EventObserver.class);
+        subscriber = new EventSubscriber<>(observer);
     }
 
     @Test
@@ -102,9 +97,9 @@ public class TestEventStreamSubscriber {
     
     @Test
     public void testOnEventThrows() throws Exception {
-        EventStreamObserver<String> observer = Mockito.mock(EventStreamObserver.class);
+        EventObserver<String> observer = Mockito.mock(EventObserver.class);
         Mockito.doThrow(new RuntimeException()).when(observer).onEvent(Mockito.anyString());
-        EventStreamSubscriber<String> subscriber = new EventStreamSubscriber<>(observer);
+        EventSubscriber<String> subscriber = new EventSubscriber<>(observer);
         
         try {
             subscriber.onEvent("tacos");
@@ -116,9 +111,9 @@ public class TestEventStreamSubscriber {
     
     @Test
     public void testOnCompletedThrows() throws Exception {
-        EventStreamObserver<String> observer = Mockito.mock(EventStreamObserver.class);
+        EventObserver<String> observer = Mockito.mock(EventObserver.class);
         Mockito.doThrow(new RuntimeException()).when(observer).onCompleted();
-        EventStreamSubscriber<String> subscriber = new EventStreamSubscriber<>(observer);
+        EventSubscriber<String> subscriber = new EventSubscriber<>(observer);
         
         try {
             subscriber.onCompleted();
@@ -129,8 +124,8 @@ public class TestEventStreamSubscriber {
     
     @Test
     public void testDoOnDisposedThrows() throws Exception {
-        EventStreamObserver<String> observer = Mockito.mock(EventStreamObserver.class);
-        EventStreamSubscriber<String> subscriber = new EventStreamSubscriber<>(observer);
+        EventObserver<String> observer = Mockito.mock(EventObserver.class);
+        EventSubscriber<String> subscriber = new EventSubscriber<>(observer);
         
         Runnable onDisposedActionThatThrows = Mockito.mock(Runnable.class);
         Mockito.doThrow(new RuntimeException()).when(onDisposedActionThatThrows).run();

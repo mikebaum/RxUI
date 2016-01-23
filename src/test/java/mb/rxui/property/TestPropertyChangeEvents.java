@@ -22,7 +22,7 @@ import org.mockito.Mockito;
 
 import mb.rxui.Subscription;
 import mb.rxui.event.EventSequenceGenerator;
-import mb.rxui.event.EventStreamObserver;
+import mb.rxui.event.EventObserver;
 
 public class TestPropertyChangeEvents {
     
@@ -37,12 +37,12 @@ public class TestPropertyChangeEvents {
         Property<Integer> property2 = Property.create(10);
         
         // subscribing to property change events should not emit a change event until the value changes from the initial value.
-        EventStreamObserver<PropertyChangeEvent<String>> changeEventsObserver = Mockito.mock(EventStreamObserver.class);
+        EventObserver<PropertyChangeEvent<String>> changeEventsObserver = Mockito.mock(EventObserver.class);
         property.changeEvents().observe(changeEventsObserver);
         verifyNoMoreInteractions(changeEventsObserver);
 
         // subscribing to property change events should not emit a change event until the value changes from the initial value.
-        EventStreamObserver<PropertyChangeEvent<Integer>> changeEventsObserver2 = Mockito.mock(EventStreamObserver.class);
+        EventObserver<PropertyChangeEvent<Integer>> changeEventsObserver2 = Mockito.mock(EventObserver.class);
         property2.changeEvents().observe(changeEventsObserver2);
         verifyNoMoreInteractions(changeEventsObserver2);
         
@@ -64,7 +64,7 @@ public class TestPropertyChangeEvents {
     public void testUnsubscribePropertyChangeEvents() throws Exception {
         Property<String> property = Property.create("tacos");
         
-        EventStreamObserver<PropertyChangeEvent<String>> changeEventsObserver = Mockito.mock(EventStreamObserver.class);
+        EventObserver<PropertyChangeEvent<String>> changeEventsObserver = Mockito.mock(EventObserver.class);
         Subscription subscription = property.changeEvents().observe(changeEventsObserver);
         verifyNoMoreInteractions(changeEventsObserver);
         
@@ -73,7 +73,7 @@ public class TestPropertyChangeEvents {
         
         // verify that unsubscribing and re-subscribing does not cancel the property changed event stream
         subscription.dispose();
-        EventStreamObserver<PropertyChangeEvent<String>> changeEventsObserver2 = Mockito.mock(EventStreamObserver.class);
+        EventObserver<PropertyChangeEvent<String>> changeEventsObserver2 = Mockito.mock(EventObserver.class);
         property.changeEvents().observe(changeEventsObserver2);
         verifyNoMoreInteractions(changeEventsObserver2);
         

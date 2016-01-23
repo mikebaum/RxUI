@@ -84,7 +84,7 @@ public class TestEventStream {
         
         EventStream<String> stream = createStream(events);
         
-        EventStreamObserver<String> observer = Mockito.mock(EventStreamObserver.class);
+        EventObserver<String> observer = Mockito.mock(EventObserver.class);
         InOrder inOrder = Mockito.inOrder(observer);
 
         Subscription subscription = stream.observe(observer);
@@ -101,7 +101,7 @@ public class TestEventStream {
     public void testCallObserveOnWrongThread() throws Exception {
         EventStream<String> stream = createOnEDT(() -> createStream());
         
-        stream.observe(Mockito.mock(EventStreamObserver.class));
+        stream.observe(Mockito.mock(EventObserver.class));
         fail("Trying to call observe should have thrown since this is the wrong thread.");
     }
     
@@ -164,7 +164,7 @@ public class TestEventStream {
     public void testFromObservable() {
         EventStream<String> stream = EventStream.from(Observable.just("tacos", "burritos", "fajitas"));
         
-        EventStreamObserver<String> observer = Mockito.mock(EventStreamObserver.class);
+        EventObserver<String> observer = Mockito.mock(EventObserver.class);
         InOrder inOrder = Mockito.inOrder(observer);
         
         Subscription subscription = stream.observe(observer);
@@ -183,7 +183,7 @@ public class TestEventStream {
         PublishSubject<String> subject = PublishSubject.create();
         EventStream<String> stream = EventStream.from(subject);
         
-        EventStreamObserver<String> observer = Mockito.mock(EventStreamObserver.class);
+        EventObserver<String> observer = Mockito.mock(EventObserver.class);
         InOrder inOrder = Mockito.inOrder(observer);
         
         assertFalse(subject.hasObservers());
@@ -204,7 +204,7 @@ public class TestEventStream {
         PublishSubject<String> subject = PublishSubject.create();
         EventStream<String> stream = EventStream.from(subject);
         
-        EventStreamObserver<String> observer = Mockito.mock(EventStreamObserver.class);
+        EventObserver<String> observer = Mockito.mock(EventObserver.class);
         
         assertFalse(subject.hasObservers());
         
@@ -220,7 +220,7 @@ public class TestEventStream {
         PublishSubject<String> subject = PublishSubject.create();
         EventStream<String> stream = EventStream.from(subject);
         
-        EventStreamObserver<String> observer = Mockito.mock(EventStreamObserver.class);
+        EventObserver<String> observer = Mockito.mock(EventObserver.class);
         
         assertFalse(subject.hasObservers());
         
@@ -238,7 +238,7 @@ public class TestEventStream {
         BehaviorSubject<String> subject = BehaviorSubject.create("tacos");
         EventStream<String> stream = EventStream.from(subject);
         
-        EventStreamObserver<String> observer = Mockito.mock(EventStreamObserver.class);
+        EventObserver<String> observer = Mockito.mock(EventObserver.class);
         InOrder inOrder = Mockito.inOrder(observer);
         
         assertFalse(subject.hasObservers());
@@ -255,7 +255,7 @@ public class TestEventStream {
     
     public static <T> EventStream<T> createStream(T... events) {
         return new EventStream<>(observer -> {
-            EventStreamSubscriber<T> subscriber = new EventStreamSubscriber<>(observer);
+            EventSubscriber<T> subscriber = new EventSubscriber<>(observer);
             
             Arrays.asList(events).forEach(subscriber::onEvent);
             subscriber.onCompleted();

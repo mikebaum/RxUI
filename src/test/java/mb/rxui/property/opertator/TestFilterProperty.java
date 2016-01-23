@@ -21,7 +21,7 @@ import org.mockito.Mockito;
 
 import mb.rxui.Subscription;
 import mb.rxui.event.EventStream;
-import mb.rxui.event.EventStreamObserver;
+import mb.rxui.event.EventObserver;
 import mb.rxui.property.Property;
 
 public class TestFilterProperty {
@@ -33,7 +33,7 @@ public class TestFilterProperty {
         
         EventStream<String> stream = property.filter(value -> value.equals("tacos"));
         
-        EventStreamObserver<String> observer = Mockito.mock(EventStreamObserver.class);
+        EventObserver<String> observer = Mockito.mock(EventObserver.class);
         Subscription subscription = stream.observe(observer);
         
         assertTrue(property.hasObservers());
@@ -60,7 +60,7 @@ public class TestFilterProperty {
         
         EventStream<String> stream = property.filter(value -> value.equals("tacos"));
         
-        EventStreamObserver<String> observer = Mockito.mock(EventStreamObserver.class);
+        EventObserver<String> observer = Mockito.mock(EventObserver.class);
         Subscription subscription = stream.observe(observer);
         
         assertTrue(property.hasObservers());
@@ -82,7 +82,7 @@ public class TestFilterProperty {
         
         property.dispose();
         
-        EventStreamObserver<String> observer = Mockito.mock(EventStreamObserver.class);
+        EventObserver<String> observer = Mockito.mock(EventObserver.class);
         Subscription subscription = stream.observe(observer);
         
         assertFalse(property.hasObservers());

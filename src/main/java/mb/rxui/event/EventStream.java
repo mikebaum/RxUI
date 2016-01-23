@@ -85,7 +85,7 @@ public class EventStream<E> {
      *             stream was created on.
      */
     public final Subscription onEvent(Consumer<E> eventHandler) {
-        return observe(EventStreamObserver.create(eventHandler));
+        return observe(EventObserver.create(eventHandler));
     }
     
     /**
@@ -99,21 +99,21 @@ public class EventStream<E> {
      *             stream was created on.
      */
     public final Subscription onCompleted(Runnable onCompletedAction) {
-        return observe(EventStreamObserver.create(onCompletedAction));
+        return observe(EventObserver.create(onCompletedAction));
     }
     
     /**
      * Subscribes to onEvents and onCompleted events, via the provided observer.
      * 
      * @param observer
-     *            some {@link EventStreamObserver} to observe this stream.
+     *            some {@link EventObserver} to observe this stream.
      * @return a {@link Subscription} that can be used to stop this observer
      *         from responding to events.
      * @throws IllegalStateException
      *             if called from a thread other than the thread that this event
      *             stream was created on.
      */
-    public final Subscription observe(EventStreamObserver<E> observer) {
+    public final Subscription observe(EventObserver<E> observer) {
         threadChecker.checkThread();
         return eventPublisher.subscribe(observer);
     }
@@ -188,7 +188,7 @@ public class EventStream<E> {
      */
     public final Observable<E> asObservable() {
         return Observable.create(subscriber -> {
-            observe(EventStreamObserver.create(subscriber::onNext, subscriber::onCompleted)); 
+            observe(EventObserver.create(subscriber::onNext, subscriber::onCompleted)); 
         });
     }
     
@@ -205,7 +205,7 @@ public class EventStream<E> {
         
         return new EventStream<>(eventObserver -> {
 
-            EventStreamSubscriber<E> subscriber = new EventStreamSubscriber<>(eventObserver);
+            EventSubscriber<E> subscriber = new EventSubscriber<>(eventObserver);
 
             rx.Subscriber<E> rxSubscriber = new Subscriber<E>() {
                 @Override

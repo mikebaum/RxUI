@@ -25,7 +25,7 @@ import org.mockito.Mockito;
 
 import mb.rxui.Subscription;
 import mb.rxui.event.EventStream;
-import mb.rxui.event.EventStreamObserver;
+import mb.rxui.event.EventObserver;
 import mb.rxui.event.EventSubject;
 
 public class TestOperatorFilter {
@@ -37,7 +37,7 @@ public class TestOperatorFilter {
         Consumer<String> onEvent = Mockito.mock(Consumer.class);
         Runnable onCompleted = Mockito.mock(Runnable.class);
         
-        Subscription subscription = filteredStream.observe(EventStreamObserver.create(onEvent, onCompleted));
+        Subscription subscription = filteredStream.observe(EventObserver.create(onEvent, onCompleted));
         assertFalse(subscription.isDisposed());
         
         events.publish("tacos");
@@ -64,7 +64,7 @@ public class TestOperatorFilter {
         Consumer<String> onEvent = Mockito.mock(Consumer.class);
         Runnable onCompleted = Mockito.mock(Runnable.class);
         
-        Subscription subscription = filteredStream.observe(EventStreamObserver.create(onEvent, onCompleted));
+        Subscription subscription = filteredStream.observe(EventObserver.create(onEvent, onCompleted));
         assertFalse(subscription.isDisposed());
         
         events.dispose();
@@ -80,7 +80,7 @@ public class TestOperatorFilter {
         assertFalse(events.hasObservers());
 
         EventStream<String> filteredStream = events.filter(val -> val.contains("tacos"));
-        EventStreamObserver<String> observer = Mockito.mock(EventStreamObserver.class);
+        EventObserver<String> observer = Mockito.mock(EventObserver.class);
         Subscription subscription = filteredStream.observe(observer);
 
         assertTrue(events.hasObservers());
@@ -93,7 +93,7 @@ public class TestOperatorFilter {
     public void testSubscribeAfterDisposed() {
         EventSubject<String> events = EventSubject.create();
         EventStream<String> filteredStream = events.filter(val -> val.contains("tacos"));
-        EventStreamObserver<String> observer = Mockito.mock(EventStreamObserver.class);
+        EventObserver<String> observer = Mockito.mock(EventObserver.class);
         
         events.dispose();
         

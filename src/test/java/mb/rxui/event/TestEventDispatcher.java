@@ -38,8 +38,8 @@ public class TestEventDispatcher {
         onEvent = Mockito.mock(Consumer.class);
         onDisposed = Mockito.mock(Runnable.class);
         
-        dispatcher.subscribe(EventStreamObserver.create(onEvent, onDisposed));
-        dispatcher.subscribe(EventStreamObserver.create(event -> assertTrue(dispatcher.isDispatching())));
+        dispatcher.subscribe(EventObserver.create(onEvent, onDisposed));
+        dispatcher.subscribe(EventObserver.create(event -> assertTrue(dispatcher.isDispatching())));
         assertEquals(2, dispatcher.getSubscriberCount());
     }
     
@@ -49,7 +49,7 @@ public class TestEventDispatcher {
         dispatcher.dispatch("tacos");
         verify(onEvent).accept("tacos");
         
-        EventStreamObserver<String> observer = Mockito.mock(EventStreamObserver.class);
+        EventObserver<String> observer = Mockito.mock(EventObserver.class);
         dispatcher.subscribe(observer);
         
         dispatcher.dispatch("tacos");
@@ -103,7 +103,7 @@ public class TestEventDispatcher {
     
     @Test
     public void testOnEventThrowsDoesNotAffectIsDispatching() throws Exception {
-        dispatcher.subscribe(EventStreamObserver.create(event -> { throw new RuntimeException(); }));
+        dispatcher.subscribe(EventObserver.create(event -> { throw new RuntimeException(); }));
         
         dispatcher.dispatch("tacos");
         assertFalse(dispatcher.isDispatching());

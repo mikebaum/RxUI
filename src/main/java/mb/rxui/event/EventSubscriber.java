@@ -32,11 +32,11 @@ import mb.rxui.Subscription;
  *            the type of data that the {@link EventStream} which this
  *            subscriber is subscribed to emits.
  */
-public class EventStreamSubscriber<E> extends Subscriber implements EventStreamObserver<E>, Subscription {
+public class EventSubscriber<E> extends Subscriber implements EventObserver<E>, Subscription {
     
-    private final EventStreamObserver<E> observer;
+    private final EventObserver<E> observer;
     
-    public EventStreamSubscriber(EventStreamObserver<E> observer) {
+    public EventSubscriber(EventObserver<E> observer) {
         this.observer = requireNonNull(observer);
     }
     

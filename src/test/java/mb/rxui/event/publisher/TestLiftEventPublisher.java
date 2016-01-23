@@ -16,24 +16,24 @@ package mb.rxui.event.publisher;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import mb.rxui.event.EventStreamObserver;
-import mb.rxui.event.EventStreamSubscriber;
+import mb.rxui.event.EventObserver;
+import mb.rxui.event.EventSubscriber;
 import mb.rxui.event.operator.Operator;
 
 public class TestLiftEventPublisher {
     @Test
     public void testSubscribe() {
         Operator<String, Integer> operator = Mockito.mock(Operator.class);
-        EventStreamSubscriber<String> parentSubscriber = Mockito.mock(EventStreamSubscriber.class);
+        EventSubscriber<String> parentSubscriber = Mockito.mock(EventSubscriber.class);
 
         Mockito.when(operator.apply(Mockito.any())).thenReturn(parentSubscriber);
         
         EventPublisher<String> publisher = Mockito.mock(EventPublisher.class);
         LiftEventPublisher<String, Integer> lifter = new LiftEventPublisher<>(operator, publisher);
         
-        lifter.subscribe(Mockito.mock(EventStreamObserver.class));
+        lifter.subscribe(Mockito.mock(EventObserver.class));
         
-        Mockito.verify(operator).apply(Mockito.any(EventStreamSubscriber.class));
+        Mockito.verify(operator).apply(Mockito.any(EventSubscriber.class));
         Mockito.verify(publisher).subscribe(parentSubscriber);
     }
 }
