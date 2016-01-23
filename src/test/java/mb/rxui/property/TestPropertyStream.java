@@ -26,7 +26,7 @@ import mb.rxui.event.EventSequenceGenerator;
 import rx.functions.Action0;
 import rx.functions.Action1;
 
-public class TestPropertyObservable {
+public class TestPropertyStream {
     
     @Before
     public void setup() {
@@ -38,10 +38,10 @@ public class TestPropertyObservable {
         Property<String> property = Property.create("tacos");
         assertFalse(property.hasObservers());
         
-        PropertyObservable<Integer> observable = property.map(String::length);
+        PropertyStream<Integer> stream = property.map(String::length);
         assertFalse(property.hasObservers());
         
-        Subscription subscription = observable.onChanged(val -> {});
+        Subscription subscription = stream.onChanged(val -> {});
         assertTrue(property.hasObservers());
         
         subscription.dispose();

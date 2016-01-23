@@ -21,7 +21,7 @@ import org.mockito.Mockito;
 
 import mb.rxui.Subscription;
 import mb.rxui.property.Property;
-import mb.rxui.property.PropertyObservable;
+import mb.rxui.property.PropertyStream;
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.operator.OperatorIs;
 
@@ -33,9 +33,9 @@ public class TestOperatorIs {
 
         assertFalse(property.hasObservers());
         
-        PropertyObservable<Boolean> isObservable = property.lift(new OperatorIs<>("tacos"));
+        PropertyStream<Boolean> isStream = property.lift(new OperatorIs<>("tacos"));
         PropertyObserver<Boolean> propertyObserver = Mockito.mock(PropertyObserver.class);
-        Subscription subscription = isObservable.observe(propertyObserver);
+        Subscription subscription = isStream.observe(propertyObserver);
         
         assertTrue(property.hasObservers());
         
@@ -53,9 +53,9 @@ public class TestOperatorIs {
     public void testMacthOnManyPredicate() throws Exception {
         Property<String> property = Property.create("tacos");
 
-        PropertyObservable<Boolean> isObservable = property.lift(new OperatorIs<>("tacos", "fajitas"));
+        PropertyStream<Boolean> isStream = property.lift(new OperatorIs<>("tacos", "fajitas"));
         PropertyObserver<Boolean> propertyObserver = Mockito.mock(PropertyObserver.class);
-        isObservable.observe(propertyObserver);
+        isStream.observe(propertyObserver);
         
         Mockito.verify(propertyObserver).onChanged(true);
         
@@ -72,12 +72,12 @@ public class TestOperatorIs {
         
         assertFalse(property.hasObservers());
 
-        PropertyObservable<Boolean> isObservable = property.lift(new OperatorIs<>("tacos"));
+        PropertyStream<Boolean> isStream = property.lift(new OperatorIs<>("tacos"));
         
         property.dispose();
         
         PropertyObserver<Boolean> propertyObserver = Mockito.mock(PropertyObserver.class);
-        Subscription subscription = isObservable.observe(propertyObserver);
+        Subscription subscription = isStream.observe(propertyObserver);
         
         assertFalse(property.hasObservers());
         

@@ -31,7 +31,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.concurrent.Task;
 import mb.rxui.Subscription;
 import mb.rxui.property.Property;
-import mb.rxui.property.PropertyObservable;
+import mb.rxui.property.PropertyStream;
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.javafx.JavaFxProperties;
 
@@ -95,11 +95,11 @@ public class TestJavaFxProperties {
     public void testUnsubscribeRemovesListener() throws Exception {
         javaFxTestHelper.runTest(() -> {
             SimpleStringProperty observableValue = Mockito.spy(new SimpleStringProperty("tacos"));
-            PropertyObservable<String> observable = fromObservableValue(observableValue);
+            PropertyStream<String> stream = fromObservableValue(observableValue);
             
             PropertyObserver<String> mock = Mockito.mock(PropertyObserver.class);
             
-            Subscription subscription = observable.observe(mock);
+            Subscription subscription = stream.observe(mock);
             Mockito.verify(observableValue).addListener(Matchers.any(ChangeListener.class));
             
             subscription.dispose();            
@@ -118,12 +118,12 @@ public class TestJavaFxProperties {
     }
     
     @Test(expected=IllegalStateException.class)
-    public void testCannotCreateFxPropertyObservableOutsideFxThread() throws Exception {
+    public void testCannotCreateFxPropertyStreamOutsideFxThread() throws Exception {
         fromObservableValue(new SimpleStringProperty("tacos"));
     }
     
     @Test
-    public void testPropertyObservableFromObservableValue() throws Exception {
+    public void testPropertyStreamFromObservableValue() throws Exception {
         javaFxTestHelper.runTest(() -> {            
             Task<Integer> task = new Task<Integer>() {
                 @Override
@@ -134,11 +134,11 @@ public class TestJavaFxProperties {
                 }
             };
             
-            PropertyObservable<String> observable = fromObservableValue(task.messageProperty());
+            PropertyStream<String> stream = fromObservableValue(task.messageProperty());
             PropertyObserver<String> observer = Mockito.mock(PropertyObserver.class);
 
             InOrder inOrder = Mockito.inOrder(observer);
-            observable.observe(observer);
+            stream.observe(observer);
             
             task.run();
             

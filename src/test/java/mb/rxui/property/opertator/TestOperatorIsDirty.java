@@ -21,7 +21,7 @@ import org.mockito.Mockito;
 
 import mb.rxui.Subscription;
 import mb.rxui.property.Property;
-import mb.rxui.property.PropertyObservable;
+import mb.rxui.property.PropertyStream;
 import mb.rxui.property.PropertyObserver;
 
 public class TestOperatorIsDirty {
@@ -29,7 +29,7 @@ public class TestOperatorIsDirty {
     @Test
     public void testIsDirty() throws Exception {
         Property<String> property = Property.create("tacos");
-        PropertyObservable<Boolean> isDirty = property.isDirty();
+        PropertyStream<Boolean> isDirty = property.isDirty();
         PropertyObserver<Boolean> observer = Mockito.mock(PropertyObserver.class);
         
         isDirty.observe(observer);
@@ -46,7 +46,7 @@ public class TestOperatorIsDirty {
     @Test
     public void testDisposeUnsubscribesObserver() throws Exception {
         Property<String> property = Property.create("tacos");
-        PropertyObservable<Boolean> isDirty = property.isDirty();
+        PropertyStream<Boolean> isDirty = property.isDirty();
         PropertyObserver<Boolean> observer = Mockito.mock(PropertyObserver.class);
         
         Subscription subscription = isDirty.observe(observer);
@@ -61,7 +61,7 @@ public class TestOperatorIsDirty {
     @Test
     public void testUnsubscribeRemovesObserver() throws Exception {
         Property<String> property = Property.create("tacos");
-        PropertyObservable<Boolean> isDirty = property.isDirty();
+        PropertyStream<Boolean> isDirty = property.isDirty();
         PropertyObserver<Boolean> observer = Mockito.mock(PropertyObserver.class);
         
         assertFalse(property.hasObservers());
@@ -76,12 +76,12 @@ public class TestOperatorIsDirty {
     @Test
     public void testSubscribeAfterDispose() throws Exception {
         Property<String> property = Property.create("tacos");
-        PropertyObservable<Boolean> observable = property.isDirty();
+        PropertyStream<Boolean> stream = property.isDirty();
         PropertyObserver<Boolean> observer = Mockito.mock(PropertyObserver.class);
         
         property.dispose();
         
-        Subscription subscription = observable.observe(observer);
+        Subscription subscription = stream.observe(observer);
         verify(observer).onChanged(false);
         verify(observer).onDisposed();
         Mockito.verifyNoMoreInteractions(observer);

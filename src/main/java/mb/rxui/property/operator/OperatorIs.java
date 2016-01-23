@@ -25,8 +25,8 @@ import mb.rxui.property.PropertySubscriber;
 import mb.rxui.property.publisher.PropertyPublisher;
 
 /**
- * A {@link PropertyOperator} that transforms the property observable into a
- * boolean property observable by checking for equality between each emitted
+ * A {@link PropertyOperator} that transforms the property stream into a
+ * boolean property stream by checking for equality between each emitted
  * value and the value provided in the constructor.
  *
  * @param <M> the type of values to compare for equality.

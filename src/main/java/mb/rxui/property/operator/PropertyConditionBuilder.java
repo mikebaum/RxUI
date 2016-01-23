@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import mb.rxui.Subscription;
-import mb.rxui.property.PropertyObservable;
+import mb.rxui.property.PropertyStream;
 
 /**
  * A {@link PropertyConditionBuilder} can be used to setup some multi-condition
@@ -33,11 +33,11 @@ import mb.rxui.property.PropertyObservable;
  */
 public class PropertyConditionBuilder<M> {
     
-    private final PropertyObservable<M> observable;
+    private final PropertyStream<M> stream;
     private final List<M> values;
     
-    public PropertyConditionBuilder(PropertyObservable<M> observable, M firstValue) {
-        this.observable = requireNonNull(observable);
+    public PropertyConditionBuilder(PropertyStream<M> stream, M firstValue) {
+        this.stream = requireNonNull(stream);
         this.values = new ArrayList<>();
         values.add(requireNonNull(firstValue));
     }
@@ -67,6 +67,6 @@ public class PropertyConditionBuilder<M> {
      *         subscription.
      */
     public Subscription then(Runnable action) {
-        return observable.lift(new OperatorIs<M>(values)).filter(TRUE).onEvent(value -> action.run());
+        return stream.lift(new OperatorIs<M>(values)).filter(TRUE).onEvent(value -> action.run());
     }
 }

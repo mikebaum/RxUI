@@ -18,7 +18,7 @@ import static mb.rxui.ThreadChecker.PLATFORM_THREAD_CHECKER;
 import javafx.beans.value.ObservableValue;
 import javafx.beans.value.WritableValue;
 import mb.rxui.property.Property;
-import mb.rxui.property.PropertyObservable;
+import mb.rxui.property.PropertyStream;
 
 public enum JavaFxProperties {
     ;  // no instances
@@ -39,23 +39,23 @@ public enum JavaFxProperties {
     }
     
     /**
-     * Creates a property observable from an observable value.
+     * Creates a property stream from an observable value.
      * 
      * @param observableValue
-     *            some observable value to create a property observable for
-     * @return a new {@link PropertyObservable} that is backed by the provided
+     *            some observable value to create a property stream for
+     * @return a new {@link PropertyStream} that is backed by the provided
      *         observable value.
      * @throws IllegalStateException
      *             if the provided {@link ObservableValue} is actually an
      *             instance of a {@link WritableValue}, or if this method is
      *             called from a thread other that the JavaFx Platform Thread
      */
-    public static <M> PropertyObservable<M> fromObservableValue(ObservableValue<M> observableValue) {
+    public static <M> PropertyStream<M> fromObservableValue(ObservableValue<M> observableValue) {
         PLATFORM_THREAD_CHECKER.checkThread();
-        // TODO: need to figure out a way to prevent creating a PropertyObservable from a WritableValue
+        // TODO: need to figure out a way to prevent creating a PropertyStream from a WritableValue
 //        checkArgument(! WritableValue.class.isAssignableFrom(observableValue.getClass()), 
 //                     "Use [" + JavaFxPropertySource.class.getSimpleName() + "] instead, " + 
 //                     "to ensure to be protected against re-entrancy." );
-        return PropertyObservable.create(new ObservableValuePropertyPublisher<>(observableValue));
+        return PropertyStream.create(new ObservableValuePropertyPublisher<>(observableValue));
     }
 }

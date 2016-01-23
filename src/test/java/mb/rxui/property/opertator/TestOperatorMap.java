@@ -24,35 +24,35 @@ import org.mockito.Mockito;
 
 import mb.rxui.Subscription;
 import mb.rxui.property.Property;
-import mb.rxui.property.PropertyObservable;
+import mb.rxui.property.PropertyStream;
 import mb.rxui.property.PropertyObserver;
 
 public class TestOperatorMap {
     @Test
     public void testMap() throws Exception {
         Property<String> property = Property.create("tacos");
-        PropertyObservable<Integer> observable = property.map(String::length);
+        PropertyStream<Integer> stream = property.map(String::length);
         PropertyObserver<Integer> observer = Mockito.mock(PropertyObserver.class);
 
-        observable.observe(observer);
+        stream.observe(observer);
         
         verify(observer).onChanged(5);
-        assertEquals(new Integer(5), observable.get());
+        assertEquals(new Integer(5), stream.get());
         verifyNoMoreInteractions(observer);
         
         property.setValue("burritos");
         verify(observer).onChanged(8);
-        assertEquals(new Integer(8), observable.get());
+        assertEquals(new Integer(8), stream.get());
         verifyNoMoreInteractions(observer);
     }
     
     @Test
     public void testDisposeUnsubscribesObserver() throws Exception {
         Property<String> property = Property.create("tacos");
-        PropertyObservable<Integer> observable = property.map(String::length);
+        PropertyStream<Integer> stream = property.map(String::length);
         PropertyObserver<Integer> observer = Mockito.mock(PropertyObserver.class);
 
-        Subscription subscription = observable.observe(observer);
+        Subscription subscription = stream.observe(observer);
         
         verify(observer).onChanged(5);
         
@@ -65,12 +65,12 @@ public class TestOperatorMap {
     @Test
     public void testUnsubscribeRemovesObserver() throws Exception {
         Property<String> property = Property.create("tacos");
-        PropertyObservable<Integer> observable = property.map(String::length);
+        PropertyStream<Integer> stream = property.map(String::length);
         PropertyObserver<Integer> observer = Mockito.mock(PropertyObserver.class);
 
         assertFalse(property.hasObservers());
 
-        Subscription subscription = observable.observe(observer);
+        Subscription subscription = stream.observe(observer);
         assertTrue(property.hasObservers());
         
         subscription.dispose();
@@ -80,12 +80,12 @@ public class TestOperatorMap {
     @Test
     public void testSubscribeAfterDispose() throws Exception {
         Property<String> property = Property.create("tacos");
-        PropertyObservable<Integer> observable = property.map(String::length);
+        PropertyStream<Integer> stream = property.map(String::length);
         PropertyObserver<Integer> observer = Mockito.mock(PropertyObserver.class);
         
         property.dispose();
         
-        Subscription subscription = observable.observe(observer);
+        Subscription subscription = stream.observe(observer);
         verify(observer).onChanged(5);
         verify(observer).onDisposed();
         Mockito.verifyNoMoreInteractions(observer);

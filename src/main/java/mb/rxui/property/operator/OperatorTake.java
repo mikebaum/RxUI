@@ -14,7 +14,7 @@
 package mb.rxui.property.operator;
 
 import mb.rxui.Subscription;
-import mb.rxui.property.PropertyObservable;
+import mb.rxui.property.PropertyStream;
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertySubscriber;
 import mb.rxui.property.publisher.PropertyPublisher;
@@ -22,8 +22,8 @@ import mb.rxui.property.publisher.PropertyPublisher;
 /**
  * An operator that limits the number of values dispatched to subscribers.<br>
  * <br>
- * NOTE: the get method of the new {@link PropertyObservable} created via this
- * operator will always return the latest value of the property observable it
+ * NOTE: the get method of the new {@link PropertyStream} created via this
+ * operator will always return the latest value of the property stream it
  * was derived from.
  * 
  * @param <M>

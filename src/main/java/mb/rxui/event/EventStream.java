@@ -27,7 +27,7 @@ import mb.rxui.event.operator.OperatorMap;
 import mb.rxui.event.publisher.EventPublisher;
 import mb.rxui.event.publisher.LiftEventPublisher;
 import mb.rxui.property.Property;
-import mb.rxui.property.PropertyObservable;
+import mb.rxui.property.PropertyStream;
 import mb.rxui.property.PropertyObserver;
 import rx.Observable;
 import rx.Subscriber;

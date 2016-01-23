@@ -31,10 +31,10 @@ public class TestFilterProperty {
         
         assertFalse(property.hasObservers());
         
-        EventStream<String> observable = property.filter(value -> value.equals("tacos"));
+        EventStream<String> stream = property.filter(value -> value.equals("tacos"));
         
         EventStreamObserver<String> observer = Mockito.mock(EventStreamObserver.class);
-        Subscription subscription = observable.observe(observer);
+        Subscription subscription = stream.observe(observer);
         
         assertTrue(property.hasObservers());
         
@@ -58,10 +58,10 @@ public class TestFilterProperty {
         
         assertFalse(property.hasObservers());
         
-        EventStream<String> observable = property.filter(value -> value.equals("tacos"));
+        EventStream<String> stream = property.filter(value -> value.equals("tacos"));
         
         EventStreamObserver<String> observer = Mockito.mock(EventStreamObserver.class);
-        Subscription subscription = observable.observe(observer);
+        Subscription subscription = stream.observe(observer);
         
         assertTrue(property.hasObservers());
         
@@ -78,12 +78,12 @@ public class TestFilterProperty {
         
         assertFalse(property.hasObservers());
         
-        EventStream<String> observable = property.filter(value -> value.equals("tacos"));
+        EventStream<String> stream = property.filter(value -> value.equals("tacos"));
         
         property.dispose();
         
         EventStreamObserver<String> observer = Mockito.mock(EventStreamObserver.class);
-        Subscription subscription = observable.observe(observer);
+        Subscription subscription = stream.observe(observer);
         
         assertFalse(property.hasObservers());
         

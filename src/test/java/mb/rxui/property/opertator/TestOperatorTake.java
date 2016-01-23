@@ -21,27 +21,27 @@ import org.mockito.Mockito;
 
 import mb.rxui.Subscription;
 import mb.rxui.property.Property;
-import mb.rxui.property.PropertyObservable;
+import mb.rxui.property.PropertyStream;
 import mb.rxui.property.PropertyObserver;
 
 public class TestOperatorTake {
     @Test
     public void testTake() throws Exception {
         Property<String> property = Property.create("tacos");
-        PropertyObservable<String> observable = property.take(3);
+        PropertyStream<String> stream = property.take(3);
         PropertyObserver<String> observer = Mockito.mock(PropertyObserver.class);
         
-        observable.observe(observer);
+        stream.observe(observer);
         verify(observer).onChanged("tacos");
-        assertEquals("tacos", observable.get());
+        assertEquals("tacos", stream.get());
         
         property.setValue("burritos");
         verify(observer).onChanged("burritos");
-        assertEquals("burritos", observable.get());
+        assertEquals("burritos", stream.get());
         
         property.setValue("fajitas");
         verify(observer).onChanged("fajitas");
-        assertEquals("fajitas", observable.get());
+        assertEquals("fajitas", stream.get());
         
         // assert that the observer is notified disposed since the amount to take has be taken
         verify(observer).onDisposed();
@@ -51,10 +51,10 @@ public class TestOperatorTake {
     @Test
     public void testDisposeUnsubscribesObserver() throws Exception {
         Property<String> property = Property.create("tacos");
-        PropertyObservable<String> observable = property.take(3);
+        PropertyStream<String> stream = property.take(3);
         PropertyObserver<String> observer = Mockito.mock(PropertyObserver.class);
         
-        Subscription subscription = observable.observe(observer);
+        Subscription subscription = stream.observe(observer);
         verify(observer).onChanged("tacos");
         
         property.dispose();
@@ -66,12 +66,12 @@ public class TestOperatorTake {
     @Test
     public void testUnsubscribeRemovesObserver() throws Exception {
         Property<String> property = Property.create("tacos");
-        PropertyObservable<String> observable = property.take(3);
+        PropertyStream<String> stream = property.take(3);
         PropertyObserver<String> observer = Mockito.mock(PropertyObserver.class);
         
         assertFalse(property.hasObservers());
 
-        Subscription subscription = observable.observe(observer);
+        Subscription subscription = stream.observe(observer);
         verify(observer).onChanged("tacos");
         
         assertTrue(property.hasObservers());
@@ -83,12 +83,12 @@ public class TestOperatorTake {
     @Test
     public void testSubscribeAfterDispose() throws Exception {
         Property<String> property = Property.create("tacos");
-        PropertyObservable<String> observable = property.take(3);
+        PropertyStream<String> stream = property.take(3);
         PropertyObserver<String> observer = Mockito.mock(PropertyObserver.class);
         
         property.dispose();
         
-        Subscription subscription = observable.observe(observer);
+        Subscription subscription = stream.observe(observer);
         verify(observer).onChanged("tacos");
         verify(observer).onDisposed();
         Mockito.verifyNoMoreInteractions(observer);

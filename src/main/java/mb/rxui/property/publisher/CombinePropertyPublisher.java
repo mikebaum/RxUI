@@ -22,35 +22,35 @@ import java.util.stream.Collectors;
 
 import mb.rxui.Subscription;
 import mb.rxui.property.CompositeSubscription;
-import mb.rxui.property.PropertyObservable;
+import mb.rxui.property.PropertyStream;
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertySubscriber;
 
 /**
  * A {@link PropertyPublisher} that will combine the values of the provided
- * property observables any time the value of any of them change.
+ * property streams any time the value of any of them change.
  *
  * @param <R>
  *            the type of the combined result
  */
 public final class CombinePropertyPublisher<R> implements PropertyPublisher<R> {
 
-    private final List<PropertyObservable<?>> observables;
+    private final List<PropertyStream<?>> streams;
     private Supplier<R> combineSupplier;
     private int disposeCount = 0;
 
-    public CombinePropertyPublisher(Supplier<R> combineSupplier, List<PropertyObservable<?>> observables) {
+    public CombinePropertyPublisher(Supplier<R> combineSupplier, List<PropertyStream<?>> streams) {
         this.combineSupplier = requireNonNull(combineSupplier);
-        this.observables = requireNonNull(observables);
+        this.streams = requireNonNull(streams);
     }
 
     /**
-     * @return true if the disposeCount equals the number of observables that
+     * @return true if the disposeCount equals the number of streams that
      *         have been subscribed to.
      */
     private boolean incrementDisposeCount() {
         disposeCount++;
-        return disposeCount == observables.size();
+        return disposeCount == streams.size();
     }
 
     @Override
@@ -64,7 +64,7 @@ public final class CombinePropertyPublisher<R> implements PropertyPublisher<R> {
         PropertySubscriber<R> combineSubscriber = new PropertySubscriber<>(observer);
 
         List<Subscription> subscriptions =
-            observables.stream()
+            streams.stream()
                        .map(subscribe(combineSubscriber))
                        .collect(Collectors.toList());
 
@@ -75,12 +75,12 @@ public final class CombinePropertyPublisher<R> implements PropertyPublisher<R> {
         return combineSubscriber;
     }
 
-    private Function<? super PropertyObservable<?>, ? extends Subscription> subscribe(PropertySubscriber<R> combineSubscriber) {
+    private Function<? super PropertyStream<?>, ? extends Subscription> subscribe(PropertySubscriber<R> combineSubscriber) {
 
-        return observable -> observable.observe(value -> combineSubscriber.onChanged(get()), 
-                                                () -> {
-                                                    if (incrementDisposeCount())
-                                                        combineSubscriber.onDisposed();
-                                                });
+        return stream -> stream.observe(value -> combineSubscriber.onChanged(get()), 
+                                        () -> {
+                                            if (incrementDisposeCount())
+                                                combineSubscriber.onDisposed();
+                                        });
     }
 }

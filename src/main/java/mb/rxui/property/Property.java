@@ -65,7 +65,7 @@ import rx.subjects.BehaviorSubject;
  * @param <T>
  *            the type of object that this property emits.
  */
-public final class Property<M> extends PropertyObservable<M> implements PropertySource<M>, Disposable {
+public final class Property<M> extends PropertyStream<M> implements PropertySource<M>, Disposable {
 
     private final PropertySource<M> propertySource;
     private final PropertyDispatcher<M> dispatcher;
@@ -122,8 +122,8 @@ public final class Property<M> extends PropertyObservable<M> implements Property
     }
     
     /**
-     * Binds this property to the provided property observable. Any value
-     * changes from the bound property observable will be propagated to this
+     * Binds this property to the provided property stream. Any value
+     * changes from the bound property stream will be propagated to this
      * property.<br>
      * <br>
      * 
@@ -139,7 +139,7 @@ public final class Property<M> extends PropertyObservable<M> implements Property
      *             already cancelled subscription (perhaps log a warning) or
      *             allow it since it will not cause any harm (I think).
      */
-    public final Subscription bind(PropertyObservable<M> propertyToBindTo) {
+    public final Subscription bind(PropertyStream<M> propertyToBindTo) {
         return propertyToBindTo.observe(new Binding<>(this));
     }
     

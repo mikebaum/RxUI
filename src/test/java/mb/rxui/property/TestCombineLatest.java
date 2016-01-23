@@ -30,15 +30,15 @@ public class TestCombineLatest {
         Property<String> property = Property.create("tacos");
         Property<Integer> property2 = Property.create(15);
         
-        PropertyObservable<String> observable = 
-            PropertyObservable.combine(property, property2, (food, amount) -> "I ate [" + amount + "] " + food);
+        PropertyStream<String> stream = 
+            PropertyStream.combine(property, property2, (food, amount) -> "I ate [" + amount + "] " + food);
         
         PropertyObserver<String> observer = Mockito.mock(PropertyObserver.class);
         
         assertFalse(property.hasObservers());
         assertFalse(property2.hasObservers());
         
-        Subscription subscription = observable.observe(observer);
+        Subscription subscription = stream.observe(observer);
         verify(observer).onChanged("I ate [15] tacos");
         verifyNoMoreInteractions(observer);
         
@@ -76,15 +76,15 @@ public class TestCombineLatest {
         Property<String> property = Property.create("tacos");
         Property<Integer> property2 = Property.create(15);
         
-        PropertyObservable<String> observable = 
-            PropertyObservable.combine(property, property2, (food, amount) -> "I ate [" + amount + "] " + food);
+        PropertyStream<String> stream = 
+            PropertyStream.combine(property, property2, (food, amount) -> "I ate [" + amount + "] " + food);
         
         PropertyObserver<String> observer = Mockito.mock(PropertyObserver.class);
         
         assertFalse(property.hasObservers());
         assertFalse(property2.hasObservers());
         
-        Subscription subscription = observable.observe(observer);
+        Subscription subscription = stream.observe(observer);
         
         assertTrue(property.hasObservers());
         assertTrue(property2.hasObservers());

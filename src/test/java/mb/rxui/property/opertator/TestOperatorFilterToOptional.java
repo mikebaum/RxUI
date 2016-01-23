@@ -24,7 +24,7 @@ import org.mockito.Mockito;
 
 import mb.rxui.Subscription;
 import mb.rxui.property.Property;
-import mb.rxui.property.PropertyObservable;
+import mb.rxui.property.PropertyStream;
 import mb.rxui.property.PropertyObserver;
 
 public class TestOperatorFilterToOptional {
@@ -34,26 +34,26 @@ public class TestOperatorFilterToOptional {
         
         PropertyObserver<Optional<String>> observer = mock(PropertyObserver.class);
         
-        PropertyObservable<Optional<String>> observable = property.filterToOptional(value -> value.equals("taco"));
+        PropertyStream<Optional<String>> stream = property.filterToOptional(value -> value.equals("taco"));
         
-        Subscription subscription = observable.observe(observer);
+        Subscription subscription = stream.observe(observer);
         verify(observer).onChanged(Optional.of("taco"));
         
         property.setValue("burrito");
-        assertEquals(observable.get(), Optional.empty());
+        assertEquals(stream.get(), Optional.empty());
         verify(observer).onChanged(Optional.empty());
         
         subscription.dispose();
-        assertEquals(observable.get(), Optional.empty());
+        assertEquals(stream.get(), Optional.empty());
     }
     
     @Test
     public void testDisposeUnsubscribesObserver() throws Exception {
         Property<String> property = Property.create("taco");
-        PropertyObservable<Optional<String>> observable = property.filterToOptional(value -> value.equals("taco"));
+        PropertyStream<Optional<String>> stream = property.filterToOptional(value -> value.equals("taco"));
         PropertyObserver<Optional<String>> observer = Mockito.mock(PropertyObserver.class);
         
-        Subscription subscription = observable.observe(observer);
+        Subscription subscription = stream.observe(observer);
         verify(observer).onChanged(Optional.of("taco"));
         
         property.dispose();
@@ -65,12 +65,12 @@ public class TestOperatorFilterToOptional {
     @Test
     public void testUnsubscribeRemovesObserver() throws Exception {
         Property<String> property = Property.create("taco");
-        PropertyObservable<Optional<String>> observable = property.filterToOptional(value -> value.equals("taco"));
+        PropertyStream<Optional<String>> stream = property.filterToOptional(value -> value.equals("taco"));
         PropertyObserver<Optional<String>> observer = Mockito.mock(PropertyObserver.class);
         
         assertFalse(property.hasObservers());
         
-        Subscription subscription = observable.observe(observer);
+        Subscription subscription = stream.observe(observer);
         verify(observer).onChanged(Optional.of("taco"));
         assertTrue(property.hasObservers());
         
@@ -81,12 +81,12 @@ public class TestOperatorFilterToOptional {
     @Test
     public void testSubscribeAfterDispose() throws Exception {
         Property<String> property = Property.create("taco");
-        PropertyObservable<Optional<String>> observable = property.filterToOptional(value -> value.equals("taco"));
+        PropertyStream<Optional<String>> stream = property.filterToOptional(value -> value.equals("taco"));
         PropertyObserver<Optional<String>> observer = Mockito.mock(PropertyObserver.class);
         
         property.dispose();
         
-        Subscription subscription = observable.observe(observer);
+        Subscription subscription = stream.observe(observer);
         verify(observer).onChanged(Optional.of("taco"));
         verify(observer).onDisposed();
         Mockito.verifyNoMoreInteractions(observer);
@@ -99,10 +99,10 @@ public class TestOperatorFilterToOptional {
     public void testOnlyEmitsIfChanged() throws Exception {
         Property<String> property = Property.create("taco");
         
-        PropertyObservable<Optional<String>> observable = property.filterToOptional(value -> value.equals("taco"));
+        PropertyStream<Optional<String>> stream = property.filterToOptional(value -> value.equals("taco"));
         PropertyObserver<Optional<String>> observer = Mockito.mock(PropertyObserver.class);
         
-        observable.observe(observer);
+        stream.observe(observer);
         Mockito.verify(observer).onChanged(Optional.of("taco"));
         
         property.setValue("burrito");
