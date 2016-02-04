@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -27,7 +28,7 @@ import java.util.function.Supplier;
 
 import mb.rxui.Preconditions;
 import mb.rxui.Subscription;
-import mb.rxui.ThreadChecker;
+import mb.rxui.ThreadContext;
 import mb.rxui.event.EventStream;
 import mb.rxui.property.operator.OperatorFilterToOptional;
 import mb.rxui.property.operator.OperatorIsDirty;
@@ -57,7 +58,7 @@ import rx.subscriptions.Subscriptions;
 public class PropertyStream<M> implements Supplier<M> {
     
     private final PropertyPublisher<M> propertyPublisher;
-    private final ThreadChecker threadChecker;
+    private final ThreadContext threadContext;
     private final M initialValue;
     
     /**
@@ -66,7 +67,7 @@ public class PropertyStream<M> implements Supplier<M> {
      */
     protected PropertyStream(PropertyPublisher<M> propertyPublisher) {
         this.propertyPublisher = requireNonNull(propertyPublisher);
-        this.threadChecker = ThreadChecker.create();
+        this.threadContext = ThreadContext.create();
         initialValue = requireNonNull(propertyPublisher.get());
     }
     
@@ -98,7 +99,7 @@ public class PropertyStream<M> implements Supplier<M> {
      */
     @Override
     public final M get() {
-        threadChecker.checkThread();
+        threadContext.checkThread();
         return propertyPublisher.get();
     }
 
@@ -108,7 +109,7 @@ public class PropertyStream<M> implements Supplier<M> {
      * @return a {@link Subscription} that can be used to cancel the subscription.
      */
     public final Subscription observe(PropertyObserver<M> observer) {
-        threadChecker.checkThread();
+        threadContext.checkThread();
         return propertyPublisher.subscribe(observer);
     }
 
@@ -199,6 +200,21 @@ public class PropertyStream<M> implements Supplier<M> {
      */
     public final EventStream<M> filter(Predicate<M> predicate) {
         return asEventStream().filter(predicate);
+    }
+    
+    /**
+     * Throttles emissions from this property, such that an event will only be
+     * emitted after an amount of event silence.
+     * 
+     * @param timeout
+     *            amount of event silence to wait for before emitting an event
+     * @param timeUnit
+     *            time unit for the provided time.
+     * @return an {@link EventStream} that will only emit values after the
+     *         prescribed amount of event silence has passed.
+     */
+    public final EventStream<M> debounce(long timeout, TimeUnit timeUnit) {
+        return asEventStream().debounce(timeout, timeUnit);
     }
     
     /**
@@ -313,7 +329,7 @@ public class PropertyStream<M> implements Supplier<M> {
      *             was created from.
      */
     private EventStream<M> asEventStream() {
-        threadChecker.checkThread();
+        threadContext.checkThread();
         return new EventStream<>(observer -> {
             return observe(PropertyObserver.create(observer::onEvent, observer::onCompleted));
         });

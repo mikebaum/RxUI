@@ -43,7 +43,7 @@ public interface Subscription extends Disposable {
      *            the subscription.
      * @return A new {@link Subscription}
      */
-    static Subscription fromDisposable(Disposable disposable) {
+    static Subscription create(Disposable disposable) {
         return new Subscription() {
             private boolean isDisposed = false;
 
@@ -61,5 +61,15 @@ public interface Subscription extends Disposable {
                 return isDisposed;
             }
         };
+    }
+    
+    /**
+     * Creates a simple Subscription that can be used as a cancellation token.
+     * 
+     * @return a new {@link Subscription} that can be used to signal
+     *         cancellation.
+     */
+    static Subscription create() {
+        return create(() -> {});
     }
 }

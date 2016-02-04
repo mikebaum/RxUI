@@ -18,12 +18,15 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 import mb.rxui.Subscription;
+import mb.rxui.SwingTestRunner;
 import mb.rxui.event.EventSequenceGenerator;
 import mb.rxui.event.EventObserver;
 
+@RunWith(SwingTestRunner.class)
 public class TestPropertyChangeEvents {
     
     @Before

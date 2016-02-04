@@ -13,20 +13,25 @@
  */
 package mb.rxui.property.opertator;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.util.Optional;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 import mb.rxui.Subscription;
+import mb.rxui.SwingTestRunner;
 import mb.rxui.property.Property;
-import mb.rxui.property.PropertyStream;
 import mb.rxui.property.PropertyObserver;
+import mb.rxui.property.PropertyStream;
 
+@RunWith(SwingTestRunner.class)
 public class TestOperatorFilterToOptional {
     @Test
     public void testFilter() throws Exception {
@@ -52,10 +57,10 @@ public class TestOperatorFilterToOptional {
         Property<String> property = Property.create("taco");
         PropertyStream<Optional<String>> stream = property.filterToOptional(value -> value.equals("taco"));
         PropertyObserver<Optional<String>> observer = Mockito.mock(PropertyObserver.class);
-        
+
         Subscription subscription = stream.observe(observer);
         verify(observer).onChanged(Optional.of("taco"));
-        
+
         property.dispose();
         verify(observer).onDisposed();
         assertTrue(subscription.isDisposed());

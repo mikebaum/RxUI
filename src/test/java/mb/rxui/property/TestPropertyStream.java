@@ -19,13 +19,16 @@ import static org.mockito.Mockito.verify;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 import mb.rxui.Subscription;
+import mb.rxui.SwingTestRunner;
 import mb.rxui.event.EventSequenceGenerator;
 import rx.functions.Action0;
 import rx.functions.Action1;
 
+@RunWith(SwingTestRunner.class)
 public class TestPropertyStream {
     
     @Before

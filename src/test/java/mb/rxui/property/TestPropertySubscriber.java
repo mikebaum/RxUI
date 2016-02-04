@@ -23,6 +23,8 @@ import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 
+import mb.rxui.ThreadedTestHelper;
+
 public class TestPropertySubscriber {
     private PropertySubscriber<String> subscriber;
     private PropertyObserver<String> observer;
@@ -97,7 +99,7 @@ public class TestPropertySubscriber {
     
     @Test
     public void testBindingSubscriber() throws Exception {
-        Binding<String> binding = new Binding<>(Property.create("tacos"));
+        Binding<String> binding = ThreadedTestHelper.createOnEDT(() -> new Binding<>(Property.create("tacos")));
         PropertySubscriber<String> propertySubscriber = new PropertySubscriber<>(binding);
         assertTrue(propertySubscriber.isBinding());
     }

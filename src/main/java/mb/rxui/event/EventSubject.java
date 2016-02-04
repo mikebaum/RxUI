@@ -16,7 +16,7 @@ package mb.rxui.event;
 import static java.util.Objects.requireNonNull;
 
 import mb.rxui.Subscription;
-import mb.rxui.ThreadChecker;
+import mb.rxui.ThreadContext;
 import mb.rxui.disposables.Disposable;
 import mb.rxui.event.publisher.EventPublisher;
 
@@ -32,12 +32,12 @@ import mb.rxui.event.publisher.EventPublisher;
 public class EventSubject<E> extends EventStream<E> implements EventSource<E>, Disposable {
 
     private final EventSourcePublisher<E> publisher;
-    private final ThreadChecker threadChecker;
+    private final ThreadContext threadContext;
 
-    private EventSubject(EventSourcePublisher<E> publisher, ThreadChecker threadChecker) {
-        super(publisher, threadChecker);
+    private EventSubject(EventSourcePublisher<E> publisher, ThreadContext threadContext) {
+        super(publisher, threadContext);
         this.publisher = requireNonNull(publisher);
-        this.threadChecker = requireNonNull(threadChecker);
+        this.threadContext = requireNonNull(threadContext);
     }
 
     /**
@@ -46,20 +46,18 @@ public class EventSubject<E> extends EventStream<E> implements EventSource<E>, D
      * @return An {@link EventSubject}
      */
     public static <E> EventSubject<E> create() {
-        EventSourcePublisher<E> eventSourcePublisher = new EventSourcePublisher<>();
-        ThreadChecker threadChecker = ThreadChecker.create();
-        return new EventSubject<>(eventSourcePublisher, threadChecker);
+        return new EventSubject<>(new EventSourcePublisher<>(), ThreadContext.create());
     }
 
     @Override
     public final void publish(E event) {
-        threadChecker.checkThread();
+        threadContext.checkThread();
         publisher.publish(event);
     }
 
     @Override
     public final void dispose() {
-        threadChecker.checkThread();
+        threadContext.checkThread();
         publisher.dispose();
     }
     
@@ -70,7 +68,7 @@ public class EventSubject<E> extends EventStream<E> implements EventSource<E>, D
      *             subject was created on.
      */
     public final boolean hasObservers() {
-        threadChecker.checkThread();
+        threadContext.checkThread();
         return publisher.hasSubscribers();
     }
 
