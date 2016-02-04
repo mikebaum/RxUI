@@ -13,6 +13,7 @@
  */
 package mb.rxui;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -22,9 +23,11 @@ import java.util.function.Supplier;
 import javax.swing.SwingUtilities;
 
 import org.junit.Assert;
+import org.junit.runners.model.Statement;
 
-import mb.rxui.event.EventStream;
-import mb.rxui.event.TestEventStream;
+import rx.Observable;
+import rx.Scheduler;
+import rx.schedulers.Schedulers;
 
 public class ThreadedTestHelper {
     
@@ -98,21 +101,67 @@ public class ThreadedTestHelper {
         AtomicReference<Throwable> error = runTestAndCaptureExceptionIfAny(someTestThatShouldThrow);
         
         if (error.get() != null) {
-            if ( error.get() instanceof AssertionError) {
+            if (error.get() instanceof AssertionError) {
+                throw error.get().getCause();
+            } else if (error.get() instanceof TestRunException) {
                 throw error.get().getCause();
             } else {
                 throw error.get();
             }
         }
     }
-
-    public static <T> T createOnEDT(Supplier<T> factory) throws Exception {
-        Object[] result = new Object[1];
     
-        SwingUtilities.invokeAndWait(() -> result[0] = factory.get());
-    
-        return (T) result[0];
+    public Statement wrapStatementToRunOnEDT(Statement statement) {
+        return new Statement() {
+            @Override
+            public void evaluate() throws Throwable {
+                runTestReThrowException(createRunnable(statement));
+            }
+        };
     }
     
+    private Runnable createRunnable(Statement statement) {
+        return () -> {
+            try {
+                statement.evaluate();
+            } catch (Throwable throwable) {
+                throw new TestRunException(throwable);
+            }
+        };
+    }
     
+    public static class TestRunException extends RuntimeException {
+        public TestRunException(Throwable throwable) {
+            super(throwable);
+        }
+    }
+
+    public static <T> T createOnEDT(Supplier<T> factory) throws Exception {
+        return callOnScheduler(factory::get, Schedulers.from(SwingUtilities::invokeLater));
+    }
+    
+    public static <T> T callOnIoThread(Callable<T> factory) {
+        return callOnScheduler(factory, Schedulers.io());
+    }
+
+    public static <T> T callOnScheduler(Callable<T> factory, Scheduler scheduler) {
+        return Observable.fromCallable(() -> factory.call())
+                         .subscribeOn(scheduler)
+                         .toBlocking()
+                         .first();
+    }
+    
+    public static void doOnIoThread(Runnable runnable) {
+        Observable.fromCallable(asCallable(runnable))
+                  .subscribeOn(Schedulers.io())
+                  .toBlocking()
+                  .first();
+    }
+
+    public static Callable<Void> asCallable(Runnable runnable) {
+        return () -> {
+            runnable.run();
+            return null;
+        };
+    }
 }

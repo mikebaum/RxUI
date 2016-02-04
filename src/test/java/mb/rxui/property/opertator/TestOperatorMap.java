@@ -20,13 +20,16 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 import mb.rxui.Subscription;
+import mb.rxui.SwingTestRunner;
 import mb.rxui.property.Property;
 import mb.rxui.property.PropertyStream;
 import mb.rxui.property.PropertyObserver;
 
+@RunWith(SwingTestRunner.class)
 public class TestOperatorMap {
     @Test
     public void testMap() throws Exception {

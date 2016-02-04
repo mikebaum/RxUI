@@ -75,12 +75,7 @@ public abstract class AbstractDispatcher<V, S extends Subscriber & Observer<V>, 
 
     @Override
     public void schedule(Runnable runnable) {
-        isDispatching = true;
-        try {
-            runnable.run();
-        } finally {            
-            isDispatching = false;
-        }
+        wrapRunnable(runnable).run();
     }
 
     @Override
@@ -96,5 +91,25 @@ public abstract class AbstractDispatcher<V, S extends Subscriber & Observer<V>, 
     @Override
     public int getSubscriberCount() {
         return subscribers.size();
+    }
+
+    /**
+     * Ensures that when the runnable is running that the dispatch flag is
+     * turned on and then off when execution is finished.
+     * 
+     * @param runnable
+     *            some runnable to wrap
+     * @return a new runnable that ensures to toggle on/off the dispatch flag
+     *         before and after execution.
+     */
+    private Runnable wrapRunnable(Runnable runnable) {
+        return () -> {            
+            isDispatching = true;
+            try {
+                runnable.run();
+            } finally {            
+                isDispatching = false;
+            }
+        };
     }
 }

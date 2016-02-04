@@ -13,7 +13,12 @@
  */
 package mb.rxui.property;
 
-import static org.junit.Assert.*;
+import static mb.rxui.ThreadedTestHelper.callOnIoThread;
+import static mb.rxui.ThreadedTestHelper.doOnIoThread;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -22,20 +27,21 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import javax.swing.SwingUtilities;
-
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 import mb.rxui.Subscription;
+import mb.rxui.SwingTestRunner;
 import rx.Observable;
 import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.subjects.BehaviorSubject;
 
+@RunWith(SwingTestRunner.class)
 public class TestProperty {
     @Test
     public void testStartWith() throws Exception {
@@ -215,52 +221,57 @@ public class TestProperty {
 
     @Test(expected = IllegalStateException.class)
     public void testCallGetValueOnWrongThread() throws Exception {
-        createPropertyOnEDT("tacos").get();
+        Property<String> property = Property.create("tacos");
+        callOnIoThread(property::get);
     }
 
     @Test(expected = IllegalStateException.class)
     public void testCallSetValueOnWrongThread() throws Exception {
-        createPropertyOnEDT("tacos").setValue("burritos");
+        Property<String> property = Property.create("tacos");
+        doOnIoThread(() -> property.setValue("burritos"));
     }
 
     @Test(expected = IllegalStateException.class)
     public void testCallAcceptValueOnWrongThread() throws Exception {
-        createPropertyOnEDT("tacos").accept("burritos");
+        Property<String> property = Property.create("tacos");
+        doOnIoThread(() -> property.accept("burritos"));
     }
 
     @Test(expected = IllegalStateException.class)
     public void testCallOnChangeOnWrongThread() throws Exception {
-        createPropertyOnEDT("tacos").onChanged(value -> {
-        });
+        Property<String> property = Property.create("tacos");
+        doOnIoThread(() -> property.onChanged(val -> {}));
     }
 
     @Test(expected = IllegalStateException.class)
     public void testCallOnDisposedOnWrongThread() throws Exception {
-        createPropertyOnEDT("tacos").onDisposed(() -> {
-        });
+        Property<String> property = Property.create("tacos");
+        doOnIoThread(() -> property.onDisposed(() -> {}));
     }
 
     @Test(expected = IllegalStateException.class)
     public void testCallObserveOnWrongThread() throws Exception {
         PropertyObserver<String> propertyObserver = Mockito.mock(PropertyObserver.class);
-        createPropertyOnEDT("tacos").observe(propertyObserver);
+        Property<String> property = Property.create("tacos");
+        doOnIoThread(() -> property.observe(propertyObserver));
     }
 
     @Test(expected = IllegalStateException.class)
     public void testCallObserveWithCallbacksOnWrongThread() throws Exception {
-        createPropertyOnEDT("tacos").observe(value -> {
-        } , () -> {
-        });
+        Property<String> property = Property.create("tacos");
+        doOnIoThread(() -> property.observe(val -> {}, () -> {}));
     }
 
     @Test(expected = IllegalStateException.class)
     public void testCallHasObserversOnWrongThread() throws Exception {
-        createPropertyOnEDT("tacos").hasObservers();
+        Property<String> property = Property.create("tacos");
+        callOnIoThread(() -> property.hasObservers());
     }
 
     @Test(expected = IllegalStateException.class)
     public void testCallResetOnWrongThread() throws Exception {
-        createPropertyOnEDT("tacos").reset();
+        Property<String> property = Property.create("tacos");
+        doOnIoThread(() -> property.reset());
     }
 
     @Test
@@ -602,15 +613,5 @@ public class TestProperty {
 
         subscription.unsubscribe();
         assertFalse(property.hasObservers());
-    }
-
-    private Property<String> createPropertyOnEDT(String initialValue) throws Exception {
-        Object[] property = new Object[1];
-
-        SwingUtilities.invokeAndWait(() -> {
-            property[0] = Property.create(initialValue);
-        });
-
-        return (Property<String>) property[0];
     }
 }

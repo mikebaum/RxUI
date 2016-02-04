@@ -13,7 +13,7 @@
  */
 package mb.rxui.event;
 
-import static mb.rxui.ThreadedTestHelper.createOnEDT;
+import static mb.rxui.ThreadedTestHelper.callOnIoThread;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -24,17 +24,22 @@ import java.util.function.Consumer;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 
 import mb.rxui.Subscription;
+import mb.rxui.SwingTestRunner;
+import mb.rxui.ThreadedTestHelper;
 import mb.rxui.property.Property;
 import mb.rxui.property.PropertyObserver;
+import rx.Notification;
 import rx.Observable;
 import rx.Observer;
 import rx.subjects.BehaviorSubject;
 import rx.subjects.PublishSubject;
 
+@RunWith(SwingTestRunner.class)
 public class TestEventStream {
     @Test
     public void testOnEvent() {
@@ -54,7 +59,7 @@ public class TestEventStream {
     
     @Test(expected=IllegalStateException.class)
     public void testCallOnEventOnWrongThread() throws Exception {
-        EventStream<String> stream = createOnEDT(() -> createStream());
+        EventStream<String> stream = callOnIoThread(() -> createStream());
         
         stream.onEvent(Mockito.mock(Consumer.class));
         fail("Trying to call onEvent should have thrown since this is the wrong thread.");
@@ -72,7 +77,7 @@ public class TestEventStream {
     
     @Test(expected=IllegalStateException.class)
     public void testCallOnCompletedOnWrongThread() throws Exception {
-        EventStream<String> stream = createOnEDT(() -> createStream());
+        EventStream<String> stream = callOnIoThread(() -> createStream());
         
         stream.onCompleted(Mockito.mock(Runnable.class));
         fail("Trying to call onCompleted should have thrown since this is the wrong thread.");
@@ -99,7 +104,7 @@ public class TestEventStream {
     
     @Test(expected=IllegalStateException.class)
     public void testCallObserveOnWrongThread() throws Exception {
-        EventStream<String> stream = createOnEDT(() -> createStream());
+        EventStream<String> stream = callOnIoThread(() -> createStream());
         
         stream.observe(Mockito.mock(EventObserver.class));
         fail("Trying to call observe should have thrown since this is the wrong thread.");
@@ -124,7 +129,7 @@ public class TestEventStream {
     
     @Test(expected=IllegalStateException.class)
     public void testCallToPropertyOnWrongThread() throws Exception {
-        EventStream<String> stream = createOnEDT(() -> createStream());
+        EventStream<String> stream = callOnIoThread(() -> createStream());
         
         stream.toProperty("burritos");
         fail("Trying to call toProperty should have thrown since this is the wrong thread.");
@@ -152,12 +157,17 @@ public class TestEventStream {
     
     @Test
     public void testCallSubscribeOnAnObservableFromWrongThread() throws Exception {
-        EventStream<String> stream = createOnEDT(()-> createStream());
+        EventStream<String> stream = createStream();
 
-        Throwable[] throwable = new Throwable[1];
-        stream.asObservable().subscribe(value->{}, error->throwable[0] = error);
+        Throwable exception = callOnIoThread(() -> {            
+            return stream.asObservable()
+                         .materialize()
+                         .filter(Notification::isOnError)
+                         .map(Notification::getThrowable)
+                         .toBlocking().first();
+            });
         
-        assertEquals(IllegalStateException.class, throwable[0].getClass());
+        assertEquals(IllegalStateException.class, exception.getClass());
     }
     
     @Test

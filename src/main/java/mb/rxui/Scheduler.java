@@ -15,6 +15,9 @@ package mb.rxui;
 
 /**
  * A scheduler can be used to <i>schedule</i> some runnable for execution.
+ * <p>
+ * TODO: do we really need this interface? Maybe this method should be added to
+ * the EventLoop interface, when it is created.
  */
 public interface Scheduler {
     /**

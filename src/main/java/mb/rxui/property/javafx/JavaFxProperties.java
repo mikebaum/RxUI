@@ -13,7 +13,7 @@
  */
 package mb.rxui.property.javafx;
 
-import static mb.rxui.ThreadChecker.PLATFORM_THREAD_CHECKER;
+import static mb.rxui.ThreadContext.JAVAFX_THREAD_CONTEXT;
 
 import javafx.beans.value.ObservableValue;
 import javafx.beans.value.WritableValue;
@@ -34,7 +34,7 @@ public enum JavaFxProperties {
      *             Platform Thread
      */
     public static <M> Property<M> fromFxProperty(javafx.beans.property.Property<M> property) {
-        PLATFORM_THREAD_CHECKER.checkThread();
+        JAVAFX_THREAD_CONTEXT.checkThread();
         return Property.create(dispatcher -> new JavaFxPropertySource<>(property, dispatcher));
     }
     
@@ -51,7 +51,7 @@ public enum JavaFxProperties {
      *             called from a thread other that the JavaFx Platform Thread
      */
     public static <M> PropertyStream<M> fromObservableValue(ObservableValue<M> observableValue) {
-        PLATFORM_THREAD_CHECKER.checkThread();
+        JAVAFX_THREAD_CONTEXT.checkThread();
         // TODO: need to figure out a way to prevent creating a PropertyStream from a WritableValue
 //        checkArgument(! WritableValue.class.isAssignableFrom(observableValue.getClass()), 
 //                     "Use [" + JavaFxPropertySource.class.getSimpleName() + "] instead, " + 

@@ -13,16 +13,20 @@
  */
 package mb.rxui.event;
 
-import static mb.rxui.ThreadedTestHelper.createOnEDT;
-import static org.junit.Assert.*;
+import static mb.rxui.ThreadedTestHelper.callOnIoThread;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.function.Consumer;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 import mb.rxui.Subscription;
+import mb.rxui.SwingTestRunner;
 
+@RunWith(SwingTestRunner.class)
 public class TestEventSubject {
     @Test
     public void testPublish() {
@@ -51,7 +55,7 @@ public class TestEventSubject {
     
     @Test(expected=IllegalStateException.class)
     public void testCallPublishOnWringThread() throws Exception {
-        EventSubject<String> subject = createOnEDT(() -> EventSubject.<String>create());
+        EventSubject<String> subject = callOnIoThread(() -> EventSubject.<String>create());
         
         subject.publish("tacos");
     }
@@ -83,7 +87,7 @@ public class TestEventSubject {
     
     @Test(expected=IllegalStateException.class)
     public void testCallDisposeOnWringThread() throws Exception {
-        EventSubject<String> subject = createOnEDT(() -> EventSubject.<String>create());
+        EventSubject<String> subject = callOnIoThread(() -> EventSubject.<String>create());
         
         subject.dispose();
     }
@@ -99,7 +103,7 @@ public class TestEventSubject {
     
     @Test(expected=IllegalStateException.class)
     public void testCallHasObserversOnWringThread() throws Exception {
-        EventSubject<String> subject = createOnEDT(() -> EventSubject.<String>create());
+        EventSubject<String> subject = callOnIoThread(() -> EventSubject.<String>create());
         
         subject.hasObservers();
     }

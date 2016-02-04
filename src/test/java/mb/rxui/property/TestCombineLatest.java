@@ -20,10 +20,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 import mb.rxui.Subscription;
+import mb.rxui.SwingTestRunner;
 
+@RunWith(SwingTestRunner.class)
 public class TestCombineLatest {
     @Test
     public void testCombineLatest2() throws Exception {

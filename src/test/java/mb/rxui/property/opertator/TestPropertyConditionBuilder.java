@@ -18,11 +18,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 import mb.rxui.Subscription;
+import mb.rxui.SwingTestRunner;
 import mb.rxui.property.Property;
 
+@RunWith(SwingTestRunner.class)
 public class TestPropertyConditionBuilder {
     @Test
     public void testConditionBuilder() throws Exception {

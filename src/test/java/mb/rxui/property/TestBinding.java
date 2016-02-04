@@ -17,8 +17,12 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.verify;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
+import mb.rxui.SwingTestRunner;
+
+@RunWith(SwingTestRunner.class)
 public class TestBinding {
     @Test
     public void testBinding() throws Exception {

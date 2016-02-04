@@ -17,13 +17,16 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 import mb.rxui.Subscription;
+import mb.rxui.SwingTestRunner;
 import mb.rxui.event.EventStream;
 import mb.rxui.event.EventObserver;
 import mb.rxui.property.Property;
 
+@RunWith(SwingTestRunner.class)
 public class TestFilterProperty {
     @Test
     public void testFilter() throws Exception {

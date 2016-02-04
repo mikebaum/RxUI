@@ -15,20 +15,20 @@ package mb.rxui.event;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 import mb.rxui.Subscription;
-import mb.rxui.ThreadChecker;
+import mb.rxui.ThreadContext;
 import mb.rxui.event.operator.Operator;
+import mb.rxui.event.operator.OperatorDebounce;
 import mb.rxui.event.operator.OperatorFilter;
 import mb.rxui.event.operator.OperatorMap;
 import mb.rxui.event.publisher.EventPublisher;
 import mb.rxui.event.publisher.LiftEventPublisher;
 import mb.rxui.property.Property;
-import mb.rxui.property.PropertyStream;
-import mb.rxui.property.PropertyObserver;
 import rx.Observable;
 import rx.Subscriber;
 import rx.subscriptions.Subscriptions;
@@ -55,11 +55,11 @@ import rx.subscriptions.Subscriptions;
 public class EventStream<E> {
     
     private final EventPublisher<E> eventPublisher;
-    private final ThreadChecker threadChecker;
+    private final ThreadContext threadContext;
     
-    protected EventStream(EventPublisher<E> eventPublisher, ThreadChecker threadChecker) {
+    protected EventStream(EventPublisher<E> eventPublisher, ThreadContext threadContext) {
         this.eventPublisher = requireNonNull(eventPublisher);
-        this.threadChecker = requireNonNull(threadChecker);
+        this.threadContext = requireNonNull(threadContext);
     }
     
     /**
@@ -69,7 +69,7 @@ public class EventStream<E> {
      *            some {@link EventPublisher} to back this stream.
      */
     public EventStream(EventPublisher<E> eventPublisher) {        
-        this(eventPublisher, ThreadChecker.create());
+        this(eventPublisher, ThreadContext.create());
     }
     
     /**
@@ -114,7 +114,7 @@ public class EventStream<E> {
      *             stream was created on.
      */
     public final Subscription observe(EventObserver<E> observer) {
-        threadChecker.checkThread();
+        threadContext.checkThread();
         return eventPublisher.subscribe(observer);
     }
     
@@ -127,7 +127,7 @@ public class EventStream<E> {
      */
     public final <R> EventStream<R> lift(Operator<E, R> operator) {
         requireNonNull(operator);
-        return new EventStream<>(new LiftEventPublisher<>(operator, eventPublisher), threadChecker);
+        return new EventStream<>(new LiftEventPublisher<>(operator, eventPublisher), threadContext);
     }
     
     /**
@@ -154,6 +154,21 @@ public class EventStream<E> {
      */
     public final EventStream<E> filter(Predicate<E> predicate) {
         return lift(new OperatorFilter<>(predicate));
+    }
+    
+    /**
+     * Throttles emissions from this event stream, such that an event will only
+     * be emitted after an amount of event silence.
+     * 
+     * @param timeout
+     *            amount of event silence to wait for before emitting an event
+     * @param timeUnit
+     *            time unit for the provided time.
+     * @return an {@link EventStream} that will only emit values after the
+     *         prescribed amount of event silence has passed.
+     */
+    public final EventStream<E> debounce(long timeout, TimeUnit timeUnit) {
+        return lift(new OperatorDebounce<>(threadContext, timeout, timeUnit));
     }
     
     /**
@@ -226,7 +241,7 @@ public class EventStream<E> {
 
             observable.subscribe(rxSubscriber);
 
-            Subscription eventStreamSubscription = Subscription.fromDisposable(rxSubscriber::unsubscribe);
+            Subscription eventStreamSubscription = Subscription.create(rxSubscriber::unsubscribe);
 
             rxSubscriber.add(Subscriptions.create(eventStreamSubscription::dispose));
 
