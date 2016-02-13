@@ -36,7 +36,9 @@ public abstract class AbstractDispatcher<V, S extends Subscriber & Observer<V>, 
     private boolean isDispatching = false;
     private boolean isDisposed = false;
     
-    protected AbstractDispatcher(List<S> subscribers, Function<S, Consumer<V>> dispatchFunction, Function<S, Runnable> disposeFunction) {
+    protected AbstractDispatcher(List<S> subscribers, 
+                                 Function<S, Consumer<V>> dispatchFunction, 
+                                 Function<S, Runnable> disposeFunction) {
         this.subscribers = requireNonNull(subscribers);
         this.disposables = new ArrayList<>();
         this.dispatchFunction = requireNonNull(dispatchFunction);

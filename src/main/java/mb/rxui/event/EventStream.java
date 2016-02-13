@@ -34,14 +34,14 @@ import rx.Subscriber;
 import rx.subscriptions.Subscriptions;
 
 /**
- * An EventStream represents a stream that emits discrete events. This
- * differs from a {@link Property} since an {@link EventStream} does not have a
- * current value.
+ * An EventStream represents a stream that emits discrete events. This differs
+ * from a {@link Property} since an {@link EventStream} does not have a current
+ * value.
  * 
  * <p>
  * Notes:
  * <li>An Event Stream will emit zero, one or many events followed by one
- * completed event
+ * completed event.
  * <li>An Event Stream can only be interacted with on the same thread that it
  * was created on. Attempting to access any of the methods outside of the thread
  * it was created on will throw an {@link IllegalStateException}
