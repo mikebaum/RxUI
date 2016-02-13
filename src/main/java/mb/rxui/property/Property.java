@@ -107,7 +107,7 @@ public final class Property<M> extends PropertyStream<M> implements PropertySour
         
         M oldValue = get();
         propertySource.setValue(requireNonNull(value));
-        dispatcher.schedule(() -> changeEvents.publish(new PropertyChangeEvent<M>(oldValue, value)));
+        dispatcher.invoke(() -> changeEvents.publish(new PropertyChangeEvent<M>(oldValue, value)));
     }
 
     /**

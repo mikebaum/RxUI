@@ -60,12 +60,12 @@ public class EventDispatcher<V> extends AbstractDispatcher<V, EventSubscriber<V>
         return new EventObserver<V>() {
             @Override
             public void onEvent(V event) {
-                schedule(() -> observer.onEvent(event));
+                invoke(() -> observer.onEvent(event));
             }
 
             @Override
             public void onCompleted() {
-                schedule(observer::onCompleted);
+                invoke(observer::onCompleted);
             }
         };
     }

@@ -76,7 +76,7 @@ public abstract class AbstractDispatcher<V, S extends Subscriber & Observer<V>, 
     }
 
     @Override
-    public void schedule(Runnable runnable) {
+    public void invoke(Runnable runnable) {
         wrapRunnable(runnable).run();
     }
 

@@ -54,12 +54,12 @@ public final class PropertyDispatcher<M> extends AbstractDispatcher<M, PropertyS
         return new PropertyObserver<M>() {
             @Override
             public void onChanged(M newValue) {
-                schedule(() -> observer.onChanged(newValue));
+                invoke(() -> observer.onChanged(newValue));
             }
 
             @Override
             public void onDisposed() {
-                schedule(observer::onDisposed);
+                invoke(observer::onDisposed);
             }
 
             @Override
