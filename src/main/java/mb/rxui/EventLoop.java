@@ -16,20 +16,25 @@ package mb.rxui;
 import static javafx.application.Platform.isFxApplicationThread;
 import static javax.swing.SwingUtilities.isEventDispatchThread;
 
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 import mb.rxui.disposables.Disposable;
 
 /**
- * A thread context captures a thread and provides a mechanism to assert that
- * the current thread matches this context. Additionally a thread context can be
- * used to schedule a runnable to run at some fixed time in the future on this
- * context's thread.
+ * A event loop captures a thread and provides a mechanism to assert that the
+ * current thread matches this context. Additionally a event loop can be used to
+ * schedule a runnable to run at some fixed time in the future on this context's
+ * thread.
  * <p>
- * TODO: Consider renaming to EventLoop and adding invokeNow, invokeLater and
- * invokeAndWait.
+ * NOTE: An event loop guarantees that only one runnable is executing at a time.
+ * Scheduling Runnables through an event loop serializes their execution. This
+ * differs than an arbitrary {@link Executor} in the sense that an executor
+ * cannot guarantee serialized execution unless it's concurrency is 1.
+ * <p>
+ * TODO: Consider adding invokeNow, invokeLater and invokeAndWait.
  */
-public interface ThreadContext {
+public interface EventLoop {
     /**
      * Checks if the current thread matches the thread for this context.
      * 
@@ -37,7 +42,12 @@ public interface ThreadContext {
      *             if the current thread does not match the valid thread for
      *             this context.
      */
-    void checkThread();
+    void checkInEventLoop();
+    
+    /**
+     * @return true if the current thread matches the thread of this event loop, false otherwise.
+     */
+    boolean isInEventLoop();
     
     /**
      * Schedules some runnable to execute at some later time.
@@ -54,17 +64,17 @@ public interface ThreadContext {
     Disposable schedule(Runnable runnable, long time, TimeUnit timeUnit);
     
 
-    static ThreadContext create() {
+    static EventLoop create() {
         if (isEventDispatchThread())
-            return SWING_THREAD_CONTEXT;
+            return SWING_EVENT_LOOP;
 
         if (isFxApplicationThread())
-            return JAVAFX_THREAD_CONTEXT;
+            return JAVAFX_EVENT_LOOP;
 
         throw new IllegalStateException(
-                "Thread: [" + Thread.currentThread() + "] cannot be used to back a thread context.");
+                "Thread: [" + Thread.currentThread() + "] cannot be used to back a event loop.");
     }
 
-    static final ThreadContext SWING_THREAD_CONTEXT = new SwingThreadContext();
-    static final ThreadContext JAVAFX_THREAD_CONTEXT = new JavaFxThreadContext();
+    static final EventLoop SWING_EVENT_LOOP = new SwingEventLoop();
+    static final EventLoop JAVAFX_EVENT_LOOP = new JavaFxEventLoop();
 }

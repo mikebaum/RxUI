@@ -22,75 +22,75 @@ import org.junit.Test;
 
 import mb.rxui.property.javafx.JavaFxTestHelper;
 
-public class TestThreadContext {
+public class TestEventLoop {
     
     @Test(expected=IllegalStateException.class)
-    public void testEDTThreadContext() throws Exception {
-        ThreadContext.SWING_THREAD_CONTEXT.checkThread();
+    public void testEDTEventLoop() throws Exception {
+        EventLoop.SWING_EVENT_LOOP.checkInEventLoop();
     }
     
     @Test(expected=IllegalStateException.class)
-    public void testPlatfromThreadContext() throws Exception {
-        ThreadContext.JAVAFX_THREAD_CONTEXT.checkThread();
+    public void testPlatfromEventLoop() throws Exception {
+        EventLoop.JAVAFX_EVENT_LOOP.checkInEventLoop();
     }
     
     @Test
-    public void testCreateEDTThreadContext() throws Exception {
-        AtomicReference<ThreadContext> threadContext = new AtomicReference<>();
+    public void testCreateEDTEventLoop() throws Exception {
+        AtomicReference<EventLoop> eventLoop = new AtomicReference<>();
         
         EDT_TEST_HELPER.runTest(() -> {
-            threadContext.set(ThreadContext.create());
+            eventLoop.set(EventLoop.create());
         });
         
         EDT_TEST_HELPER.runTest(() -> {
-            threadContext.get().checkThread();
+            eventLoop.get().checkInEventLoop();
         }); 
     }
     
     @Test(expected=IllegalStateException.class)
-    public void testCreateEDTThreadContextThrows() throws Exception {
-        AtomicReference<ThreadContext> threadContext = new AtomicReference<>();
+    public void testCreateEDTEventLoopThrows() throws Exception {
+        AtomicReference<EventLoop> eventLoop = new AtomicReference<>();
         
         EDT_TEST_HELPER.runTest(() -> {
-            threadContext.set(ThreadContext.create());
+            eventLoop.set(EventLoop.create());
         });
         
-        threadContext.get().checkThread();
+        eventLoop.get().checkInEventLoop();
     }
     
     @Test
-    public void testCreatePlatformThreadContext() throws Exception {
-        AtomicReference<ThreadContext> threadContext = new AtomicReference<>();
+    public void testCreatePlatformEventLoop() throws Exception {
+        AtomicReference<EventLoop> eventLoop = new AtomicReference<>();
         
         JavaFxTestHelper.instance().runTest(() -> {
-            threadContext.set(ThreadContext.create());
+            eventLoop.set(EventLoop.create());
         });
         
         JavaFxTestHelper.instance().runTest(() -> {
-            threadContext.get().checkThread();
+            eventLoop.get().checkInEventLoop();
         }); 
     }
     
     @Test(expected=IllegalStateException.class)
-    public void testCreatePlatformThreadContextThrows() throws Exception {
-        AtomicReference<ThreadContext> threadContext = new AtomicReference<>();
+    public void testCreatePlatformEventLoopThrows() throws Exception {
+        AtomicReference<EventLoop> eventLoop = new AtomicReference<>();
         
         JavaFxTestHelper.instance().runTest(() -> {
-            threadContext.set(ThreadContext.create());
+            eventLoop.set(EventLoop.create());
         });
         
-        threadContext.get().checkThread();
+        eventLoop.get().checkInEventLoop();
     }
     
     @Test(expected=IllegalStateException.class)
     public void testCreateOnUnknownThread() throws Exception {
-        ThreadContext.create();
+        EventLoop.create();
     }
     
     @Test(expected=IllegalStateException.class)
-    public void testArbitraryThreadContextThrows() throws Throwable {
-        ThreadContext threadContext = ThreadedTestHelper.createOnEDT(ThreadContext::create);
+    public void testArbitraryEventLoopThrows() throws Throwable {
+        EventLoop eventLoop = ThreadedTestHelper.createOnEDT(EventLoop::create);
         
-        JavaFxTestHelper.instance().runTestReThrowException(threadContext::checkThread);
+        JavaFxTestHelper.instance().runTestReThrowException(eventLoop::checkInEventLoop);
     }
 }

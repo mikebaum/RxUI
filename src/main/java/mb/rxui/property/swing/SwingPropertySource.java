@@ -13,7 +13,7 @@
  */
 package mb.rxui.property.swing;
 
-import static mb.rxui.ThreadContext.SWING_THREAD_CONTEXT;
+import static mb.rxui.EventLoop.SWING_EVENT_LOOP;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -38,7 +38,7 @@ public abstract class SwingPropertySource<M, L, C> implements PropertySource<M> 
                                   PropertyDispatcher<M> dispatcher) {
         this.getter = getter;
         this.setter = setter;
-        SWING_THREAD_CONTEXT.checkThread();
+        SWING_EVENT_LOOP.checkInEventLoop();
         dispatcher.onDisposed(addListener(component, createListener(dispatcher)));
     }
 

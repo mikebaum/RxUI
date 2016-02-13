@@ -26,13 +26,13 @@ import mb.rxui.disposables.Disposable;
 import mb.rxui.disposables.DisposableRunnable;
 
 /**
- * A thread context that can be used for JavaFx applications.
+ * A event loop that can be used for JavaFx applications.
  */
-public class JavaFxThreadContext implements ThreadContext {
+public class JavaFxEventLoop implements EventLoop {
 
     @Override
-    public void checkThread() {
-        checkState(Platform.isFxApplicationThread(),
+    public void checkInEventLoop() {
+        checkState(isInEventLoop(),
                    "Method should have been called on the JavaFx Platform Thread, but instead it was called from: " + 
                    Thread.currentThread());
     }
@@ -48,5 +48,10 @@ public class JavaFxThreadContext implements ThreadContext {
         timeLine.play();
         
         return disposableRunnable;
+    }
+
+    @Override
+    public boolean isInEventLoop() {
+        return Platform.isFxApplicationThread();
     }
 }

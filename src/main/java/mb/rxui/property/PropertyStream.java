@@ -28,7 +28,7 @@ import java.util.function.Supplier;
 
 import mb.rxui.Preconditions;
 import mb.rxui.Subscription;
-import mb.rxui.ThreadContext;
+import mb.rxui.EventLoop;
 import mb.rxui.event.EventStream;
 import mb.rxui.property.operator.OperatorFilterToOptional;
 import mb.rxui.property.operator.OperatorIsDirty;
@@ -58,7 +58,7 @@ import rx.subscriptions.Subscriptions;
 public class PropertyStream<M> implements Supplier<M> {
     
     private final PropertyPublisher<M> propertyPublisher;
-    private final ThreadContext threadContext;
+    private final EventLoop eventLoop;
     private final M initialValue;
     
     /**
@@ -67,7 +67,7 @@ public class PropertyStream<M> implements Supplier<M> {
      */
     protected PropertyStream(PropertyPublisher<M> propertyPublisher) {
         this.propertyPublisher = requireNonNull(propertyPublisher);
-        this.threadContext = ThreadContext.create();
+        this.eventLoop = EventLoop.create();
         initialValue = requireNonNull(propertyPublisher.get());
     }
     
@@ -99,7 +99,7 @@ public class PropertyStream<M> implements Supplier<M> {
      */
     @Override
     public final M get() {
-        threadContext.checkThread();
+        eventLoop.checkInEventLoop();
         return propertyPublisher.get();
     }
 
@@ -109,7 +109,7 @@ public class PropertyStream<M> implements Supplier<M> {
      * @return a {@link Subscription} that can be used to cancel the subscription.
      */
     public final Subscription observe(PropertyObserver<M> observer) {
-        threadContext.checkThread();
+        eventLoop.checkInEventLoop();
         return propertyPublisher.subscribe(observer);
     }
 
@@ -329,7 +329,7 @@ public class PropertyStream<M> implements Supplier<M> {
      *             was created from.
      */
     private EventStream<M> asEventStream() {
-        threadContext.checkThread();
+        eventLoop.checkInEventLoop();
         return new EventStream<>(observer -> {
             return observe(PropertyObserver.create(observer::onEvent, observer::onCompleted));
         });

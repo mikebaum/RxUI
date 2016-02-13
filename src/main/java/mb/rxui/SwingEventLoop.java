@@ -25,13 +25,13 @@ import mb.rxui.disposables.Disposable;
 import mb.rxui.disposables.DisposableRunnable;
 
 /**
- * A thread context that should be used for Swing/AWT applications.
+ * A event loop that should be used for Swing/AWT applications.
  */
-public final class SwingThreadContext implements ThreadContext {
+public final class SwingEventLoop implements EventLoop {
 
     @Override
-    public void checkThread() {
-        checkState(SwingUtilities.isEventDispatchThread(),
+    public void checkInEventLoop() {
+        checkState(isInEventLoop(),
                    "Method should have been called on the EDT, but instead it was called from: " + 
                    Thread.currentThread());
     }
@@ -47,5 +47,10 @@ public final class SwingThreadContext implements ThreadContext {
         timer.start();
         
         return disposableRunnable;
+    }
+
+    @Override
+    public boolean isInEventLoop() {
+        return SwingUtilities.isEventDispatchThread();
     }
 }

@@ -16,7 +16,7 @@ package mb.rxui.event;
 import static java.util.Objects.requireNonNull;
 
 import mb.rxui.Subscription;
-import mb.rxui.ThreadContext;
+import mb.rxui.EventLoop;
 import mb.rxui.disposables.Disposable;
 import mb.rxui.event.publisher.EventPublisher;
 
@@ -32,12 +32,12 @@ import mb.rxui.event.publisher.EventPublisher;
 public class EventSubject<E> extends EventStream<E> implements EventSource<E>, Disposable {
 
     private final EventSourcePublisher<E> publisher;
-    private final ThreadContext threadContext;
+    private final EventLoop eventLoop;
 
-    private EventSubject(EventSourcePublisher<E> publisher, ThreadContext threadContext) {
-        super(publisher, threadContext);
+    private EventSubject(EventSourcePublisher<E> publisher, EventLoop eventLoop) {
+        super(publisher, eventLoop);
         this.publisher = requireNonNull(publisher);
-        this.threadContext = requireNonNull(threadContext);
+        this.eventLoop = requireNonNull(eventLoop);
     }
 
     /**
@@ -46,18 +46,18 @@ public class EventSubject<E> extends EventStream<E> implements EventSource<E>, D
      * @return An {@link EventSubject}
      */
     public static <E> EventSubject<E> create() {
-        return new EventSubject<>(new EventSourcePublisher<>(), ThreadContext.create());
+        return new EventSubject<>(new EventSourcePublisher<>(), EventLoop.create());
     }
 
     @Override
     public final void publish(E event) {
-        threadContext.checkThread();
+        eventLoop.checkInEventLoop();
         publisher.publish(event);
     }
 
     @Override
     public final void dispose() {
-        threadContext.checkThread();
+        eventLoop.checkInEventLoop();
         publisher.dispose();
     }
     
@@ -68,7 +68,7 @@ public class EventSubject<E> extends EventStream<E> implements EventSource<E>, D
      *             subject was created on.
      */
     public final boolean hasObservers() {
-        threadContext.checkThread();
+        eventLoop.checkInEventLoop();
         return publisher.hasSubscribers();
     }
 

@@ -21,7 +21,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import mb.rxui.Subscription;
-import mb.rxui.ThreadContext;
+import mb.rxui.EventLoop;
 import mb.rxui.event.operator.Operator;
 import mb.rxui.event.operator.OperatorDebounce;
 import mb.rxui.event.operator.OperatorFilter;
@@ -55,11 +55,11 @@ import rx.subscriptions.Subscriptions;
 public class EventStream<E> {
     
     private final EventPublisher<E> eventPublisher;
-    private final ThreadContext threadContext;
+    private final EventLoop eventLoop;
     
-    protected EventStream(EventPublisher<E> eventPublisher, ThreadContext threadContext) {
+    protected EventStream(EventPublisher<E> eventPublisher, EventLoop eventLoop) {
         this.eventPublisher = requireNonNull(eventPublisher);
-        this.threadContext = requireNonNull(threadContext);
+        this.eventLoop = requireNonNull(eventLoop);
     }
     
     /**
@@ -69,7 +69,7 @@ public class EventStream<E> {
      *            some {@link EventPublisher} to back this stream.
      */
     public EventStream(EventPublisher<E> eventPublisher) {        
-        this(eventPublisher, ThreadContext.create());
+        this(eventPublisher, EventLoop.create());
     }
     
     /**
@@ -114,7 +114,7 @@ public class EventStream<E> {
      *             stream was created on.
      */
     public final Subscription observe(EventObserver<E> observer) {
-        threadContext.checkThread();
+        eventLoop.checkInEventLoop();
         return eventPublisher.subscribe(observer);
     }
     
@@ -127,7 +127,7 @@ public class EventStream<E> {
      */
     public final <R> EventStream<R> lift(Operator<E, R> operator) {
         requireNonNull(operator);
-        return new EventStream<>(new LiftEventPublisher<>(operator, eventPublisher), threadContext);
+        return new EventStream<>(new LiftEventPublisher<>(operator, eventPublisher), eventLoop);
     }
     
     /**
@@ -168,7 +168,7 @@ public class EventStream<E> {
      *         prescribed amount of event silence has passed.
      */
     public final EventStream<E> debounce(long timeout, TimeUnit timeUnit) {
-        return lift(new OperatorDebounce<>(threadContext, timeout, timeUnit));
+        return lift(new OperatorDebounce<>(eventLoop, timeout, timeUnit));
     }
     
     /**
