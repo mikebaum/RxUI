@@ -13,6 +13,18 @@
  */
 package mb.rxui.property;
 
+/**
+ * A Binding is a special type of Property Observer that represents an observer
+ * that binds one property to another. When dispatching events property bindings
+ * are processed first, this guarantees that all properties have the up to date
+ * value instantly at the same time before any other observers receive updates.
+ * The reasoning behind this is that it should help to remove glitches and
+ * redundant updates. See <a href="http://stackoverflow.com/a/25141234">glich
+ * description</a>.
+ *
+ * @param <M>
+ *            the type of data observed by this observer.
+ */
 public class Binding<M> implements PropertyObserver<M> {
     
     private final Property<M> boundProperty;

@@ -183,6 +183,18 @@ public class EventStream<E> {
      *             stream was created on. 
      */
     public final Property<E> toProperty(E initialValue) {
+        
+        /**
+         * TODO: This needs work. The following things need to be done:
+         * <p>
+         * 1) If the event stream source is completed the subscription needs to
+         * be terminated
+         * <p>
+         * 2) Consider creating a Binding observer like has been done for
+         * properties. It might be necessary to process bindings before other
+         * observers in order to prevent glitches.
+         */
+        
         Property<E> property = Property.create(initialValue);
         
         Subscription subscription = onEvent(property::setValue);
