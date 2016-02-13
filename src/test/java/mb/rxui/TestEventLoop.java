@@ -13,12 +13,15 @@
  */
 package mb.rxui;
 
+import static mb.rxui.EventLoop.JAVAFX_EVENT_LOOP;
+import static mb.rxui.EventLoop.SWING_EVENT_LOOP;
 import static mb.rxui.ThreadedTestHelper.EDT_TEST_HELPER;
 import static org.junit.Assert.*;
 
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import mb.rxui.property.javafx.JavaFxTestHelper;
 
@@ -45,6 +48,50 @@ public class TestEventLoop {
         EDT_TEST_HELPER.runTest(() -> {
             eventLoop.get().checkInEventLoop();
         }); 
+    }
+    
+    @Test
+    public void testInvokeNowOnEDT() {
+        EDT_TEST_HELPER.runTest(() -> {
+            Runnable runnable = Mockito.mock(Runnable.class);
+            
+            SWING_EVENT_LOOP.invokeNow(runnable);
+            
+            Mockito.verify(runnable).run();
+        });
+    }
+    
+    @Test(expected=IllegalStateException.class)
+    public void testInvokeNowOnEDTFromWrongThread() throws Throwable {
+        JavaFxTestHelper.instance().runTestReThrowException(() -> {
+            Runnable runnable = Mockito.mock(Runnable.class);
+            
+            SWING_EVENT_LOOP.invokeNow(runnable);
+            
+            Mockito.verify(runnable).run();
+        });
+    }
+    
+    @Test
+    public void testInvokeNowOnPlatformThread() {
+        JavaFxTestHelper.instance().runTest(() -> {
+            Runnable runnable = Mockito.mock(Runnable.class);
+            
+            JAVAFX_EVENT_LOOP.invokeNow(runnable);
+            
+            Mockito.verify(runnable).run();
+        });
+    }
+    
+    @Test(expected=IllegalStateException.class)
+    public void testInvokeNowOnPlatformThreadFromWrongThread() throws Throwable {
+        EDT_TEST_HELPER.runTestReThrowException(() -> {
+            Runnable runnable = Mockito.mock(Runnable.class);
+            
+            JAVAFX_EVENT_LOOP.invokeNow(runnable);
+            
+            Mockito.verify(runnable).run();
+        });
     }
     
     @Test(expected=IllegalStateException.class)

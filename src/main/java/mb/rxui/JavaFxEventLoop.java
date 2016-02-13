@@ -54,4 +54,24 @@ public class JavaFxEventLoop implements EventLoop {
     public boolean isInEventLoop() {
         return Platform.isFxApplicationThread();
     }
+
+    @Override
+    public void invokeNow(Runnable runnable) {
+        checkInEventLoop();
+        /*
+         * TODO: consider tracking how long it takes to run the runnable and
+         * logging a message if it take too long.
+         */
+        runnable.run();
+    }
+
+    @Override
+    public Disposable invokeLater(Runnable runnable) {
+        
+        DisposableRunnable disposableRunnable = new DisposableRunnable(runnable);
+        
+        Platform.runLater(disposableRunnable);
+        
+        return disposableRunnable;
+    }
 }

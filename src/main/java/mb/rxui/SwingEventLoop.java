@@ -53,4 +53,24 @@ public final class SwingEventLoop implements EventLoop {
     public boolean isInEventLoop() {
         return SwingUtilities.isEventDispatchThread();
     }
+
+    @Override
+    public void invokeNow(Runnable runnable) {
+        checkInEventLoop();
+        /*
+         * TODO: consider tracking how long it takes to run the runnable and
+         * logging a message if it take too long.
+         */
+        runnable.run();
+    }
+
+    @Override
+    public Disposable invokeLater(Runnable runnable) {
+        
+        DisposableRunnable disposableRunnable = new DisposableRunnable(runnable);
+        
+        SwingUtilities.invokeLater(disposableRunnable);
+        
+        return disposableRunnable;
+    }
 }

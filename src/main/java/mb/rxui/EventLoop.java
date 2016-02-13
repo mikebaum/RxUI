@@ -32,7 +32,7 @@ import mb.rxui.disposables.Disposable;
  * differs than an arbitrary {@link Executor} in the sense that an executor
  * cannot guarantee serialized execution unless it's concurrency is 1.
  * <p>
- * TODO: Consider adding invokeNow, invokeLater and invokeAndWait.
+ * TODO: Consider adding invokeAndWait.
  */
 public interface EventLoop {
     /**
@@ -40,7 +40,7 @@ public interface EventLoop {
      * 
      * @throws IllegalStateException
      *             if the current thread does not match the valid thread for
-     *             this context.
+     *             this event loop.
      */
     void checkInEventLoop();
     
@@ -48,6 +48,30 @@ public interface EventLoop {
      * @return true if the current thread matches the thread of this event loop, false otherwise.
      */
     boolean isInEventLoop();
+    
+    /**
+     * Invokes the provided runnable now.
+     * 
+     * @param runnable
+     *            some runnable to run.
+     * @throws IllegalStateException
+     *             if the current thread does not match the valid thread for
+     *             this event loop.
+     */
+    void invokeNow(Runnable runnable);
+
+    /**
+     * Schedules a runnable to be executed on this event loop at a later time.
+     * This is achieved by adding it to the event loop's queue. When this
+     * runnable will be executed is a function of how many pending items there
+     * are in the queue.
+     * 
+     * @param runnable
+     *            some runnable to execute at a later time.
+     * @return a {@link Disposable} that can be used to cancel the execution of
+     *         this runnable should it not have already been executed.
+     */
+    Disposable invokeLater(Runnable runnable);
     
     /**
      * Schedules some runnable to execute at some later time.
