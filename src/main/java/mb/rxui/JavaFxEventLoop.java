@@ -22,6 +22,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.util.Duration;
+import mb.rxui.dispatcher.Dispatchers;
 import mb.rxui.disposables.Disposable;
 import mb.rxui.disposables.DisposableRunnable;
 
@@ -40,6 +41,8 @@ public class JavaFxEventLoop implements EventLoop {
     @Override
     public Disposable schedule(Runnable runnable, long time, TimeUnit timeUnit) {
         checkArgument(time >= 0, "Cannot schedule a runnable with a negative time [" + time + "]");
+        
+        runnable = Dispatchers.getInstance().wrapRunnableWithCurrentDispatchState().apply(runnable);
         
         DisposableRunnable disposableRunnable = new DisposableRunnable(runnable);
         

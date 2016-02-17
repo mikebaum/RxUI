@@ -19,8 +19,8 @@ import static mb.rxui.EventLoop.JAVAFX_EVENT_LOOP;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import mb.rxui.dispatcher.Dispatcher;
+import mb.rxui.dispatcher.PropertyDispatcher;
 import mb.rxui.disposables.Disposable;
-import mb.rxui.property.PropertyDispatcher;
 import mb.rxui.property.PropertySource;
 
 /**

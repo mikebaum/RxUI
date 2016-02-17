@@ -15,8 +15,10 @@ package mb.rxui.event;
 
 import static java.util.Objects.requireNonNull;
 
-import mb.rxui.Subscription;
 import mb.rxui.EventLoop;
+import mb.rxui.Subscription;
+import mb.rxui.dispatcher.Dispatcher;
+import mb.rxui.dispatcher.EventDispatcher;
 import mb.rxui.disposables.Disposable;
 import mb.rxui.event.publisher.EventPublisher;
 
@@ -77,7 +79,7 @@ public class EventSubject<E> extends EventStream<E> implements EventSource<E>, D
         private final EventDispatcher<E> dispatcher;
 
         public EventSourcePublisher() {
-            dispatcher = EventDispatcher.create();
+            dispatcher = Dispatcher.createEventDispatcher();
         }
 
         @Override

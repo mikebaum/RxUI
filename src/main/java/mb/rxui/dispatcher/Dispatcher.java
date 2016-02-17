@@ -16,7 +16,6 @@ package mb.rxui.dispatcher;
 import mb.rxui.Observer;
 import mb.rxui.Subscriber;
 import mb.rxui.disposables.Disposable;
-import mb.rxui.property.PropertyDispatcher;
 import mb.rxui.property.PropertySubscriber;
 
 /**
@@ -27,6 +26,8 @@ import mb.rxui.property.PropertySubscriber;
  *            the type of values this dispatcher can dispatch
  */
 public interface Dispatcher<V, S extends Subscriber, O extends Observer<V>> extends Disposable {
+    
+    public static enum Type { PROPERTY, EVENT }
 
     /**
      * Dispatches the new value.<br>
@@ -86,11 +87,20 @@ public interface Dispatcher<V, S extends Subscriber, O extends Observer<V>> exte
     S subscribe(O observer);
 
     /**
+     * @return gets the dispatcher type of this dispatcher. 
+     */
+    Type getType();
+
+    /**
      * Creates a {@link Dispatcher} to be used to dispatch property events.
      * 
      * @return a new {@link Dispatcher} to be used to dispatch property events.
      */
     static <V> PropertyDispatcher<V> createPropertyDispatcher() {
-        return PropertyDispatcher.create();
+        return Dispatchers.getInstance().createPropertyDispatcher();
+    }
+    
+    static <E> EventDispatcher<E> createEventDispatcher() {
+        return Dispatchers.getInstance().createEventDispatcher();
     }
 }

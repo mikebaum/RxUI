@@ -18,8 +18,8 @@ import static mb.rxui.EventLoop.SWING_EVENT_LOOP;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import mb.rxui.dispatcher.PropertyDispatcher;
 import mb.rxui.disposables.Disposable;
-import mb.rxui.property.PropertyDispatcher;
 import mb.rxui.property.PropertySource;
 
 /**

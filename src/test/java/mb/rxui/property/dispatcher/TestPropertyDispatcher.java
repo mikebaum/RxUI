@@ -28,10 +28,10 @@ import org.mockito.Mockito;
 
 import mb.rxui.SwingTestRunner;
 import mb.rxui.dispatcher.Dispatcher;
+import mb.rxui.dispatcher.PropertyDispatcher;
 import mb.rxui.disposables.Disposable;
 import mb.rxui.property.Binding;
 import mb.rxui.property.Property;
-import mb.rxui.property.PropertyDispatcher;
 import mb.rxui.property.PropertyObserver;
 
 @RunWith(SwingTestRunner.class)

@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
+import mb.rxui.dispatcher.Dispatchers;
 import mb.rxui.disposables.Disposable;
 import mb.rxui.disposables.DisposableRunnable;
 
@@ -39,6 +40,8 @@ public final class SwingEventLoop implements EventLoop {
     @Override
     public Disposable schedule(Runnable runnable, long time, TimeUnit timeUnit) {
         checkArgument(time >= 0, "Cannot schedule a runnable with a negative time [" + time + "]");
+        
+        runnable = Dispatchers.getInstance().wrapRunnableWithCurrentDispatchState().apply(runnable);
         
         DisposableRunnable disposableRunnable = new DisposableRunnable(runnable);
         
