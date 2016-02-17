@@ -30,6 +30,10 @@ public class Dispatchers {
 
     private final Map<AbstractDispatcher<?, ?, ?>, Void> dispatchers = new WeakHashMap<>();
 
+    private PropertyDispatcherFactory propertyDispatcherFactory = Dispatcher::createPropertyDispatcher;
+    private EventDispatcherFactory eventDispatcherFactory = Dispatcher::createEventDispatcher;
+    
+    
     private Dispatchers() {
     } // Singleton
 
@@ -38,11 +42,19 @@ public class Dispatchers {
     }
 
     <M> PropertyDispatcher<M> createPropertyDispatcher() {
-        return addDispatcher(PropertyDispatcher.create());
+        return addDispatcher(propertyDispatcherFactory.create());
     }
 
+    void setPropertyDispatcherFactory(PropertyDispatcherFactory propertyDispatcherFactory) {
+        this.propertyDispatcherFactory = propertyDispatcherFactory;
+    }
+    
     <E> EventDispatcher<E> createEventDispatcher() {
-        return addDispatcher(EventDispatcher.create());
+        return addDispatcher(eventDispatcherFactory.create());
+    }
+
+    void setEventDispatcherFactory(EventDispatcherFactory eventDispatcherFactory) {
+        this.eventDispatcherFactory = eventDispatcherFactory;
     }
 
     /**
@@ -64,31 +76,29 @@ public class Dispatchers {
      *         state of the dispatchers and wrap the provided runnable with
      *         calls to restore this state.
      */
-    public Function<Runnable, Runnable> wrapRunnableWithCurrentDispatchState() {
+    public Runnable wrapRunnableWithCurrentDispatchState(Runnable runnableToWrap) {
 
         Map<AbstractDispatcher<?, ?, ?>, Void> dispatchingDispatchers = new WeakHashMap<>();
 
         dispatchers.keySet().stream().filter(Dispatcher::isDispatching)
                 .forEach(dispatcher -> dispatchingDispatchers.put(dispatcher, null));
 
-        return runnableToWrap -> {
-            return () -> {
-                // capture the current state of the dispatchers since it could
-                // have changed since warp was called
-                List<Runnable> dispatchStateRestoreList = dispatchingDispatchers.keySet().stream()
-                        .map(Dispatchers::createStateRestorer).collect(Collectors.toList());
+        return () -> {
+            // capture the current state of the dispatchers since it could
+            // have changed since warp was called
+            List<Runnable> dispatchStateRestoreList = dispatchingDispatchers.keySet().stream()
+                    .map(Dispatchers::createStateRestorer).collect(Collectors.toList());
 
-                // toggle all the dispatchers to true that where captured when
-                // wrapping the runnable
-                dispatchingDispatchers.keySet().forEach(dispatcher -> dispatcher.setDispatching(true));
+            // toggle all the dispatchers to true that where captured when
+            // wrapping the runnable
+            dispatchingDispatchers.keySet().forEach(dispatcher -> dispatcher.setDispatching(true));
 
-                // perform the dispatch
-                runnableToWrap.run();
+            // perform the dispatch
+            runnableToWrap.run();
 
-                // restore the dispatch state to what is was before running the
-                // runnable.
-                dispatchStateRestoreList.forEach(Runnable::run);
-            };
+            // restore the dispatch state to what is was before running the
+            // runnable.
+            dispatchStateRestoreList.forEach(Runnable::run);
         };
     }
     
@@ -101,5 +111,15 @@ public class Dispatchers {
             D eventDispatcher) {
         dispatchers.put(eventDispatcher, null);
         return eventDispatcher;
+    }
+    
+    public static interface PropertyDispatcherFactory
+    {
+        <M> PropertyDispatcher<M> create();
+    }
+    
+    public static interface EventDispatcherFactory
+    {
+        <M> EventDispatcher<M> create();
     }
 }

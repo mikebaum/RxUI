@@ -27,7 +27,7 @@ import mb.rxui.property.PropertySubscriber;
  * 
  * @param <M> the type of value this dispatcher dispatches.
  */
-public final class PropertyDispatcher<M> extends AbstractDispatcher<M, PropertySubscriber<M>, PropertyObserver<M>> {
+public class PropertyDispatcher<M> extends AbstractDispatcher<M, PropertySubscriber<M>, PropertyObserver<M>> {
 
     private final List<PropertySubscriber<M>> subscribers;
     private static Comparator<? super PropertySubscriber<?>> SUBSCRIBER_COMPARATOR = createComparator();

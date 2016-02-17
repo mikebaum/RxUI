@@ -41,7 +41,7 @@ public final class SwingEventLoop implements EventLoop {
     public Disposable schedule(Runnable runnable, long time, TimeUnit timeUnit) {
         checkArgument(time >= 0, "Cannot schedule a runnable with a negative time [" + time + "]");
         
-        runnable = Dispatchers.getInstance().wrapRunnableWithCurrentDispatchState().apply(runnable);
+        runnable = Dispatchers.getInstance().wrapRunnableWithCurrentDispatchState(runnable);
         
         DisposableRunnable disposableRunnable = new DisposableRunnable(runnable);
         
