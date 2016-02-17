@@ -21,7 +21,8 @@ import java.util.Optional;
 import javax.security.auth.Subject;
 
 import mb.rxui.Subscription;
-import mb.rxui.ThreadContext;
+import mb.rxui.dispatcher.PropertyDispatcher;
+import mb.rxui.EventLoop;
 import mb.rxui.disposables.Disposable;
 import mb.rxui.event.EventStream;
 import mb.rxui.event.EventSubject;
@@ -70,7 +71,7 @@ public final class Property<M> extends PropertyStream<M> implements PropertySour
     private final PropertySource<M> propertySource;
     private final PropertyDispatcher<M> dispatcher;
     private final M initialValue;
-    private final ThreadContext threadContext;
+    private final EventLoop eventLoop;
     private final EventSubject<PropertyChangeEvent<M>> changeEvents;
 
     private Property(PropertySource<M> propertySource, PropertyDispatcher<M> dispatcher) {
@@ -78,20 +79,20 @@ public final class Property<M> extends PropertyStream<M> implements PropertySour
         this.propertySource = requireNonNull(propertySource);
         this.dispatcher = requireNonNull(dispatcher);
         this.initialValue = requireNonNull(get(), "A Property must be initialized with a value");
-        this.threadContext = ThreadContext.create();
+        this.eventLoop = EventLoop.create();
         this.changeEvents = EventSubject.create();
     }
     
     @Override
     public void dispose() {
-        threadContext.checkThread();
+        eventLoop.checkInEventLoop();
         dispatcher.dispose();
         changeEvents.dispose();
     }
 
     @Override
     public void setValue(M value) {
-        threadContext.checkThread();
+        eventLoop.checkInEventLoop();
     
         // blocks reentrant calls
         if (dispatcher.isDispatching())
@@ -107,7 +108,7 @@ public final class Property<M> extends PropertyStream<M> implements PropertySour
         
         M oldValue = get();
         propertySource.setValue(requireNonNull(value));
-        dispatcher.schedule(() -> changeEvents.publish(new PropertyChangeEvent<M>(oldValue, value)));
+        dispatcher.invoke(() -> changeEvents.publish(new PropertyChangeEvent<M>(oldValue, value)));
     }
 
     /**
@@ -181,7 +182,7 @@ public final class Property<M> extends PropertyStream<M> implements PropertySour
     }
 
     public final boolean hasObservers() {
-        threadContext.checkThread();
+        eventLoop.checkInEventLoop();
         return dispatcher.getSubscriberCount() > 0;
     }
     
@@ -200,8 +201,8 @@ public final class Property<M> extends PropertyStream<M> implements PropertySour
      * 
      * @param propertySourceFactory
      *            some factory that can be used to create a property source.
-     * @param threadContext
-     *            the thread context to use to verify thread contract when using
+     * @param eventLoop
+     *            the event loop to use to verify thread contract when using
      *            the created property
      * @return a new {@link Property}
      */

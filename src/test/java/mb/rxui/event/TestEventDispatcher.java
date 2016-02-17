@@ -24,6 +24,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import mb.rxui.dispatcher.Dispatcher;
+import mb.rxui.dispatcher.EventDispatcher;
 import mb.rxui.disposables.Disposable;
 
 public class TestEventDispatcher {
@@ -33,7 +35,7 @@ public class TestEventDispatcher {
 
     @Before
     public void setup() {
-        dispatcher = EventDispatcher.create();
+        dispatcher = Dispatcher.createEventDispatcher();
         
         onEvent = Mockito.mock(Consumer.class);
         onDisposed = Mockito.mock(Runnable.class);

@@ -32,15 +32,20 @@ public abstract class AbstractDispatcher<V, S extends Subscriber & Observer<V>, 
     private final List<Disposable> disposables;
     private final Function<S, Consumer<V>> dispatchFunction;
     private final Function<S, Runnable> disposeFunction;
+    private final Type type;
 
     private boolean isDispatching = false;
     private boolean isDisposed = false;
     
-    protected AbstractDispatcher(List<S> subscribers, Function<S, Consumer<V>> dispatchFunction, Function<S, Runnable> disposeFunction) {
+    protected AbstractDispatcher(List<S> subscribers, 
+                                 Function<S, Consumer<V>> dispatchFunction, 
+                                 Function<S, Runnable> disposeFunction,
+                                 Type type) {
         this.subscribers = requireNonNull(subscribers);
         this.disposables = new ArrayList<>();
         this.dispatchFunction = requireNonNull(dispatchFunction);
         this.disposeFunction = requireNonNull(disposeFunction);
+        this.type = requireNonNull(type);
     }
     
     @Override
@@ -74,13 +79,25 @@ public abstract class AbstractDispatcher<V, S extends Subscriber & Observer<V>, 
     }
 
     @Override
-    public void schedule(Runnable runnable) {
+    public void invoke(Runnable runnable) {
         wrapRunnable(runnable).run();
     }
 
     @Override
     public boolean isDispatching() {
         return isDispatching;
+    }
+    
+    /**
+     * Updates the dispatching state of this dispatchers. This is only required
+     * in order to re-establish the dispatching state for time shifted event
+     * emissions.
+     * 
+     * @param isDispatching
+     *            the new dispatching state to set for this dispatcher
+     */
+    void setDispatching( boolean isDispatching ) {
+        this.isDispatching = isDispatching;
     }
     
     @Override
@@ -91,6 +108,11 @@ public abstract class AbstractDispatcher<V, S extends Subscriber & Observer<V>, 
     @Override
     public int getSubscriberCount() {
         return subscribers.size();
+    }
+    
+    @Override
+    public Type getType() {
+        return type;
     }
 
     /**

@@ -22,17 +22,18 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.util.Duration;
+import mb.rxui.dispatcher.Dispatchers;
 import mb.rxui.disposables.Disposable;
 import mb.rxui.disposables.DisposableRunnable;
 
 /**
- * A thread context that can be used for JavaFx applications.
+ * A event loop that can be used for JavaFx applications.
  */
-public class JavaFxThreadContext implements ThreadContext {
+public class JavaFxEventLoop implements EventLoop {
 
     @Override
-    public void checkThread() {
-        checkState(Platform.isFxApplicationThread(),
+    public void checkInEventLoop() {
+        checkState(isInEventLoop(),
                    "Method should have been called on the JavaFx Platform Thread, but instead it was called from: " + 
                    Thread.currentThread());
     }
@@ -41,11 +42,38 @@ public class JavaFxThreadContext implements ThreadContext {
     public Disposable schedule(Runnable runnable, long time, TimeUnit timeUnit) {
         checkArgument(time >= 0, "Cannot schedule a runnable with a negative time [" + time + "]");
         
+        runnable = Dispatchers.getInstance().wrapRunnableWithCurrentDispatchState(runnable);
+        
         DisposableRunnable disposableRunnable = new DisposableRunnable(runnable);
         
         Timeline timeLine = new Timeline(new KeyFrame(Duration.millis(timeUnit.toMillis(time)), 
                                                       event -> disposableRunnable.run()));
         timeLine.play();
+        
+        return disposableRunnable;
+    }
+
+    @Override
+    public boolean isInEventLoop() {
+        return Platform.isFxApplicationThread();
+    }
+
+    @Override
+    public void invokeNow(Runnable runnable) {
+        checkInEventLoop();
+        /*
+         * TODO: consider tracking how long it takes to run the runnable and
+         * logging a message if it take too long.
+         */
+        runnable.run();
+    }
+
+    @Override
+    public Disposable invokeLater(Runnable runnable) {
+        
+        DisposableRunnable disposableRunnable = new DisposableRunnable(runnable);
+        
+        Platform.runLater(disposableRunnable);
         
         return disposableRunnable;
     }

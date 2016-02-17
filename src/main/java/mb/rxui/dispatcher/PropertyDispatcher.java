@@ -11,30 +11,33 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package mb.rxui.property;
+package mb.rxui.dispatcher;
+
+import static mb.rxui.dispatcher.Dispatcher.Type.PROPERTY;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import mb.rxui.dispatcher.AbstractDispatcher;
+import mb.rxui.property.PropertyObserver;
+import mb.rxui.property.PropertySubscriber;
 
 /**
  * A dispatcher for property change events.
  * 
  * @param <M> the type of value this dispatcher dispatches.
  */
-public final class PropertyDispatcher<M> extends AbstractDispatcher<M, PropertySubscriber<M>, PropertyObserver<M>> {
+public class PropertyDispatcher<M> extends AbstractDispatcher<M, PropertySubscriber<M>, PropertyObserver<M>> {
 
     private final List<PropertySubscriber<M>> subscribers;
     private static Comparator<? super PropertySubscriber<?>> SUBSCRIBER_COMPARATOR = createComparator();
     
     private PropertyDispatcher(List<PropertySubscriber<M>> subscribers) {
-        super(subscribers, subscriber -> subscriber::onChanged, subscriber -> subscriber::onDisposed);
+        super(subscribers, subscriber -> subscriber::onChanged, subscriber -> subscriber::onDisposed, PROPERTY);
         this.subscribers = subscribers;
     }
     
-    public static <M> PropertyDispatcher<M> create() {
+    static <M> PropertyDispatcher<M> create() {
         return new PropertyDispatcher<>(new ArrayList<>());
     }
     
@@ -54,12 +57,12 @@ public final class PropertyDispatcher<M> extends AbstractDispatcher<M, PropertyS
         return new PropertyObserver<M>() {
             @Override
             public void onChanged(M newValue) {
-                schedule(() -> observer.onChanged(newValue));
+                invoke(() -> observer.onChanged(newValue));
             }
 
             @Override
             public void onDisposed() {
-                schedule(observer::onDisposed);
+                invoke(observer::onDisposed);
             }
 
             @Override

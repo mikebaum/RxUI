@@ -11,15 +11,17 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package mb.rxui.event;
+package mb.rxui.dispatcher;
 
 import static java.util.Objects.requireNonNull;
+import static mb.rxui.dispatcher.Dispatcher.Type.EVENT;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import mb.rxui.dispatcher.AbstractDispatcher;
-import mb.rxui.dispatcher.Dispatcher;
+import mb.rxui.event.EventObserver;
+import mb.rxui.event.EventStream;
+import mb.rxui.event.EventSubscriber;
 
 /**
  * An {@link EventDispatcher} is a {@link Dispatcher} suitable to be used with
@@ -32,11 +34,11 @@ public class EventDispatcher<V> extends AbstractDispatcher<V, EventSubscriber<V>
     private final List<EventSubscriber<V>> subscribers;
 
     private EventDispatcher(List<EventSubscriber<V>> subscribers) {
-        super(subscribers, subscriber -> subscriber::onEvent, subscriber -> subscriber::onCompleted);
+        super(subscribers, subscriber -> subscriber::onEvent, subscriber -> subscriber::onCompleted, EVENT);
         this.subscribers = requireNonNull(subscribers);
     }
     
-    public static <E> EventDispatcher<E> create() {
+    static <E> EventDispatcher<E> create() {
         return new EventDispatcher<>(new ArrayList<>());
     }
 
@@ -60,12 +62,12 @@ public class EventDispatcher<V> extends AbstractDispatcher<V, EventSubscriber<V>
         return new EventObserver<V>() {
             @Override
             public void onEvent(V event) {
-                schedule(() -> observer.onEvent(event));
+                invoke(() -> observer.onEvent(event));
             }
 
             @Override
             public void onCompleted() {
-                schedule(observer::onCompleted);
+                invoke(observer::onCompleted);
             }
         };
     }

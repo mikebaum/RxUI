@@ -14,10 +14,8 @@
 package mb.rxui.dispatcher;
 
 import mb.rxui.Observer;
-import mb.rxui.Scheduler;
 import mb.rxui.Subscriber;
 import mb.rxui.disposables.Disposable;
-import mb.rxui.property.PropertyDispatcher;
 import mb.rxui.property.PropertySubscriber;
 
 /**
@@ -27,7 +25,9 @@ import mb.rxui.property.PropertySubscriber;
  * @param <V>
  *            the type of values this dispatcher can dispatch
  */
-public interface Dispatcher<V, S extends Subscriber, O extends Observer<V>> extends Disposable, Scheduler {
+public interface Dispatcher<V, S extends Subscriber, O extends Observer<V>> extends Disposable {
+    
+    public static enum Type { PROPERTY, EVENT }
 
     /**
      * Dispatches the new value.<br>
@@ -41,6 +41,15 @@ public interface Dispatcher<V, S extends Subscriber, O extends Observer<V>> exte
      *             if called when the dispatcher is disposed.
      */
     void dispatch(V newValue);
+    
+    /**
+     * Invokes the provided {@link Runnable} and ensures that when the runnable
+     * is running that the dispatch flag is turned on and then off when
+     * execution is finished.
+     * 
+     * @param runnable some runnable to invoke and flag "Dispatching" while being run.
+     */
+    void invoke(Runnable runnable);
 
     /**
      * Adds some disposable to dispose when this dispatcher is disposed.
@@ -78,11 +87,20 @@ public interface Dispatcher<V, S extends Subscriber, O extends Observer<V>> exte
     S subscribe(O observer);
 
     /**
+     * @return gets the dispatcher type of this dispatcher. 
+     */
+    Type getType();
+
+    /**
      * Creates a {@link Dispatcher} to be used to dispatch property events.
      * 
      * @return a new {@link Dispatcher} to be used to dispatch property events.
      */
     static <V> PropertyDispatcher<V> createPropertyDispatcher() {
-        return PropertyDispatcher.create();
+        return Dispatchers.getInstance().createPropertyDispatcher();
+    }
+    
+    static <E> EventDispatcher<E> createEventDispatcher() {
+        return Dispatchers.getInstance().createEventDispatcher();
     }
 }

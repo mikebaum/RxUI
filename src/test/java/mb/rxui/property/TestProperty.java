@@ -15,10 +15,7 @@ package mb.rxui.property;
 
 import static mb.rxui.ThreadedTestHelper.callOnIoThread;
 import static mb.rxui.ThreadedTestHelper.doOnIoThread;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -315,6 +312,31 @@ public class TestProperty {
 
         property.setValue("fajitas");
         Assert.assertEquals("fajitas", property.get());
+    }
+    
+    @Test
+    public void testReentrancyBlockedThroughBindings() {
+        Property<String> property = Property.create("tacos");
+        Property<String> property2 = Property.create("burritos");
+        
+        property2.bind(property);
+        Assert.assertEquals("tacos", property.get());
+        Assert.assertEquals("tacos", property2.get());
+        
+        // Add a reentrant listener
+        property2.onChanged(newValue -> property.setValue("burritos"));
+        Assert.assertEquals("burritos", property.get());
+        Assert.assertEquals("tacos", property2.get());
+
+        // Assert that reentrancy is blocked when setting the first property in the binding chain
+        property.setValue("fajitas");
+        Assert.assertEquals("fajitas", property.get());
+        Assert.assertEquals("fajitas", property2.get());
+        
+        // The reentrant call to the first property is permitted, since the dispatch started at the second.
+        property2.setValue("nachos");
+        Assert.assertEquals("burritos", property.get());
+        Assert.assertEquals("nachos", property2.get());
     }
 
     @Test

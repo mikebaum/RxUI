@@ -16,7 +16,7 @@ package mb.rxui.event.operator;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import mb.rxui.ThreadContext;
+import mb.rxui.EventLoop;
 import mb.rxui.annotations.RequiresTest;
 import mb.rxui.disposables.Disposable;
 import mb.rxui.event.EventObserver;
@@ -32,14 +32,14 @@ import mb.rxui.event.EventSubscriber;
 @RequiresTest
 public class OperatorDebounce<M> implements Operator<M, M> {
     
-    private final ThreadContext context;
+    private final EventLoop eventLoop;
     private final long delay;
     private final TimeUnit timeUnit;
     
     private Optional<Disposable> currentDisposable = Optional.empty();
 
-    public OperatorDebounce(ThreadContext context, long delay, TimeUnit timeUnit) {
-        this.context = context;
+    public OperatorDebounce(EventLoop eventLoop, long delay, TimeUnit timeUnit) {
+        this.eventLoop = eventLoop;
         this.delay = delay;
         this.timeUnit = timeUnit;
     }
@@ -49,7 +49,7 @@ public class OperatorDebounce<M> implements Operator<M, M> {
         
         EventObserver<M> sourceObserver = EventObserver.create(value -> {
             currentDisposable.ifPresent(Disposable::dispose);
-            currentDisposable = Optional.of(context.schedule(() -> childSubscriber.onEvent(value), delay, timeUnit));
+            currentDisposable = Optional.of(eventLoop.schedule(() -> childSubscriber.onEvent(value), delay, timeUnit));
         } , () -> {
             currentDisposable.ifPresent(Disposable::dispose);
             childSubscriber.onCompleted();

@@ -17,7 +17,7 @@ import java.util.function.Supplier;
 
 import mb.rxui.Publisher;
 import mb.rxui.Subscription;
-import mb.rxui.property.PropertyDispatcher;
+import mb.rxui.dispatcher.PropertyDispatcher;
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertySubscriber;
 

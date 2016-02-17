@@ -21,17 +21,18 @@ import java.util.concurrent.TimeUnit;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
+import mb.rxui.dispatcher.Dispatchers;
 import mb.rxui.disposables.Disposable;
 import mb.rxui.disposables.DisposableRunnable;
 
 /**
- * A thread context that should be used for Swing/AWT applications.
+ * A event loop that should be used for Swing/AWT applications.
  */
-public final class SwingThreadContext implements ThreadContext {
+public final class SwingEventLoop implements EventLoop {
 
     @Override
-    public void checkThread() {
-        checkState(SwingUtilities.isEventDispatchThread(),
+    public void checkInEventLoop() {
+        checkState(isInEventLoop(),
                    "Method should have been called on the EDT, but instead it was called from: " + 
                    Thread.currentThread());
     }
@@ -40,11 +41,38 @@ public final class SwingThreadContext implements ThreadContext {
     public Disposable schedule(Runnable runnable, long time, TimeUnit timeUnit) {
         checkArgument(time >= 0, "Cannot schedule a runnable with a negative time [" + time + "]");
         
+        runnable = Dispatchers.getInstance().wrapRunnableWithCurrentDispatchState(runnable);
+        
         DisposableRunnable disposableRunnable = new DisposableRunnable(runnable);
         
         Timer timer = new Timer((int)timeUnit.toMillis(time), event -> disposableRunnable.run());
         timer.setRepeats(false);
         timer.start();
+        
+        return disposableRunnable;
+    }
+
+    @Override
+    public boolean isInEventLoop() {
+        return SwingUtilities.isEventDispatchThread();
+    }
+
+    @Override
+    public void invokeNow(Runnable runnable) {
+        checkInEventLoop();
+        /*
+         * TODO: consider tracking how long it takes to run the runnable and
+         * logging a message if it take too long.
+         */
+        runnable.run();
+    }
+
+    @Override
+    public Disposable invokeLater(Runnable runnable) {
+        
+        DisposableRunnable disposableRunnable = new DisposableRunnable(runnable);
+        
+        SwingUtilities.invokeLater(disposableRunnable);
         
         return disposableRunnable;
     }

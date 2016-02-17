@@ -18,9 +18,9 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 
+import mb.rxui.dispatcher.PropertyDispatcher;
 import mb.rxui.disposables.Disposable;
 import mb.rxui.property.Property;
-import mb.rxui.property.PropertyDispatcher;
 
 /**
  * A Swing text property source.

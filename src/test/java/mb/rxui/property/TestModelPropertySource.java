@@ -19,6 +19,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import mb.rxui.dispatcher.Dispatcher;
+import mb.rxui.dispatcher.PropertyDispatcher;
 
 public class TestModelPropertySource {
     @Test

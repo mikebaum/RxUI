@@ -21,7 +21,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import mb.rxui.Subscription;
-import mb.rxui.ThreadContext;
+import mb.rxui.EventLoop;
 import mb.rxui.event.operator.Operator;
 import mb.rxui.event.operator.OperatorDebounce;
 import mb.rxui.event.operator.OperatorFilter;
@@ -34,14 +34,14 @@ import rx.Subscriber;
 import rx.subscriptions.Subscriptions;
 
 /**
- * An EventStream represents a stream that emits discrete events. This
- * differs from a {@link Property} since an {@link EventStream} does not have a
- * current value.
+ * An EventStream represents a stream that emits discrete events. This differs
+ * from a {@link Property} since an {@link EventStream} does not have a current
+ * value.
  * 
  * <p>
  * Notes:
  * <li>An Event Stream will emit zero, one or many events followed by one
- * completed event
+ * completed event.
  * <li>An Event Stream can only be interacted with on the same thread that it
  * was created on. Attempting to access any of the methods outside of the thread
  * it was created on will throw an {@link IllegalStateException}
@@ -55,11 +55,11 @@ import rx.subscriptions.Subscriptions;
 public class EventStream<E> {
     
     private final EventPublisher<E> eventPublisher;
-    private final ThreadContext threadContext;
+    private final EventLoop eventLoop;
     
-    protected EventStream(EventPublisher<E> eventPublisher, ThreadContext threadContext) {
+    protected EventStream(EventPublisher<E> eventPublisher, EventLoop eventLoop) {
         this.eventPublisher = requireNonNull(eventPublisher);
-        this.threadContext = requireNonNull(threadContext);
+        this.eventLoop = requireNonNull(eventLoop);
     }
     
     /**
@@ -69,7 +69,7 @@ public class EventStream<E> {
      *            some {@link EventPublisher} to back this stream.
      */
     public EventStream(EventPublisher<E> eventPublisher) {        
-        this(eventPublisher, ThreadContext.create());
+        this(eventPublisher, EventLoop.create());
     }
     
     /**
@@ -114,7 +114,7 @@ public class EventStream<E> {
      *             stream was created on.
      */
     public final Subscription observe(EventObserver<E> observer) {
-        threadContext.checkThread();
+        eventLoop.checkInEventLoop();
         return eventPublisher.subscribe(observer);
     }
     
@@ -127,7 +127,7 @@ public class EventStream<E> {
      */
     public final <R> EventStream<R> lift(Operator<E, R> operator) {
         requireNonNull(operator);
-        return new EventStream<>(new LiftEventPublisher<>(operator, eventPublisher), threadContext);
+        return new EventStream<>(new LiftEventPublisher<>(operator, eventPublisher), eventLoop);
     }
     
     /**
@@ -168,7 +168,7 @@ public class EventStream<E> {
      *         prescribed amount of event silence has passed.
      */
     public final EventStream<E> debounce(long timeout, TimeUnit timeUnit) {
-        return lift(new OperatorDebounce<>(threadContext, timeout, timeUnit));
+        return lift(new OperatorDebounce<>(eventLoop, timeout, timeUnit));
     }
     
     /**
@@ -183,6 +183,18 @@ public class EventStream<E> {
      *             stream was created on. 
      */
     public final Property<E> toProperty(E initialValue) {
+        
+        /**
+         * TODO: This needs work. The following things need to be done:
+         * <p>
+         * 1) If the event stream source is completed the subscription needs to
+         * be terminated
+         * <p>
+         * 2) Consider creating a Binding observer like has been done for
+         * properties. It might be necessary to process bindings before other
+         * observers in order to prevent glitches.
+         */
+        
         Property<E> property = Property.create(initialValue);
         
         Subscription subscription = onEvent(property::setValue);

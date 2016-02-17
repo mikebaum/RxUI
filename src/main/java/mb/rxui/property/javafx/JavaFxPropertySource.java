@@ -14,13 +14,13 @@
 package mb.rxui.property.javafx;
 
 import static java.util.Objects.requireNonNull;
-import static mb.rxui.ThreadContext.JAVAFX_THREAD_CONTEXT;
+import static mb.rxui.EventLoop.JAVAFX_EVENT_LOOP;
 
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import mb.rxui.dispatcher.Dispatcher;
+import mb.rxui.dispatcher.PropertyDispatcher;
 import mb.rxui.disposables.Disposable;
-import mb.rxui.property.PropertyDispatcher;
 import mb.rxui.property.PropertySource;
 
 /**
@@ -40,7 +40,7 @@ public class JavaFxPropertySource<M> implements PropertySource<M> {
      * @throws IllegalStateException if called outside of the Platform thread.
      */
     JavaFxPropertySource(Property<M> fxProperty, PropertyDispatcher<M> dispatcher) {
-        JAVAFX_THREAD_CONTEXT.checkThread();
+        JAVAFX_EVENT_LOOP.checkInEventLoop();
         this.fxProperty = requireNonNull(fxProperty);
         dispatcher.onDisposed(addPropertyListener(dispatcher, fxProperty));
     }

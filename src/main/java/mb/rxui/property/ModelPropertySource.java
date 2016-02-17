@@ -15,6 +15,8 @@ package mb.rxui.property;
 
 import static java.util.Objects.requireNonNull;
 
+import mb.rxui.dispatcher.PropertyDispatcher;
+
 /**
  * A property source for model properties.
  * 
