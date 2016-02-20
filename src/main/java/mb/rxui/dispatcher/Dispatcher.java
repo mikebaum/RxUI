@@ -43,15 +43,6 @@ public interface Dispatcher<V, S extends Subscriber, O extends Observer<V>> exte
     void dispatch(V newValue);
     
     /**
-     * Invokes the provided {@link Runnable} and ensures that when the runnable
-     * is running that the dispatch flag is turned on and then off when
-     * execution is finished.
-     * 
-     * @param runnable some runnable to invoke and flag "Dispatching" while being run.
-     */
-    void invoke(Runnable runnable);
-
-    /**
      * Adds some disposable to dispose when this dispatcher is disposed.
      * 
      * @param toDispose

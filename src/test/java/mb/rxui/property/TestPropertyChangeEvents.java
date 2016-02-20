@@ -13,6 +13,7 @@
  */
 package mb.rxui.property;
 
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -51,10 +52,12 @@ public class TestPropertyChangeEvents {
         
         property.setValue("burritos");
         verify(changeEventsObserver).onEvent(new PropertyChangeEvent<>("tacos", "burritos", 0));
+        verify(changeEventsObserver, atLeastOnce()).isBinding();
         verifyNoMoreInteractions(changeEventsObserver);
         
         property2.setValue(20);
         verify(changeEventsObserver2).onEvent(new PropertyChangeEvent<>(10, 20, 1));
+        verify(changeEventsObserver2, atLeastOnce()).isBinding();
         verifyNoMoreInteractions(changeEventsObserver2);
         
         property.dispose();

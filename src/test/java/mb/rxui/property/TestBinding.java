@@ -14,6 +14,7 @@
 package mb.rxui.property;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
 import org.junit.Test;
@@ -32,13 +33,14 @@ public class TestBinding {
         property.observe(observer);
         verify(observer).onChanged("tacos");
         
-        PropertyObserver<String> binding = new Binding<>(property);
+        PropertyObserver<String> binding = new PropertyBinding<>(property);
         assertTrue(binding.isBinding());
         
         binding.onChanged("burritos");
         verify(observer).onChanged("burritos");
         
         binding.onDisposed();
+        Mockito.verify(observer, atLeastOnce()).isBinding();
         Mockito.verifyNoMoreInteractions(observer);
     }
 }

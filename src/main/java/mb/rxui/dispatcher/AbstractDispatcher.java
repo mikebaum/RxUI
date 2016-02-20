@@ -33,9 +33,12 @@ public abstract class AbstractDispatcher<V, S extends Subscriber & Observer<V>, 
     private final Function<S, Consumer<V>> dispatchFunction;
     private final Function<S, Runnable> disposeFunction;
     private final Type type;
+    private final List<Runnable> pausedDisptaches;
 
     private boolean isDispatching = false;
     private boolean isDisposed = false;
+    private int pauseCount = 0;
+    private boolean dispatchingToBinding = false;
     
     protected AbstractDispatcher(List<S> subscribers, 
                                  Function<S, Consumer<V>> dispatchFunction, 
@@ -46,6 +49,7 @@ public abstract class AbstractDispatcher<V, S extends Subscriber & Observer<V>, 
         this.dispatchFunction = requireNonNull(dispatchFunction);
         this.disposeFunction = requireNonNull(disposeFunction);
         this.type = requireNonNull(type);
+        this.pausedDisptaches = new ArrayList<>();
     }
     
     @Override
@@ -75,12 +79,23 @@ public abstract class AbstractDispatcher<V, S extends Subscriber & Observer<V>, 
     @Override
     public void dispatch(V newValue) {
         checkState(!isDisposed, "Dispatcher has been disposed, cannot dispatch: " + newValue);
-        new ArrayList<>(subscribers).stream().map(dispatchFunction).forEach(consumer -> consumer.accept(newValue));
+        dispatchOrQueue(createDisptachRunnable(newValue));
     }
 
-    @Override
-    public void invoke(Runnable runnable) {
-        wrapRunnable(runnable).run();
+    private Runnable createDisptachRunnable(V newValue) {
+        return () -> {
+            boolean isEventDispatcher = getType() == Dispatcher.Type.EVENT;
+            
+            if (isEventDispatcher)
+                Dispatchers.getInstance().pausePropertyDispatchers();
+            
+            new ArrayList<>(subscribers).stream()
+                                        .map(dispatchFunction)
+                                        .forEach(consumer -> consumer.accept(newValue));
+            
+            if(isEventDispatcher)
+                Dispatchers.getInstance().resumePropertyDispatchers();
+        };
     }
 
     @Override
@@ -113,6 +128,41 @@ public abstract class AbstractDispatcher<V, S extends Subscriber & Observer<V>, 
     @Override
     public Type getType() {
         return type;
+    }
+    
+    protected void dispatchOrQueue(Runnable disptchRunnable) {
+        Runnable wrappedRunnable = wrapRunnable(disptchRunnable);
+        if (isPaused()) {
+            pausedDisptaches.add(wrappedRunnable);
+        } else {
+            wrappedRunnable.run();
+        }
+    }
+    
+    boolean isPaused() {
+        return pauseCount > 0;
+    }
+    
+    void pause() {
+        pauseCount++;
+    }
+
+    void resume() {
+        pauseCount--;
+        
+        if (isPaused())
+            return;
+        
+        pausedDisptaches.forEach(Runnable::run);
+        pausedDisptaches.clear();
+    }
+    
+    void setDispatchingToBinding(boolean dispatchingToBinding) {
+        this.dispatchingToBinding = dispatchingToBinding;
+    }
+    
+    boolean isDispatchingToBinding() {
+        return dispatchingToBinding;
     }
 
     /**

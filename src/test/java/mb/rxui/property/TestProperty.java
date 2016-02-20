@@ -33,6 +33,7 @@ import org.mockito.Mockito;
 
 import mb.rxui.Subscription;
 import mb.rxui.SwingTestRunner;
+import mb.rxui.event.EventSubject;
 import rx.Observable;
 import rx.functions.Action0;
 import rx.functions.Action1;
@@ -315,28 +316,46 @@ public class TestProperty {
     }
     
     @Test
-    public void testReentrancyBlockedThroughBindings() {
+    public void testReentrantBindings() {
         Property<String> property = Property.create("tacos");
         Property<String> property2 = Property.create("burritos");
+        Property<String> property3 = Property.create("nachos");
         
         property2.bind(property);
         Assert.assertEquals("tacos", property.get());
         Assert.assertEquals("tacos", property2.get());
+        Assert.assertEquals("nachos", property3.get());
         
-        // Add a reentrant listener
-        property2.onChanged(newValue -> property.setValue("burritos"));
-        Assert.assertEquals("burritos", property.get());
+        property3.bind(property2);
+        Assert.assertEquals("tacos", property.get());
         Assert.assertEquals("tacos", property2.get());
-
-        // Assert that reentrancy is blocked when setting the first property in the binding chain
-        property.setValue("fajitas");
+        Assert.assertEquals("tacos", property3.get());
+        
+        property3.setValue("fajitas");
+        Assert.assertEquals("tacos", property.get());
+        Assert.assertEquals("tacos", property2.get());
+        Assert.assertEquals("fajitas", property3.get());
+        
+        property.bind(property3);
         Assert.assertEquals("fajitas", property.get());
         Assert.assertEquals("fajitas", property2.get());
+        Assert.assertEquals("fajitas", property3.get());
+    }
+    
+    @Test
+    public void testCannotAddCallbackThatAttemptsToSetValueOnAProperty() {
+        Property<String> property = Property.create("tacos");
+        Property<String> property2 = Property.create("burritos");
+        EventSubject<String> eventSubject = EventSubject.create();
         
-        // The reentrant call to the first property is permitted, since the dispatch started at the second.
-        property2.setValue("nachos");
-        Assert.assertEquals("burritos", property.get());
-        Assert.assertEquals("nachos", property2.get());
+        // Add a callback that attempts to set the value of another property.
+        property2.onChanged(newValue -> property.setValue("burritos"));
+        assertEquals("tacos", property.get());
+
+        // Add a callback to an event stream that attempts to set the value of a property
+        eventSubject.onEvent(event -> property.setValue("burritos"));
+        eventSubject.publish("nachos");
+        assertEquals("tacos", property.get());
     }
 
     @Test

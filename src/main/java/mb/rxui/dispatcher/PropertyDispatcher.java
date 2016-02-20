@@ -30,7 +30,7 @@ import mb.rxui.property.PropertySubscriber;
 public class PropertyDispatcher<M> extends AbstractDispatcher<M, PropertySubscriber<M>, PropertyObserver<M>> {
 
     private final List<PropertySubscriber<M>> subscribers;
-    private static Comparator<? super PropertySubscriber<?>> SUBSCRIBER_COMPARATOR = createComparator();
+    private static final Comparator<? super PropertySubscriber<?>> SUBSCRIBER_COMPARATOR = createComparator();
     
     private PropertyDispatcher(List<PropertySubscriber<M>> subscribers) {
         super(subscribers, subscriber -> subscriber::onChanged, subscriber -> subscriber::onDisposed, PROPERTY);
@@ -57,12 +57,16 @@ public class PropertyDispatcher<M> extends AbstractDispatcher<M, PropertySubscri
         return new PropertyObserver<M>() {
             @Override
             public void onChanged(M newValue) {
-                invoke(() -> observer.onChanged(newValue));
+                dispatchOrQueue(() -> {
+                    setDispatchingToBinding(observer.isBinding());
+                    observer.onChanged(newValue);
+                    setDispatchingToBinding(false);
+                });
             }
 
             @Override
             public void onDisposed() {
-                invoke(observer::onDisposed);
+                dispatchOrQueue(observer::onDisposed);
             }
 
             @Override

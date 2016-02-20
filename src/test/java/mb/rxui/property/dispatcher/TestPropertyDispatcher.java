@@ -30,7 +30,7 @@ import mb.rxui.SwingTestRunner;
 import mb.rxui.dispatcher.Dispatcher;
 import mb.rxui.dispatcher.PropertyDispatcher;
 import mb.rxui.disposables.Disposable;
-import mb.rxui.property.Binding;
+import mb.rxui.property.PropertyBinding;
 import mb.rxui.property.Property;
 import mb.rxui.property.PropertyObserver;
 
@@ -121,7 +121,7 @@ public class TestPropertyDispatcher {
     
     @Test
     public void testBindingsDispatchedFirst() throws Exception {
-        Binding<String> binding = Mockito.spy(new Binding<>(Property.create("burritos")));
+        PropertyBinding<String> binding = Mockito.spy(new PropertyBinding<>(Property.create("burritos")));
         dispatcher.subscribe(binding);
         
         PropertyObserver<String> observer = Mockito.mock(PropertyObserver.class);
@@ -135,25 +135,23 @@ public class TestPropertyDispatcher {
         inOrder.verify(binding).onChanged("fajitas");
         inOrder.verify(onChanged).accept("fajitas");
         inOrder.verify(observer).onChanged("fajitas");
-        inOrder.verifyNoMoreInteractions();
         
         dispatcher.dispose();
         
         inOrder.verify(binding).onDisposed();
         inOrder.verify(onDisposed).run();
         inOrder.verify(observer).onDisposed();
-        inOrder.verifyNoMoreInteractions();
     }
     
     @Test
     public void testOrderOfBindingsSameAsAdded() throws Exception {
-        Binding<String> binding1 = Mockito.spy(new Binding<>(Property.create("burritos")));
+        PropertyBinding<String> binding1 = Mockito.spy(new PropertyBinding<>(Property.create("burritos")));
         dispatcher.subscribe(binding1);
         
         PropertyObserver<String> observer = Mockito.mock(PropertyObserver.class);
         dispatcher.subscribe(observer);
         
-        Binding<String> binding2 = Mockito.spy(new Binding<>(Property.create("burritos")));
+        PropertyBinding<String> binding2 = Mockito.spy(new PropertyBinding<>(Property.create("burritos")));
         dispatcher.subscribe(binding2);
         
         InOrder inOrder = Mockito.inOrder(onChanged, observer, binding1, binding2);
@@ -164,6 +162,5 @@ public class TestPropertyDispatcher {
         inOrder.verify(binding2).onChanged("tacos");
         inOrder.verify(onChanged).accept("tacos");
         inOrder.verify(observer).onChanged("tacos");
-        inOrder.verifyNoMoreInteractions();
     }
 }

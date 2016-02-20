@@ -99,7 +99,7 @@ public class TestPropertySubscriber {
     
     @Test
     public void testBindingSubscriber() throws Exception {
-        Binding<String> binding = ThreadedTestHelper.createOnEDT(() -> new Binding<>(Property.create("tacos")));
+        PropertyBinding<String> binding = ThreadedTestHelper.createOnEDT(() -> new PropertyBinding<>(Property.create("tacos")));
         PropertySubscriber<String> propertySubscriber = new PropertySubscriber<>(binding);
         assertTrue(propertySubscriber.isBinding());
     }

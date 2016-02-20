@@ -20,8 +20,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import mb.rxui.Subscription;
 import mb.rxui.EventLoop;
+import mb.rxui.Subscription;
 import mb.rxui.event.operator.Operator;
 import mb.rxui.event.operator.OperatorDebounce;
 import mb.rxui.event.operator.OperatorFilter;
@@ -184,20 +184,9 @@ public class EventStream<E> {
      */
     public final Property<E> toProperty(E initialValue) {
         
-        /**
-         * TODO: This needs work. The following things need to be done:
-         * <p>
-         * 1) If the event stream source is completed the subscription needs to
-         * be terminated
-         * <p>
-         * 2) Consider creating a Binding observer like has been done for
-         * properties. It might be necessary to process bindings before other
-         * observers in order to prevent glitches.
-         */
-        
         Property<E> property = Property.create(initialValue);
         
-        Subscription subscription = onEvent(property::setValue);
+        Subscription subscription = property.bind(this);
         property.onDisposed(subscription::dispose);
         
         return property;

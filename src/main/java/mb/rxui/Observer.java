@@ -20,5 +20,9 @@ package mb.rxui;
  *            the type of data being observed
  */
 public interface Observer<T> {
-    // no methods, marker interface for now.
+    
+    /**
+     * @return true if this observer is represents a binding, false otherwise.
+     */
+    default boolean isBinding() { return false; };
 }
