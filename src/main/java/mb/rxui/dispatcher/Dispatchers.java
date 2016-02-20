@@ -23,6 +23,7 @@ import mb.rxui.EventLoop;
 import mb.rxui.Observer;
 import mb.rxui.Subscriber;
 import mb.rxui.annotations.RequiresTest;
+import mb.rxui.dispatcher.Dispatcher.Type;
 
 @RequiresTest
 public class Dispatchers {
@@ -30,8 +31,8 @@ public class Dispatchers {
 
     private final Map<AbstractDispatcher<?, ?, ?>, Void> dispatchers = new WeakHashMap<>();
 
-    private PropertyDispatcherFactory propertyDispatcherFactory = Dispatcher::createPropertyDispatcher;
-    private EventDispatcherFactory eventDispatcherFactory = Dispatcher::createEventDispatcher;
+    private PropertyDispatcherFactory propertyDispatcherFactory = PropertyDispatcher::create;
+    private EventDispatcherFactory eventDispatcherFactory = EventDispatcher::create;
     
     
     private Dispatchers() {
@@ -40,23 +41,7 @@ public class Dispatchers {
     public static Dispatchers getInstance() {
         return instance;
     }
-
-    <M> PropertyDispatcher<M> createPropertyDispatcher() {
-        return addDispatcher(propertyDispatcherFactory.create());
-    }
-
-    void setPropertyDispatcherFactory(PropertyDispatcherFactory propertyDispatcherFactory) {
-        this.propertyDispatcherFactory = propertyDispatcherFactory;
-    }
     
-    <E> EventDispatcher<E> createEventDispatcher() {
-        return addDispatcher(eventDispatcherFactory.create());
-    }
-
-    void setEventDispatcherFactory(EventDispatcherFactory eventDispatcherFactory) {
-        this.eventDispatcherFactory = eventDispatcherFactory;
-    }
-
     /**
      * Creates a function that accepts a runnable and returns a runnable that is
      * wrapped with calls to re-establish the current dispatch state.
@@ -101,7 +86,37 @@ public class Dispatchers {
             dispatchStateRestoreList.forEach(Runnable::run);
         };
     }
+
+    <M> PropertyDispatcher<M> createPropertyDispatcher() {
+        return addDispatcher(propertyDispatcherFactory.create());
+    }
+
+    void setPropertyDispatcherFactory(PropertyDispatcherFactory propertyDispatcherFactory) {
+        this.propertyDispatcherFactory = propertyDispatcherFactory;
+    }
     
+    <E> EventDispatcher<E> createEventDispatcher() {
+        return addDispatcher(eventDispatcherFactory.create());
+    }
+
+    void setEventDispatcherFactory(EventDispatcherFactory eventDispatcherFactory) {
+        this.eventDispatcherFactory = eventDispatcherFactory;
+    }
+
+    void pausePropertyDispatchers() {
+        dispatchers.keySet()
+                   .stream()
+                   .filter(dispatcher -> dispatcher.getType() == Type.PROPERTY)
+                   .forEach(AbstractDispatcher::pause);
+    }
+
+    void resumePropertyDispatchers() {
+        dispatchers.keySet()
+                   .stream()
+                   .filter(dispatcher -> dispatcher.getType() == Type.PROPERTY)
+                   .forEach(AbstractDispatcher::resume);
+    }
+
     private static Runnable createStateRestorer(AbstractDispatcher<?, ?, ?> dispatcher) {
         boolean dispatching = dispatcher.isDispatching();
         return () -> dispatcher.setDispatching(dispatching);

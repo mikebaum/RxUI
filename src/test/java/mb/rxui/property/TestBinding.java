@@ -32,7 +32,7 @@ public class TestBinding {
         property.observe(observer);
         verify(observer).onChanged("tacos");
         
-        PropertyObserver<String> binding = new Binding<>(property);
+        PropertyObserver<String> binding = new PropertyBinding<>(property);
         assertTrue(binding.isBinding());
         
         binding.onChanged("burritos");

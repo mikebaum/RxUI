@@ -24,6 +24,7 @@ import mb.rxui.Subscription;
 import mb.rxui.dispatcher.PropertyDispatcher;
 import mb.rxui.EventLoop;
 import mb.rxui.disposables.Disposable;
+import mb.rxui.event.EventBinding;
 import mb.rxui.event.EventStream;
 import mb.rxui.event.EventSubject;
 import mb.rxui.property.publisher.PropertyPublisher;
@@ -108,7 +109,9 @@ public final class Property<M> extends PropertyStream<M> implements PropertySour
         
         M oldValue = get();
         propertySource.setValue(requireNonNull(value));
-        dispatcher.invoke(() -> changeEvents.publish(new PropertyChangeEvent<M>(oldValue, value)));
+        // TODO: This call can be reentrant.
+        changeEvents.publish(new PropertyChangeEvent<M>(oldValue, value));
+//        dispatcher.invoke(() -> changeEvents.publish(new PropertyChangeEvent<M>(oldValue, value)));
     }
 
     /**
@@ -141,7 +144,23 @@ public final class Property<M> extends PropertyStream<M> implements PropertySour
      *             allow it since it will not cause any harm (I think).
      */
     public final Subscription bind(PropertyStream<M> propertyToBindTo) {
-        return propertyToBindTo.observe(new Binding<>(this));
+        return propertyToBindTo.observe(new PropertyBinding<>(this));
+    }
+    
+    /**
+     * Binds this property to the provided event stream. Any events emitted by
+     * the bound event stream will be propagated to this property.<br>
+     * <br>
+     * 
+     * @param streamToBindTo
+     *            some event stream to bind to
+     * @return a Subscription that can be used to cancel this binding.
+     * @throws IllegalStateException
+     *             if called from a thread other than the one that this property
+     *             was created from.
+     */
+    public final Subscription bind(EventStream<M> streamToBindTo) {
+        return streamToBindTo.observe(new EventBinding<>(this));
     }
     
     /**

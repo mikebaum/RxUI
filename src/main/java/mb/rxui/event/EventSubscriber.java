@@ -56,4 +56,9 @@ public class EventSubscriber<E> extends Subscriber implements EventObserver<E>, 
         runSafeCallback(observer::onCompleted);
         dispose();
     }
+
+    @Override
+    public boolean isBinding() {
+        return observer.isBinding();
+    }
 }
