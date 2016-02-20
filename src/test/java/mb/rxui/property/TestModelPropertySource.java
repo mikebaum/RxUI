@@ -14,6 +14,7 @@
 package mb.rxui.property;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.atLeastOnce;
 
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -36,6 +37,7 @@ public class TestModelPropertySource {
         source.setValue("burritos");
         assertEquals("burritos", source.get());
         Mockito.verify(observer).onChanged("burritos");
+        Mockito.verify(observer, atLeastOnce()).isBinding();
         Mockito.verifyNoMoreInteractions(observer);
     }
 }

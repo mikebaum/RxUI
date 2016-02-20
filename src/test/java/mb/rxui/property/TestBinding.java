@@ -14,6 +14,7 @@
 package mb.rxui.property;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
 import org.junit.Test;
@@ -39,6 +40,7 @@ public class TestBinding {
         verify(observer).onChanged("burritos");
         
         binding.onDisposed();
+        Mockito.verify(observer, atLeastOnce()).isBinding();
         Mockito.verifyNoMoreInteractions(observer);
     }
 }

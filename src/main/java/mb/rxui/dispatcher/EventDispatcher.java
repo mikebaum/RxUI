@@ -82,12 +82,16 @@ public class EventDispatcher<V> extends AbstractDispatcher<V, EventSubscriber<V>
         return new EventObserver<V>() {
             @Override
             public void onEvent(V event) {
-                invoke(() -> observer.onEvent(event));
+                dispatchOrQueue(() -> {
+                    setDispatchingToBinding(observer.isBinding());
+                    observer.onEvent(event);
+                    setDispatchingToBinding(false);
+                });
             }
 
             @Override
             public void onCompleted() {
-                invoke(observer::onCompleted);
+                dispatchOrQueue(observer::onCompleted);
             }
 
             @Override

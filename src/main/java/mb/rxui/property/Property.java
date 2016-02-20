@@ -14,6 +14,7 @@
 package mb.rxui.property;
 
 import static java.util.Objects.requireNonNull;
+import static mb.rxui.Preconditions.checkState;
 import static mb.rxui.dispatcher.Dispatcher.createPropertyDispatcher;
 
 import java.util.Optional;
@@ -21,8 +22,10 @@ import java.util.Optional;
 import javax.security.auth.Subject;
 
 import mb.rxui.Subscription;
+import mb.rxui.dispatcher.Dispatchers;
 import mb.rxui.dispatcher.PropertyDispatcher;
 import mb.rxui.EventLoop;
+import mb.rxui.Preconditions;
 import mb.rxui.disposables.Disposable;
 import mb.rxui.event.EventBinding;
 import mb.rxui.event.EventStream;
@@ -91,6 +94,9 @@ public final class Property<M> extends PropertyStream<M> implements PropertySour
         changeEvents.dispose();
     }
 
+    /**
+     * @throws IllegalStateException see {@link #checkCanSetValue()}
+     */
     @Override
     public void setValue(M value) {
         eventLoop.checkInEventLoop();
@@ -107,11 +113,33 @@ public final class Property<M> extends PropertyStream<M> implements PropertySour
         if (get().equals(value))
             return;
         
+        // blows up with an illegal state exception if an attempt is made to set the value via a non-binding callback.
+        checkCanSetValue();
+        
         M oldValue = get();
         propertySource.setValue(requireNonNull(value));
         // TODO: This call can be reentrant.
         changeEvents.publish(new PropertyChangeEvent<M>(oldValue, value));
 //        dispatcher.invoke(() -> changeEvents.publish(new PropertyChangeEvent<M>(oldValue, value)));
+    }
+
+    /**
+     * Checks whether the setValue call can be dispatched safely. It is only
+     * safe to set the value of this property within a Binding. Failing to
+     * respect this invariant would subvert the glitch protection that has been
+     * put in place.
+     * 
+     * @throws IllegalStateException
+     *             if an attempt was made to set the value from a callback,
+     *             other than a binding.
+     */
+    private void checkCanSetValue() {
+        boolean isNotDispatching = ! Dispatchers.getInstance().isDispatching();
+        boolean isDispatchingToBinding = Dispatchers.getInstance().isDispatchingBinding();
+        
+        checkState(isNotDispatching || isDispatchingToBinding, 
+                   "It is not possible to add a callback that sets the value of a property. " + 
+                   "You must use bind to connect a stream to this property");
     }
 
     /**

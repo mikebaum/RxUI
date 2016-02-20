@@ -57,12 +57,16 @@ public class PropertyDispatcher<M> extends AbstractDispatcher<M, PropertySubscri
         return new PropertyObserver<M>() {
             @Override
             public void onChanged(M newValue) {
-                invoke(() -> observer.onChanged(newValue));
+                dispatchOrQueue(() -> {
+                    setDispatchingToBinding(observer.isBinding());
+                    observer.onChanged(newValue);
+                    setDispatchingToBinding(false);
+                });
             }
 
             @Override
             public void onDisposed() {
-                invoke(observer::onDisposed);
+                dispatchOrQueue(observer::onDisposed);
             }
 
             @Override

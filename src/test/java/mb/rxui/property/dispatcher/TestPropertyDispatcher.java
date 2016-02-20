@@ -135,14 +135,12 @@ public class TestPropertyDispatcher {
         inOrder.verify(binding).onChanged("fajitas");
         inOrder.verify(onChanged).accept("fajitas");
         inOrder.verify(observer).onChanged("fajitas");
-        inOrder.verifyNoMoreInteractions();
         
         dispatcher.dispose();
         
         inOrder.verify(binding).onDisposed();
         inOrder.verify(onDisposed).run();
         inOrder.verify(observer).onDisposed();
-        inOrder.verifyNoMoreInteractions();
     }
     
     @Test
@@ -164,6 +162,5 @@ public class TestPropertyDispatcher {
         inOrder.verify(binding2).onChanged("tacos");
         inOrder.verify(onChanged).accept("tacos");
         inOrder.verify(observer).onChanged("tacos");
-        inOrder.verifyNoMoreInteractions();
     }
 }

@@ -86,6 +86,14 @@ public class Dispatchers {
             dispatchStateRestoreList.forEach(Runnable::run);
         };
     }
+    
+    public boolean isDispatching() {
+        return dispatchers.keySet().stream().filter(Dispatcher::isDispatching).findAny().isPresent();
+    }
+    
+    public boolean isDispatchingBinding() {
+        return dispatchers.keySet().stream().filter(AbstractDispatcher::isDispatchingToBinding).findAny().isPresent();
+    }
 
     <M> PropertyDispatcher<M> createPropertyDispatcher() {
         return addDispatcher(propertyDispatcherFactory.create());

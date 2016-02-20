@@ -38,6 +38,7 @@ public abstract class AbstractDispatcher<V, S extends Subscriber & Observer<V>, 
     private boolean isDispatching = false;
     private boolean isDisposed = false;
     private int pauseCount = 0;
+    private boolean dispatchingToBinding = false;
     
     protected AbstractDispatcher(List<S> subscribers, 
                                  Function<S, Consumer<V>> dispatchFunction, 
@@ -98,11 +99,6 @@ public abstract class AbstractDispatcher<V, S extends Subscriber & Observer<V>, 
     }
 
     @Override
-    public void invoke(Runnable runnable) {
-        dispatchOrQueue(wrapRunnable(runnable));
-    }
-
-    @Override
     public boolean isDispatching() {
         return isDispatching;
     }
@@ -134,6 +130,15 @@ public abstract class AbstractDispatcher<V, S extends Subscriber & Observer<V>, 
         return type;
     }
     
+    protected void dispatchOrQueue(Runnable disptchRunnable) {
+        Runnable wrappedRunnable = wrapRunnable(disptchRunnable);
+        if (isPaused()) {
+            pausedDisptaches.add(wrappedRunnable);
+        } else {
+            wrappedRunnable.run();
+        }
+    }
+    
     boolean isPaused() {
         return pauseCount > 0;
     }
@@ -150,6 +155,14 @@ public abstract class AbstractDispatcher<V, S extends Subscriber & Observer<V>, 
         
         pausedDisptaches.forEach(Runnable::run);
         pausedDisptaches.clear();
+    }
+    
+    void setDispatchingToBinding(boolean dispatchingToBinding) {
+        this.dispatchingToBinding = dispatchingToBinding;
+    }
+    
+    boolean isDispatchingToBinding() {
+        return dispatchingToBinding;
     }
 
     /**
@@ -170,13 +183,5 @@ public abstract class AbstractDispatcher<V, S extends Subscriber & Observer<V>, 
                 isDispatching = false;
             }
         };
-    }
-    
-    private void dispatchOrQueue(Runnable disptchRunnable) {
-        if (isPaused()) {
-            pausedDisptaches.add(disptchRunnable);
-        } else {
-            disptchRunnable.run();
-        }
     }
 }

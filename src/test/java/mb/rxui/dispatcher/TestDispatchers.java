@@ -13,6 +13,8 @@
  */
 package mb.rxui.dispatcher;
 
+import static org.junit.Assert.*;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,6 +24,7 @@ import org.mockito.Mockito;
 import mb.rxui.SwingTestRunner;
 import mb.rxui.dispatcher.Dispatchers.EventDispatcherFactory;
 import mb.rxui.dispatcher.Dispatchers.PropertyDispatcherFactory;
+import mb.rxui.property.Property;
 
 @RunWith(SwingTestRunner.class)
 public class TestDispatchers {
@@ -78,5 +81,52 @@ public class TestDispatchers {
         Assert.assertFalse(propertyDispatcher2.isDispatching());
         Assert.assertFalse(propertyDispatcher3.isDispatching());
         Assert.assertFalse(propertyDispatcher4.isDispatching());
+    }
+    
+    @Test
+    public void testIsDispatching() {
+        Dispatchers dispatchers = Dispatchers.getInstance();
+
+        Property<String> property1 = Property.create("one");
+        Property<String> property2 = Property.create("two");
+
+        // check during property1 dispatch that dispatchers isDispatching == true and isDispatchingBinding == false
+        property1.onChanged(value -> assertTrue(dispatchers.isDispatching()));
+        property1.onChanged(value -> assertFalse(dispatchers.isDispatchingBinding()));
+        
+        // check when not dispatching that isDispatching == false and isDispatchingBinding == false
+        assertFalse(dispatchers.isDispatching());
+        assertFalse(dispatchers.isDispatchingBinding());
+        
+        // check during property1 dispatch that dispatchers isDispatching == true
+        property2.onChanged(value -> assertTrue(dispatchers.isDispatching()));
+        
+        // check when not dispatching that isDispatching == false and isDispatchingBinding == false
+        assertFalse(dispatchers.isDispatching());
+        assertFalse(dispatchers.isDispatchingBinding());
+    }
+    
+    @Test
+    public void testIsDispatchingBinding() {
+        Dispatchers dispatchers = Dispatchers.getInstance();
+
+        Property<String> property1 = Property.create("one");
+        Property<String> property2 = Property.create("two");
+        
+        property1.bind(property2);
+        
+        // check during property1 dispatch that dispatchers isDispatching == true and isDispatchingBinding == true
+        property1.onChanged(value -> assertTrue(dispatchers.isDispatchingBinding()));
+        property1.onChanged(value -> assertTrue(dispatchers.isDispatching()));
+        
+        // check when not dispatching that isDispatching == false and isDispatchingBinding == false
+        assertFalse(dispatchers.isDispatching());
+        assertFalse(dispatchers.isDispatchingBinding());
+        
+        property2.setValue("three");
+        
+        // check when not dispatching that isDispatching == false and isDispatchingBinding == false
+        assertFalse(dispatchers.isDispatching());
+        assertFalse(dispatchers.isDispatchingBinding());
     }
 }
