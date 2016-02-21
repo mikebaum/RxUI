@@ -21,14 +21,15 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import mb.rxui.EventLoop;
 import mb.rxui.Preconditions;
 import mb.rxui.Subscription;
-import mb.rxui.EventLoop;
 import mb.rxui.event.EventStream;
 import mb.rxui.property.operator.OperatorFilterToOptional;
 import mb.rxui.property.operator.OperatorIsDirty;
@@ -259,6 +260,67 @@ public class PropertyStream<M> implements Supplier<M> {
     public final PropertyStream<M> take(int amount) {
         Preconditions.checkArgument(amount > 0, "Cannot take zero elements");
         return lift(new OperatorTake<>(amount));
+    }
+    
+    /**
+     * Scans this stream by combining the previously computed value of R with
+     * every property change that is emitted generating a new R.
+     * 
+     * The event stream created by this method, will emit a value immediately.
+     * 
+     * @param scanFunction
+     *            some function that will be applied to each emitted value and
+     *            the last computed value generating a new R.
+     * @return a new {@link EventStream} of values computed as per the scan
+     *         function.
+     */
+    public final <R> EventStream<R> scan(BiFunction<M, Optional<R>, R> scanFunction) {
+        return asEventStream().scan(scanFunction);
+    }
+    
+    /**
+     * Scans this stream by combining the previously computed value of R with
+     * every event that is emitted generating a new R.
+     * 
+     * The event stream created by this method, will emit a value immediately
+     * using the seed value and then a new value every time this stream emits an
+     * event.
+     * 
+     * @param scanFunction
+     *            some function that will be applied to each emitted value and
+     *            the last computed value generating a new R.
+     * @param seed
+     *            some initial value to start the scan operation with. This
+     *            value will be emitted immediately to all subscribers.
+     * @return a new {@link EventStream} of values computed as per the scan
+     *         function.
+     */
+    public final <R> EventStream<R> scan(BiFunction<M, R, R> scanFunction, R seed) {
+        return asEventStream().scan(scanFunction, seed);
+    }
+    
+    /**
+     * Scans this stream by combining the previously computed value of M with
+     * every property change that is emitted generating a new M.
+     * 
+     * The event stream created by this method, will emit a value immediately
+     * using the seed value and then a new value every time this stream emits an
+     * event.
+     * 
+     * This method is provided as a convenience, since
+     * {@link #scan(BiFunction, Object)} could be called directly.
+     * 
+     * @param scanFunction
+     *            some function that will be applied to each emitted value and
+     *            the last computed value generating a new M.
+     * @param seed
+     *            some initial value to start the scan operation with. This
+     *            value will be emitted immediately to all subscribers.
+     * @return a new {@link EventStream} of values computed as per the scan
+     *         function.
+     */
+    public final EventStream<M> accumulate(BinaryOperator<M> accumulator, M initialValue) {
+        return asEventStream().scan(accumulator, initialValue);
     }
     
     /**

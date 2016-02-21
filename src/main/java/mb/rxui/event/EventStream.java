@@ -15,7 +15,10 @@ package mb.rxui.event;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -23,9 +26,12 @@ import java.util.function.Predicate;
 import mb.rxui.EventLoop;
 import mb.rxui.Subscription;
 import mb.rxui.event.operator.Operator;
+import mb.rxui.event.operator.OperatorAccumulate;
 import mb.rxui.event.operator.OperatorDebounce;
 import mb.rxui.event.operator.OperatorFilter;
 import mb.rxui.event.operator.OperatorMap;
+import mb.rxui.event.operator.OperatorScan;
+import mb.rxui.event.operator.OperatorScanOptional;
 import mb.rxui.event.publisher.EventPublisher;
 import mb.rxui.event.publisher.LiftEventPublisher;
 import mb.rxui.property.Property;
@@ -169,6 +175,68 @@ public class EventStream<E> {
      */
     public final EventStream<E> debounce(long timeout, TimeUnit timeUnit) {
         return lift(new OperatorDebounce<>(eventLoop, timeout, timeUnit));
+    }
+    
+    /**
+     * Scans this stream by combining the previously computed value of R with
+     * every event that is emitted generating a new R.
+     * 
+     * The event stream created by this method, will not emit a value until an
+     * event is emitted.
+     * 
+     * @param scanFunction
+     *            some function that will be applied to each emitted value and
+     *            the last computed value generating a new R.
+     * @return a new {@link EventStream} of values computed as per the scan
+     *         function.
+     */
+    public final <R> EventStream<R> scan(BiFunction<E, Optional<R>, R> scanFunction) {
+        return lift(new OperatorScanOptional<>(scanFunction));
+    }
+    
+    /**
+     * Scans this stream by combining the previously computed value of R with
+     * every event that is emitted generating a new R.
+     * 
+     * The event stream created by this method, will emit a value immediately
+     * using the seed value and then a new value every time this stream emits an
+     * event.
+     * 
+     * @param scanFunction
+     *            some function that will be applied to each emitted value and
+     *            the last computed value generating a new R.
+     * @param seed
+     *            some initial value to start the scan operation with. This
+     *            value will be emitted immediately to all subscribers.
+     * @return a new {@link EventStream} of values computed as per the scan
+     *         function.
+     */
+    public final <R> EventStream<R> scan(BiFunction<E, R, R> scanFunction, R seed) {
+        return lift(new OperatorScan<>(scanFunction, seed));
+    }
+    
+    /**
+     * Scans this stream by combining the previously computed value of R with
+     * every event that is emitted generating a new R.
+     * 
+     * The event stream created by this method, will emit a value immediately
+     * using the seed value and then a new value every time this stream emits an
+     * event.
+     * 
+     * This method is provided as a convenience, since
+     * {@link #scan(BiFunction, Object)} could be called directly.
+     * 
+     * @param scanFunction
+     *            some function that will be applied to each emitted value and
+     *            the last computed value generating a new R.
+     * @param seed
+     *            some initial value to start the scan operation with. This
+     *            value will be emitted immediately to all subscribers.
+     * @return a new {@link EventStream} of values computed as per the scan
+     *         function.
+     */
+    public final EventStream<E> accumulate(BinaryOperator<E> accumulator, E initialValue) {
+        return scan(accumulator, initialValue);
     }
     
     /**

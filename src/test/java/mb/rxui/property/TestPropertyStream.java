@@ -16,6 +16,8 @@ package mb.rxui.property;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.verify;
 
+import java.util.function.Consumer;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,6 +27,7 @@ import org.mockito.Mockito;
 import mb.rxui.Subscription;
 import mb.rxui.SwingTestRunner;
 import mb.rxui.event.EventSequenceGenerator;
+import mb.rxui.event.EventStream;
 import rx.functions.Action0;
 import rx.functions.Action1;
 
@@ -131,5 +134,69 @@ public class TestPropertyStream {
         rx.Subscription subscription = property.asObservable().subscribe(onNext);
         
         assertEquals("tacos", property.get());
+    }
+    
+    @Test
+    public void testScan() {
+        Property<String> property = Property.create("tacos");
+        
+        EventStream<Integer> eventStream = property.<Integer>scan((value, last) -> {
+            if(!last.isPresent())
+                return value.length();
+            
+            return last.get() + value.length();
+        });
+        
+        Consumer<Integer> consumer = Mockito.mock(Consumer.class);
+        eventStream.onEvent(consumer);
+        verify(consumer).accept(5);
+        
+        property.setValue("burritos");
+        verify(consumer).accept(13);
+        
+        // this reentrant listener should do nothing
+        eventStream.onEvent(event -> property.setValue(Integer.toString(event)));
+        assertEquals("burritos", property.get());
+    }
+    
+    @Test
+    public void testScanWithSeed() {
+        Property<String> property = Property.create("tacos");
+        
+        EventStream<Integer> eventStream = property.<Integer>scan((value, last) -> last + value.length(), 0);
+        
+        Consumer<Integer> consumer = Mockito.mock(Consumer.class);
+        eventStream.onEvent(consumer);
+        verify(consumer).accept(5);
+        
+        property.setValue("burritos");
+        verify(consumer).accept(13);
+        
+        
+        // this reentrant listener should do nothing
+        eventStream.onEvent(event -> property.setValue(Integer.toString(event))); 
+        // FIXME: uncomment this code when issue #37 is fixed. See: https://github.com/mikebaum/RxUI/issues/37
+        // assertEquals("burritos", property.get());
+    }
+    
+    @Test
+    public void testAccumulate() {
+        Property<Integer> property = Property.create(5);
+        
+        EventStream<Integer> eventStream = property.accumulate((value, last) -> last + value, 0);
+        
+        Consumer<Integer> consumer = Mockito.mock(Consumer.class);
+        eventStream.onEvent(consumer);
+        verify(consumer).accept(0);
+        verify(consumer).accept(5);
+        
+        property.setValue(10);
+        verify(consumer).accept(15);
+        
+        
+        // this reentrant listener should do nothing
+        eventStream.onEvent(event -> property.setValue(event)); 
+        // FIXME: uncomment this code when issue #37 is fixed. See: https://github.com/mikebaum/RxUI/issues/37
+        // assertEquals("burritos", property.get());
     }
 }
