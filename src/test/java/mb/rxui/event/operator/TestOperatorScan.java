@@ -32,7 +32,7 @@ import mb.rxui.event.EventSubject;
 @RunWith(SwingTestRunner.class)
 public class TestOperatorScan {
     @Test
-    public void testMap() {
+    public void testChanges() {
         EventSubject<String> events = EventSubject.create();
         EventStream<Integer> scannedStream = events.scan((string, last) -> (string.length() + last), 5);
         

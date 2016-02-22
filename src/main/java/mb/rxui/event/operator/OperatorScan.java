@@ -15,14 +15,10 @@ package mb.rxui.event.operator;
 
 import static java.util.Objects.requireNonNull;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 
-import javax.swing.SwingUtilities;
-
 import mb.rxui.event.EventObserver;
-import mb.rxui.event.EventSubject;
 import mb.rxui.event.EventSubscriber;
 
 /**
