@@ -26,6 +26,7 @@ import java.util.function.Predicate;
 import mb.rxui.EventLoop;
 import mb.rxui.Subscription;
 import mb.rxui.event.operator.Operator;
+import mb.rxui.event.operator.OperatorChanges;
 import mb.rxui.event.operator.OperatorDebounce;
 import mb.rxui.event.operator.OperatorFilter;
 import mb.rxui.event.operator.OperatorMap;
@@ -236,6 +237,15 @@ public class EventStream<E> {
      */
     public final EventStream<E> accumulate(BinaryOperator<E> accumulator, E initialValue) {
         return scan(accumulator, initialValue);
+    }
+    
+    /**
+     * @return an {@link EventStream} of change events for this
+     *         stream. The stream will not emit a value after subscribing
+     *         until the stream has emitted at least two events.
+     */
+    public final <C> EventStream<C> changes(BiFunction<E, E, C> changeEventFactory) {
+        return lift(new OperatorChanges<>(changeEventFactory));
     }
     
     /**

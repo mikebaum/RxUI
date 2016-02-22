@@ -28,9 +28,7 @@ import mb.rxui.dispatcher.PropertyDispatcher;
 import mb.rxui.disposables.Disposable;
 import mb.rxui.event.EventBinding;
 import mb.rxui.event.EventStream;
-import mb.rxui.event.EventSubject;
 import mb.rxui.property.publisher.PropertyPublisher;
-import rx.Observable;
 import rx.subjects.BehaviorSubject;
 
 /**
@@ -75,7 +73,6 @@ public final class Property<M> extends PropertyStream<M> implements PropertySour
     private final PropertyDispatcher<M> dispatcher;
     private final M initialValue;
     private final EventLoop eventLoop;
-    private final EventSubject<PropertyChangeEvent<M>> changeEvents;
 
     private Property(PropertySource<M> propertySource, PropertyDispatcher<M> dispatcher) {
         super(PropertyPublisher.create(propertySource, dispatcher));
@@ -83,14 +80,12 @@ public final class Property<M> extends PropertyStream<M> implements PropertySour
         this.dispatcher = requireNonNull(dispatcher);
         this.initialValue = requireNonNull(get(), "A Property must be initialized with a value");
         this.eventLoop = EventLoop.create();
-        this.changeEvents = EventSubject.create();
     }
     
     @Override
     public void dispose() {
         eventLoop.checkInEventLoop();
         dispatcher.dispose();
-        changeEvents.dispose();
     }
 
     /**
@@ -115,11 +110,7 @@ public final class Property<M> extends PropertyStream<M> implements PropertySour
         // blows up with an illegal state exception if an attempt is made to set the value via a non-binding callback.
         checkCanSetValue();
         
-        M oldValue = get();
         propertySource.setValue(requireNonNull(value));
-        // TODO: This call can be reentrant.
-        changeEvents.publish(new PropertyChangeEvent<M>(oldValue, value));
-//        dispatcher.invoke(() -> changeEvents.publish(new PropertyChangeEvent<M>(oldValue, value)));
     }
 
     /**
@@ -230,13 +221,6 @@ public final class Property<M> extends PropertyStream<M> implements PropertySour
     public final boolean hasObservers() {
         eventLoop.checkInEventLoop();
         return dispatcher.getSubscriberCount() > 0;
-    }
-    
-    /**
-     * @return an {@link Observable} stream of property change events for this property.
-     */
-    public final EventStream<PropertyChangeEvent<M>> changeEvents() {
-        return changeEvents;
     }
     
     // Factory methods

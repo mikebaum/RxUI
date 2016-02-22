@@ -324,6 +324,16 @@ public class PropertyStream<M> implements Supplier<M> {
     }
     
     /**
+     * @return an {@link EventStream} of property change events for this
+     *         property. The stream will not emit a value after subscribing
+     *         until the property has changed at least once.
+     */
+    @SuppressWarnings("unchecked") // the use of the raw type in the method reference is okay.
+    public final EventStream<PropertyChangeEvent<M>> changeEvents() {
+        return asEventStream().changes(PropertyChangeEvent::new);
+    }
+    
+    /**
      * Using the provided operator creates a new, converted property stream.
      * 
      * @param operator
