@@ -26,7 +26,6 @@ import java.util.function.Predicate;
 import mb.rxui.EventLoop;
 import mb.rxui.Subscription;
 import mb.rxui.event.operator.Operator;
-import mb.rxui.event.operator.OperatorAccumulate;
 import mb.rxui.event.operator.OperatorDebounce;
 import mb.rxui.event.operator.OperatorFilter;
 import mb.rxui.event.operator.OperatorMap;
