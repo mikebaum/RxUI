@@ -15,8 +15,11 @@ package mb.rxui.event;
 
 import static mb.rxui.ThreadedTestHelper.callOnIoThread;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.verify;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 
 import org.junit.Assert;
@@ -27,7 +30,6 @@ import org.mockito.Mockito;
 
 import mb.rxui.Subscription;
 import mb.rxui.SwingTestRunner;
-import mb.rxui.ThreadedTestHelper;
 import mb.rxui.property.Property;
 import mb.rxui.property.PropertyObserver;
 import rx.Notification;
@@ -258,6 +260,45 @@ public class TestEventStream {
         
         subject.onNext("burritos");
         inOrder.verify(observer).onEvent("burritos");
+    }
+    
+    @Test
+    public void testMergeWithIterable() {
+        EventSubject<String> events1 = EventSubject.create();
+        EventSubject<String> events2 = EventSubject.create();
+        EventSubject<String> events3 = EventSubject.create();
+        
+        List<EventStream<String>> eventStreams = Arrays.asList(events2, events3);
+        
+        EventStream<String> mergedStreams = events1.mergeWith(eventStreams);
+        
+        Consumer<String> eventHandler = Mockito.mock(Consumer.class);
+        mergedStreams.onEvent(eventHandler);
+        
+        events1.publish("tacos");
+        verify(eventHandler).accept("tacos");
+        
+        events2.publish("burritos");
+        verify(eventHandler).accept("burritos");
+        
+        events3.publish("nachos");
+        verify(eventHandler).accept("nachos");
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testMergeThrowsExceptionIfCalledWithNoArgs() {
+        EventStream.merge();
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testMergeThrowsExceptionIfCalledWithEmptyArray() {
+        EventStream<String>[] streams = new EventStream[0];
+        EventStream.merge(streams);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testMergeThrowsIfCalledWithAnEmptyList() {
+        EventStream.merge(new ArrayList<>());
     }
     
     public static <T> EventStream<T> createStream(T... events) {

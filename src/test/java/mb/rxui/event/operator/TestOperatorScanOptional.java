@@ -32,7 +32,7 @@ import mb.rxui.event.EventSubject;
 @RunWith(SwingTestRunner.class)
 public class TestOperatorScanOptional {
     @Test
-    public void testChanges() {
+    public void testScan() {
         EventSubject<String> events = EventSubject.create();
         EventStream<Integer> scannedStream = events.scan((string, last) -> {
             int characterCount = string.length();
