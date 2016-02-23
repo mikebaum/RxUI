@@ -14,14 +14,22 @@
 package mb.rxui.event;
 
 import static java.util.Objects.requireNonNull;
+import static mb.rxui.Preconditions.checkArgument;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import mb.rxui.EventLoop;
 import mb.rxui.Subscription;
@@ -34,6 +42,7 @@ import mb.rxui.event.operator.OperatorScan;
 import mb.rxui.event.operator.OperatorScanOptional;
 import mb.rxui.event.publisher.EventPublisher;
 import mb.rxui.event.publisher.LiftEventPublisher;
+import mb.rxui.event.publisher.MergeEventPublisher;
 import mb.rxui.property.Property;
 import rx.Observable;
 import rx.Subscriber;
@@ -249,6 +258,45 @@ public class EventStream<E> {
     }
     
     /**
+     * Merges the provided streams with this streams.
+     * 
+     * See {@link #merge(EventStream...)}
+     * 
+     * @param streams
+     *            streams to merge with this stream
+     * @return a new {@link EventStream} that results from merging this stream
+     *         will all the provided streams.
+     */
+    @SafeVarargs
+    public final EventStream<E> mergeWith(EventStream<E>... streams) {
+        
+        EventStream<E>[] eventStreams = Arrays.copyOf(streams, streams.length + 1);
+        eventStreams[eventStreams.length -1] = this;
+        
+        return EventStream.merge(eventStreams);
+    }
+    
+    /**
+     * Merges the provided streams with this streams.
+     * 
+     * See {@link #merge(EventStream...)}
+     * 
+     * @param streams
+     *            streams to merge with this stream
+     * @return a new {@link EventStream} that results from merging this stream
+     *         will all the provided streams.
+     */
+    public final EventStream<E> mergeWith(Iterable<EventStream<E>> streams) {
+        
+        List<EventStream<E>> streamList = 
+                StreamSupport.stream(streams.spliterator(), false).collect(Collectors.toList());
+        
+        streamList.add(this);
+        
+        return EventStream.merge(streamList);
+    }
+    
+    /**
      * Creates a property that is bound to this stream.
      * 
      * @param initialValue
@@ -325,5 +373,56 @@ public class EventStream<E> {
 
             return eventStreamSubscription;
         });
+    }
+
+    /**
+     * Create a new stream that results from merging all events emitted by the
+     * provided streams.
+     * 
+     * @param eventStreams
+     *            some event streams to merge, must contain at least one stream.
+     * @return a new {@link EventStream} that will emit all the events emitted
+     *         by the source event streams
+     * @throws IllegalArgumentException
+     *             if the provided array of streams is empty
+     */
+    @SafeVarargs
+    public final static <E> EventStream<E> merge(EventStream<E>... eventStreams) {
+        checkArgument(eventStreams.length > 0, "You must provide at least one stream to merge");
+        
+        if (eventStreams.length == 1)
+            return eventStreams[0];
+        
+        return new EventStream<E>(new MergeEventPublisher<>(Arrays.asList(eventStreams)));
+    }
+    
+    /**
+     * Create a new stream that results from merging all events emitted by the
+     * provided streams.
+     * 
+     * @param eventStreams
+     *            some event streams to merge, must contain at least one stream.
+     * @return a new {@link EventStream} that will emit all the events emitted
+     *         by the source event streams
+     * @throws IllegalArgumentException
+     *             if the provided array of streams is empty
+     */
+    public final static <E> EventStream<E> merge(Iterable<EventStream<E>> eventStreams) {
+        
+        Collection<EventStream<E>> streamList;
+        if ( eventStreams instanceof Collection ) {            
+            streamList = (Collection<EventStream<E>>) eventStreams;
+        }
+        else {            
+            streamList = StreamSupport.stream(eventStreams.spliterator(), false).collect(Collectors.toList());
+        }
+        
+        
+        checkArgument(streamList.size() > 0, "You must provide at least one stream to merge");
+        
+        if (streamList.size() == 1)
+            return streamList.iterator().next();
+        
+        return new EventStream<E>(new MergeEventPublisher<>(streamList));
     }
 }
