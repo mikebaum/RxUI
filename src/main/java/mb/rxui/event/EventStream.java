@@ -20,8 +20,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Spliterator;
-import java.util.Spliterators;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
@@ -41,6 +39,7 @@ import mb.rxui.event.operator.OperatorMap;
 import mb.rxui.event.operator.OperatorScan;
 import mb.rxui.event.operator.OperatorScanOptional;
 import mb.rxui.event.publisher.EventPublisher;
+import mb.rxui.event.publisher.FlattenPublisher;
 import mb.rxui.event.publisher.LiftEventPublisher;
 import mb.rxui.event.publisher.MergeEventPublisher;
 import mb.rxui.property.Property;
@@ -423,6 +422,17 @@ public class EventStream<E> {
         if (streamList.size() == 1)
             return streamList.iterator().next();
         
-        return new EventStream<E>(new MergeEventPublisher<>(streamList));
+        return new EventStream<>(new MergeEventPublisher<>(streamList));
+    }
+    
+    /**
+     * Removes one level of nesting from a stream of streams.
+     * 
+     * @param streamOfStreams
+     *            a stream of streams to flatten
+     * @return a new event stream with one level of nesting removed.
+     */
+    public final static <E> EventStream<E> flatten(EventStream<EventStream<E>> streamOfStreams) {
+        return new EventStream<>(new FlattenPublisher<>(streamOfStreams));
     }
 }
