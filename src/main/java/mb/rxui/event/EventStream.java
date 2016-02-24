@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import mb.rxui.EventLoop;
-import mb.rxui.Subscription;
 import mb.rxui.event.operator.Operator;
 import mb.rxui.event.operator.OperatorChanges;
 import mb.rxui.event.operator.OperatorDebounce;
@@ -38,11 +37,13 @@ import mb.rxui.event.operator.OperatorFilter;
 import mb.rxui.event.operator.OperatorMap;
 import mb.rxui.event.operator.OperatorScan;
 import mb.rxui.event.operator.OperatorScanOptional;
+import mb.rxui.event.operator.OperatorSwitchMap;
 import mb.rxui.event.publisher.EventPublisher;
 import mb.rxui.event.publisher.FlattenPublisher;
 import mb.rxui.event.publisher.LiftEventPublisher;
 import mb.rxui.event.publisher.MergeEventPublisher;
 import mb.rxui.property.Property;
+import mb.rxui.subscription.Subscription;
 import rx.Observable;
 import rx.Subscriber;
 import rx.subscriptions.Subscriptions;
@@ -293,6 +294,27 @@ public class EventStream<E> {
         streamList.add(this);
         
         return EventStream.merge(streamList);
+    }
+
+    /**
+     * Creates a new stream that can switch the output stream by the provided
+     * switchFunction. Visually, this is roughly equivalent to the following:
+     * <br>
+     *                    _________________________________
+     *                   |       switchFunction            | 
+     *                   | [stream 1] -->                  |
+     * [this stream] --> | [stream 2] --> switches between | --> [stream 1 | stream 2 | stream 3]
+     *                   | [stream 3] -->     streams      |
+     *                   |_________________________________|
+     * <br>
+     * @param switchFunction
+     *            function that can be used to switch between a set of source
+     *            streams.
+     * @return a new stream that uses the provided switchFunction to switch
+     *         between a set of source streams.
+     */
+    public final <R> EventStream<R> switchMap(Function<E, EventStream<R>> switchFunction) {
+        return lift(new OperatorSwitchMap<>(switchFunction));
     }
     
     /**

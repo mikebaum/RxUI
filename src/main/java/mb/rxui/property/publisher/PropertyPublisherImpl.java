@@ -18,10 +18,10 @@ import static java.util.Objects.requireNonNull;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import mb.rxui.Subscription;
 import mb.rxui.dispatcher.PropertyDispatcher;
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertySubscriber;
+import mb.rxui.subscription.Subscription;
 
 /**
  * Default implementation of a property publisher.

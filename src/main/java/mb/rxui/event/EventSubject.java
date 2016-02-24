@@ -16,11 +16,11 @@ package mb.rxui.event;
 import static java.util.Objects.requireNonNull;
 
 import mb.rxui.EventLoop;
-import mb.rxui.Subscription;
 import mb.rxui.dispatcher.Dispatcher;
 import mb.rxui.dispatcher.EventDispatcher;
 import mb.rxui.disposables.Disposable;
 import mb.rxui.event.publisher.EventPublisher;
+import mb.rxui.subscription.Subscription;
 
 /**
  * An instance of an {@link EventStream} that is also an {@link EventSource} and can

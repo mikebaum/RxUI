@@ -22,13 +22,14 @@ import java.util.Optional;
 import javax.security.auth.Subject;
 
 import mb.rxui.EventLoop;
-import mb.rxui.Subscription;
 import mb.rxui.dispatcher.Dispatchers;
 import mb.rxui.dispatcher.PropertyDispatcher;
 import mb.rxui.disposables.Disposable;
 import mb.rxui.event.EventBinding;
 import mb.rxui.event.EventStream;
 import mb.rxui.property.publisher.PropertyPublisher;
+import mb.rxui.subscription.CompositeSubscription;
+import mb.rxui.subscription.Subscription;
 import rx.subjects.BehaviorSubject;
 
 /**

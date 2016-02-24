@@ -66,6 +66,9 @@ public class EventDispatcher<V> extends AbstractDispatcher<V, EventSubscriber<V>
         
         EventSubscriber<V> subscriber = new EventSubscriber<>(wrapObserver(observer));
         
+        if (observer instanceof EventSubscriber)
+            subscriber.doOnDispose(((EventSubscriber<V>)observer)::dispose);
+        
         if(isDisposed()) {
             subscriber.onCompleted();
             return subscriber;

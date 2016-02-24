@@ -29,7 +29,6 @@ import java.util.function.Supplier;
 
 import mb.rxui.EventLoop;
 import mb.rxui.Preconditions;
-import mb.rxui.Subscription;
 import mb.rxui.event.EventStream;
 import mb.rxui.property.operator.OperatorFilterToOptional;
 import mb.rxui.property.operator.OperatorIsDirty;
@@ -39,6 +38,7 @@ import mb.rxui.property.operator.PropertyConditionBuilder;
 import mb.rxui.property.operator.PropertyOperator;
 import mb.rxui.property.publisher.CombinePropertyPublisher;
 import mb.rxui.property.publisher.PropertyPublisher;
+import mb.rxui.subscription.Subscription;
 import rx.Observable;
 import rx.subscriptions.Subscriptions;
 

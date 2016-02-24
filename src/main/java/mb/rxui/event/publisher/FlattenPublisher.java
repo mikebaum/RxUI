@@ -15,11 +15,11 @@ package mb.rxui.event.publisher;
 
 import static java.util.Objects.requireNonNull;
 
-import mb.rxui.Subscription;
 import mb.rxui.event.EventObserver;
 import mb.rxui.event.EventStream;
 import mb.rxui.event.EventSubscriber;
-import mb.rxui.property.CompositeSubscription;
+import mb.rxui.subscription.CompositeSubscription;
+import mb.rxui.subscription.Subscription;
 
 /**
  * A Flatten Publisher can flatten a nested stream of stream into a stream.
@@ -44,7 +44,7 @@ public class FlattenPublisher<E> implements EventPublisher<E> {
         
         Subscription streamSub = 
                 streamOfStreams.map(stream -> stream.onEvent(flattenSubscriber::onEvent))
-                               .observe(EventObserver.create(subscriptions::add, 
+                               .observe(EventObserver.create(subscriptions::add,
                                                              flattenSubscriber::onCompleted));
 
         subscriptions.add(streamSub);

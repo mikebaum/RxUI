@@ -19,8 +19,8 @@ import static mb.rxui.Functions.TRUE;
 import java.util.ArrayList;
 import java.util.List;
 
-import mb.rxui.Subscription;
 import mb.rxui.property.PropertyStream;
+import mb.rxui.subscription.Subscription;
 
 /**
  * A {@link PropertyConditionBuilder} can be used to setup some multi-condition

@@ -24,11 +24,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
-import mb.rxui.Subscription;
 import mb.rxui.SwingTestRunner;
 import mb.rxui.event.EventStream;
 import mb.rxui.event.EventObserver;
 import mb.rxui.event.EventSubject;
+import mb.rxui.subscription.Subscription;
 
 @RunWith(SwingTestRunner.class)
 public class TestOperatorFilter {

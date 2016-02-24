@@ -55,10 +55,6 @@ public class OperatorDebounce<M> implements Operator<M, M> {
             childSubscriber.onCompleted();
         });
         
-        EventSubscriber<M> subscriber = new EventSubscriber<>(sourceObserver);
-        
-        childSubscriber.doOnDispose(subscriber::dispose);
-        
-        return subscriber;
+        return new EventSubscriber<>(sourceObserver);
     }
 }

@@ -17,7 +17,7 @@ import static java.util.Objects.requireNonNull;
 import static mb.rxui.Callbacks.runSafeCallback;
 
 import mb.rxui.Subscriber;
-import mb.rxui.Subscription;
+import mb.rxui.subscription.Subscription;
 
 /**
  * A subscriber used when subscribing to an {@link EventStream}.
@@ -38,6 +38,11 @@ public class EventSubscriber<E> extends Subscriber implements EventObserver<E>, 
     
     public EventSubscriber(EventObserver<E> observer) {
         this.observer = requireNonNull(observer);
+    }
+    
+    public EventSubscriber(EventSubscriber<E> subscriber) {
+        this.observer = subscriber;
+        doOnDispose(subscriber::dispose);
     }
     
     @Override

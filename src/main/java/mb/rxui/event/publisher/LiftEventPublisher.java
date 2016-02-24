@@ -15,10 +15,10 @@ package mb.rxui.event.publisher;
 
 import static java.util.Objects.requireNonNull;
 
-import mb.rxui.Subscription;
 import mb.rxui.event.EventObserver;
 import mb.rxui.event.EventSubscriber;
 import mb.rxui.event.operator.Operator;
+import mb.rxui.subscription.Subscription;
 
 /**
  * An {@link EventPublisher} that is used to transform (lift) the emitted event
@@ -43,6 +43,12 @@ public class LiftEventPublisher<T, R> implements EventPublisher<R> {
     
     @Override
     public Subscription subscribe(EventObserver<R> observer) {
-        return sourcePublisher.subscribe(operator.apply(new EventSubscriber<>(observer)));
+        EventSubscriber<R> subscriber = new EventSubscriber<>(observer);
+        
+        Subscription subscription = sourcePublisher.subscribe(operator.apply(subscriber));
+        
+        subscriber.doOnDispose(subscription::dispose);
+        
+        return subscriber;
     }
 }

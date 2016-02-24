@@ -15,10 +15,10 @@ package mb.rxui.property.operator;
 
 import java.util.function.Function;
 
-import mb.rxui.Subscription;
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertySubscriber;
 import mb.rxui.property.publisher.PropertyPublisher;
+import mb.rxui.subscription.Subscription;
 
 public class OperatorMap<S, R> implements PropertyOperator<S, R>{
 

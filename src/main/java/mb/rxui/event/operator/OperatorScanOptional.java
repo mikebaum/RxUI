@@ -48,10 +48,6 @@ public class OperatorScanOptional<E, R> implements Operator<E, R> {
                                      },
                                      childSubscriber::onCompleted);
         
-        EventSubscriber<E> subscriber = new EventSubscriber<>(sourceObserver);
-        
-        childSubscriber.doOnDispose(subscriber::dispose);
-        
-        return subscriber;
+        return new EventSubscriber<>(sourceObserver);
     }
 }

@@ -13,11 +13,11 @@
  */
 package mb.rxui.property.operator;
 
-import mb.rxui.Subscription;
 import mb.rxui.property.PropertyStream;
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertySubscriber;
 import mb.rxui.property.publisher.PropertyPublisher;
+import mb.rxui.subscription.Subscription;
 
 /**
  * An operator that limits the number of values dispatched to subscribers.<br>

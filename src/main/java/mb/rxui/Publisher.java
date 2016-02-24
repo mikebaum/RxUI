@@ -14,6 +14,7 @@
 package mb.rxui;
 
 import mb.rxui.property.PropertySubscriber;
+import mb.rxui.subscription.Subscription;
 
 /**
  * A publisher is some class that can publish values and can be subscribed to.

@@ -18,6 +18,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import mb.rxui.disposables.Disposable;
+import mb.rxui.subscription.Subscription;
 
 public class TestSubscription {
     @Test

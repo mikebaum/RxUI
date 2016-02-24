@@ -25,11 +25,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
-import mb.rxui.Subscription;
 import mb.rxui.SwingTestRunner;
 import mb.rxui.property.Property;
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertyStream;
+import mb.rxui.subscription.Subscription;
 
 @RunWith(SwingTestRunner.class)
 public class TestOperatorFilterToOptional {
