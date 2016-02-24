@@ -29,11 +29,11 @@ import org.mockito.Mockito;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.concurrent.Task;
-import mb.rxui.Subscription;
 import mb.rxui.property.Property;
 import mb.rxui.property.PropertyStream;
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.javafx.JavaFxProperties;
+import mb.rxui.subscription.Subscription;
 
 public class TestJavaFxProperties {
     

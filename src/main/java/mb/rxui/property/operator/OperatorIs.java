@@ -19,10 +19,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import mb.rxui.Subscription;
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertySubscriber;
 import mb.rxui.property.publisher.PropertyPublisher;
+import mb.rxui.subscription.Subscription;
 
 /**
  * A {@link PropertyOperator} that transforms the property stream into a

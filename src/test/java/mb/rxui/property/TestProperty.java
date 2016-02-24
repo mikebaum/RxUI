@@ -31,9 +31,9 @@ import org.mockito.InOrder;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 
-import mb.rxui.Subscription;
 import mb.rxui.SwingTestRunner;
 import mb.rxui.event.EventSubject;
+import mb.rxui.subscription.Subscription;
 import rx.Observable;
 import rx.functions.Action0;
 import rx.functions.Action1;

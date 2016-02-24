@@ -20,11 +20,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import mb.rxui.Counter;
-import mb.rxui.Subscription;
 import mb.rxui.event.EventObserver;
 import mb.rxui.event.EventStream;
 import mb.rxui.event.EventSubscriber;
-import mb.rxui.property.CompositeSubscription;
+import mb.rxui.subscription.CompositeSubscription;
+import mb.rxui.subscription.Subscription;
 
 /**
  * A Publisher that merges many event streams into one stream.

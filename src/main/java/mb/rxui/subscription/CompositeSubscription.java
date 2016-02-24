@@ -11,13 +11,12 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package mb.rxui.property;
+package mb.rxui.subscription;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import mb.rxui.Subscription;
 import mb.rxui.disposables.Disposable;
 
 public class CompositeSubscription implements Subscription {

@@ -28,10 +28,10 @@ import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 
-import mb.rxui.Subscription;
 import mb.rxui.SwingTestRunner;
 import mb.rxui.property.Property;
 import mb.rxui.property.PropertyObserver;
+import mb.rxui.subscription.Subscription;
 import rx.Notification;
 import rx.Observable;
 import rx.Observer;

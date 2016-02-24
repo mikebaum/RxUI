@@ -43,10 +43,6 @@ public final class OperatorFilter<T> implements Operator<T, T> {
                 childSubscriber.onEvent(value);
         } , childSubscriber::onCompleted);
 
-        EventSubscriber<T> subscriber = new EventSubscriber<>(sourceObserver);
-
-        childSubscriber.doOnDispose(subscriber::dispose);
-
-        return subscriber;
+        return new EventSubscriber<>(sourceObserver);
     }
 }

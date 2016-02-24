@@ -44,10 +44,6 @@ public class OperatorMap<I, R> implements Operator<I, R> {
                 EventObserver.create(value -> childSubscriber.onEvent(mapper.apply(value)),
                                            childSubscriber::onCompleted);
         
-        EventSubscriber<I> subscriber = new EventSubscriber<>(sourceObserver);
-        
-        childSubscriber.doOnDispose(subscriber::dispose);
-        
-        return subscriber;
+        return new EventSubscriber<>(sourceObserver);
     }
 }

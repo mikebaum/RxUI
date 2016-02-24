@@ -49,11 +49,7 @@ public class OperatorChanges<E, C> implements Operator<E, C> {
                 EventObserver.create(value -> emitValueOrSetLast(lastValue, value, childSubscriber),
                                      childSubscriber::onCompleted);
         
-        EventSubscriber<E> subscriber = new EventSubscriber<>(sourceObserver);
-        
-        childSubscriber.doOnDispose(subscriber::dispose);
-        
-        return subscriber;
+        return new EventSubscriber<>(sourceObserver);
     }
     
     private void emitValueOrSetLast(AtomicReference<E> lastValue, E currentValue, EventSubscriber<C> subscriber) {

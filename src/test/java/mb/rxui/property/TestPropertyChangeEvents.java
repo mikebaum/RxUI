@@ -22,9 +22,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
-import mb.rxui.Subscription;
 import mb.rxui.SwingTestRunner;
 import mb.rxui.event.EventSequenceGenerator;
+import mb.rxui.subscription.Subscription;
 import mb.rxui.event.EventObserver;
 
 @RunWith(SwingTestRunner.class)

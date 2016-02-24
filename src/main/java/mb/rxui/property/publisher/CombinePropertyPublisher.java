@@ -20,11 +20,11 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import mb.rxui.Subscription;
-import mb.rxui.property.CompositeSubscription;
 import mb.rxui.property.PropertyStream;
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertySubscriber;
+import mb.rxui.subscription.CompositeSubscription;
+import mb.rxui.subscription.Subscription;
 
 /**
  * A {@link PropertyPublisher} that will combine the values of the provided

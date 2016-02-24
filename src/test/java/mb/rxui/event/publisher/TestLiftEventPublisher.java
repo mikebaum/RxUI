@@ -13,12 +13,15 @@
  */
 package mb.rxui.event.publisher;
 
+import static org.junit.Assert.*;
+
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import mb.rxui.event.EventObserver;
 import mb.rxui.event.EventSubscriber;
 import mb.rxui.event.operator.Operator;
+import mb.rxui.subscription.Subscription;
 
 public class TestLiftEventPublisher {
     @Test
@@ -29,11 +32,36 @@ public class TestLiftEventPublisher {
         Mockito.when(operator.apply(Mockito.any())).thenReturn(parentSubscriber);
         
         EventPublisher<String> publisher = Mockito.mock(EventPublisher.class);
+        Mockito.when(publisher.subscribe(Mockito.any())).thenReturn(new EventSubscriber<>(EventObserver.create(()->{})));
+        
         LiftEventPublisher<String, Integer> lifter = new LiftEventPublisher<>(operator, publisher);
         
-        lifter.subscribe(Mockito.mock(EventObserver.class));
+        EventObserver<Integer> observer = Mockito.mock(EventObserver.class);
+        
+        lifter.subscribe(observer);
         
         Mockito.verify(operator).apply(Mockito.any(EventSubscriber.class));
         Mockito.verify(publisher).subscribe(parentSubscriber);
+    }
+    
+    @Test
+    public void testDiposeUnsubscribesFromSource() {
+        Operator<String, Integer> operator = Mockito.mock(Operator.class);
+        EventSubscriber<String> parentSubscriber = Mockito.mock(EventSubscriber.class);
+        EventSubscriber<String> sourceSubscriber = Mockito.mock(EventSubscriber.class);
+
+        Mockito.when(operator.apply(Mockito.any())).thenReturn(parentSubscriber);
+        
+        EventPublisher<String> publisher = Mockito.mock(EventPublisher.class);
+        Mockito.when(publisher.subscribe(Mockito.any())).thenReturn(sourceSubscriber);
+        
+        LiftEventPublisher<String, Integer> lifter = new LiftEventPublisher<>(operator, publisher);
+        
+        EventObserver<Integer> observer = Mockito.mock(EventObserver.class);
+        
+        Subscription subscription = lifter.subscribe(observer);
+        
+        subscription.dispose();
+        Mockito.verify(sourceSubscriber).dispose();
     }
 }

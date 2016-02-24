@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package mb.rxui.property;
+package mb.rxui.subscription;
 
 import static org.junit.Assert.*;
 
@@ -21,7 +21,8 @@ import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 
-import mb.rxui.Subscription;
+import mb.rxui.subscription.CompositeSubscription;
+import mb.rxui.subscription.Subscription;
 
 public class TestCompositeSubscription {
     

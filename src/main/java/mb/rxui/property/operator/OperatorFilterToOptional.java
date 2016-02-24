@@ -16,10 +16,10 @@ package mb.rxui.property.operator;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import mb.rxui.Subscription;
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertySubscriber;
 import mb.rxui.property.publisher.PropertyPublisher;
+import mb.rxui.subscription.Subscription;
 
 /**
  * Filters values based on some predicate. Emits an Optional empty if the

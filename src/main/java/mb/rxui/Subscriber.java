@@ -16,6 +16,8 @@ package mb.rxui;
 import java.util.ArrayList;
 import java.util.List;
 
+import mb.rxui.subscription.Subscription;
+
 public abstract class Subscriber implements Subscription {
 
     private final List<Runnable> onDisposedActions;

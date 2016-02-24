@@ -16,10 +16,10 @@ package mb.rxui.property.publisher;
 import java.util.function.Supplier;
 
 import mb.rxui.Publisher;
-import mb.rxui.Subscription;
 import mb.rxui.dispatcher.PropertyDispatcher;
 import mb.rxui.property.PropertyObserver;
 import mb.rxui.property.PropertySubscriber;
+import mb.rxui.subscription.Subscription;
 
 /**
  * A {@link PropertyPublisher} represents some source of property updates.
