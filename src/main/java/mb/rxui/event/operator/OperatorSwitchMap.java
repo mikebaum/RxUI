@@ -36,7 +36,7 @@ import mb.rxui.subscription.RollingSubscription;
  * @param <R>
  *            the type of the stream created by the switch function
  */
-public class OperatorSwitchMap<E, R> implements Operator<E, R>{
+public class OperatorSwitchMap<E, R> implements Operator<E, R> {
     
     private final Function<E, EventStream<R>> switchFunction;
     
