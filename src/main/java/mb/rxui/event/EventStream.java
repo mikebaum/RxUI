@@ -43,6 +43,8 @@ import mb.rxui.event.publisher.FlattenPublisher;
 import mb.rxui.event.publisher.LiftEventPublisher;
 import mb.rxui.event.publisher.MergeEventPublisher;
 import mb.rxui.property.Property;
+import mb.rxui.property.PropertyStream;
+import mb.rxui.subscription.RollingSubscription;
 import mb.rxui.subscription.Subscription;
 import rx.Observable;
 import rx.Subscriber;
@@ -115,6 +117,22 @@ public class EventStream<E> {
      */
     public final Subscription onCompleted(Runnable onCompletedAction) {
         return observe(EventObserver.create(onCompletedAction));
+    }
+    
+    /**
+     * Subscribes to onEvents and onCompleted events, via the provided
+     * eventHandler and onCompleteAction.
+     * 
+     * @param observer
+     *            some {@link EventObserver} to observe this stream.
+     * @return a {@link Subscription} that can be used to stop this observer
+     *         from responding to events.
+     * @throws IllegalStateException
+     *             if called from a thread other than the thread that this event
+     *             stream was created on.
+     */
+    public final Subscription observe(Consumer<E> eventHandler, Runnable onCompleteAction) {
+        return eventPublisher.subscribe(EventObserver.create(eventHandler, onCompleteAction));
     }
     
     /**
@@ -309,12 +327,40 @@ public class EventStream<E> {
      * <br>
      * @param switchFunction
      *            function that can be used to switch between a set of source
-     *            streams.
-     * @return a new stream that uses the provided switchFunction to switch
-     *         between a set of source streams.
+     *            event streams.
+     * @return a new event stream that uses the provided switchFunction to switch
+     *         between a set of source event streams.
      */
     public final <R> EventStream<R> switchMap(Function<E, EventStream<R>> switchFunction) {
         return lift(new OperatorSwitchMap<>(switchFunction));
+    }
+    
+    /**
+     * Like {@link #switchMap(Function)}, except that the switchMap creates
+     * property streams. The property stream that is created, will have the same
+     * lifetime as this event stream.
+     * 
+     * @param switchFunction
+     *            function that can be used to switch between a set of source
+     *            property streams.
+     * @param initialValue
+     *            the initial value for the property stream that is returned.
+     * @return a new property stream that uses the provided switchFunction to
+     *         switch between a set of source property streams.
+     */
+    public final <R> PropertyStream<R> switchMap(Function<E, PropertyStream<R>> switchFunction, R initialValue) {
+        
+        Property<R> property = Property.create(initialValue);
+        RollingSubscription subscription = new RollingSubscription();
+        EventStream<PropertyStream<R>> propertyEventStream = map(switchFunction);
+
+        Subscription propertyStreamSubscription = 
+                propertyEventStream.observe(stream -> subscription.set(property.bind(stream)),
+                                            property::dispose);
+        
+        property.onDisposed(propertyStreamSubscription::dispose);
+        
+        return property;
     }
     
     /**
@@ -326,7 +372,8 @@ public class EventStream<E> {
      *         initialized with the provided intialValue.
      * @throws IllegalStateException
      *             if called from a thread other than the thread that this event
-     *             stream was created on. 
+     *             stream was created on.
+     * TODO: perhaps this should return a PropertyStream instead?
      */
     public final Property<E> toProperty(E initialValue) {
         

@@ -13,7 +13,8 @@
  */
 package mb.rxui.event.operator;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -25,7 +26,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.mockito.internal.util.reflection.LenientCopyTool;
 
 import mb.rxui.SwingTestRunner;
 import mb.rxui.event.EventObserver;

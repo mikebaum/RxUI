@@ -301,6 +301,17 @@ public class TestEventStream {
         EventStream.merge(new ArrayList<>());
     }
     
+    /**
+     * Creates an event stream from the provided events. Each subscriber to the
+     * returned event stream will be dispatched all the events and then be
+     * completed.
+     * 
+     * @param events
+     *            some events to create an event stream for.
+     * @return a new {@link EventStream} that will dispatch all the events when
+     *         subscribed to and then complete.
+     * TODO: Factor this into an operator and add a method to EventStream.
+     */
     public static <T> EventStream<T> createStream(T... events) {
         return new EventStream<>(observer -> {
             EventSubscriber<T> subscriber = new EventSubscriber<>(observer);

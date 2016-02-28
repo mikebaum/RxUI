@@ -33,6 +33,7 @@ import mb.rxui.event.EventStream;
 import mb.rxui.property.operator.OperatorFilterToOptional;
 import mb.rxui.property.operator.OperatorIsDirty;
 import mb.rxui.property.operator.OperatorMap;
+import mb.rxui.property.operator.OperatorSwitchMap;
 import mb.rxui.property.operator.OperatorTake;
 import mb.rxui.property.operator.PropertyConditionBuilder;
 import mb.rxui.property.operator.PropertyOperator;
@@ -331,6 +332,23 @@ public class PropertyStream<M> implements Supplier<M> {
     @SuppressWarnings("unchecked") // the use of the raw type in the method reference is okay.
     public final EventStream<PropertyChangeEvent<M>> changeEvents() {
         return asEventStream().changes(PropertyChangeEvent::new);
+    }
+    
+    /**
+     * Creates a new property stream that uses the provided switch function to
+     * change the bound stream. This is, as the name implies, just like switch
+     * but for streams.<br>
+     * <br>
+     * See {@link EventStream#switchMap(Function)}
+     * 
+     * @param switchFunction
+     *            function that can be used to switch between a set of source
+     *            property streams.
+     * @return a new property stream that uses the provided switchFunction to
+     *         switch between a set of source property streams.
+     */
+    public final <R> PropertyStream<R> switchMap(Function<M, PropertyStream<R>> switchFunction) {
+        return lift(new OperatorSwitchMap<>(switchFunction));
     }
     
     /**
