@@ -442,6 +442,42 @@ public class EventStream<E> {
             return eventStreamSubscription;
         });
     }
+    
+    /**
+     * Creates an event stream from the provided events. Each subscriber to the
+     * returned event stream will be dispatched all the events and then be
+     * completed.
+     * 
+     * @param events
+     *            some events to create an event stream for.
+     * @return a new {@link EventStream} that will dispatch all the events when
+     *         subscribed to and then complete.
+     */
+    @SafeVarargs
+    public static final <T> EventStream<T> fromArray(T... events) {
+        return fromIterable(Arrays.asList(events));
+    }
+
+    /**
+     * Creates an event stream from the provided iterable of events. Each subscriber to the
+     * returned event stream will be dispatched all the events and then be
+     * completed.
+     * 
+     * @param events
+     *            some iterable of events to create an event stream for.
+     * @return a new {@link EventStream} that will dispatch all the events when
+     *         subscribed to and then complete.
+     */
+    public static <T> EventStream<T> fromIterable(Iterable<T> eventList) {
+        return new EventStream<>(observer -> {
+            EventSubscriber<T> subscriber = new EventSubscriber<>(observer);
+            
+            eventList.forEach(subscriber::onEvent);
+            subscriber.onCompleted();
+            
+            return subscriber;
+        });
+    }
 
     /**
      * Create a new stream that results from merging all events emitted by the

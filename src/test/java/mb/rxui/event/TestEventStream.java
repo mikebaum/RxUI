@@ -15,6 +15,8 @@ package mb.rxui.event;
 
 import static mb.rxui.ThreadedTestHelper.callOnIoThread;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
@@ -43,7 +45,7 @@ public class TestEventStream {
     @Test
     public void testOnEvent() {
         String[] events = new String[] { "tacos", "burritos", "fajitas" };
-        EventStream<String> stream = createStream("tacos", "burritos", "fajitas");
+        EventStream<String> stream = EventStream.fromArray("tacos", "burritos", "fajitas");
         
         Consumer<String> eventHandler = Mockito.mock(Consumer.class);
         InOrder inOrder = Mockito.inOrder(eventHandler);
@@ -58,7 +60,7 @@ public class TestEventStream {
     
     @Test(expected=IllegalStateException.class)
     public void testCallOnEventOnWrongThread() throws Exception {
-        EventStream<String> stream = callOnIoThread(() -> createStream());
+        EventStream<String> stream = callOnIoThread(() -> EventStream.fromArray());
         
         stream.onEvent(Mockito.mock(Consumer.class));
         fail("Trying to call onEvent should have thrown since this is the wrong thread.");
@@ -66,7 +68,7 @@ public class TestEventStream {
 
     @Test
     public void testOnCompleted() {
-        EventStream<String> stream = createStream();
+        EventStream<String> stream = EventStream.fromArray();
         
         Runnable onCompleted = Mockito.mock(Runnable.class);
         stream.onCompleted(onCompleted);
@@ -76,7 +78,7 @@ public class TestEventStream {
     
     @Test(expected=IllegalStateException.class)
     public void testCallOnCompletedOnWrongThread() throws Exception {
-        EventStream<String> stream = callOnIoThread(() -> createStream());
+        EventStream<String> stream = callOnIoThread(() -> EventStream.fromArray());
         
         stream.onCompleted(Mockito.mock(Runnable.class));
         fail("Trying to call onCompleted should have thrown since this is the wrong thread.");
@@ -86,7 +88,7 @@ public class TestEventStream {
     public void testObserve() {
         String[] events = new String[] { "tacos", "burritos", "fajitas" };
         
-        EventStream<String> stream = createStream(events);
+        EventStream<String> stream = EventStream.fromArray(events);
         
         EventObserver<String> observer = Mockito.mock(EventObserver.class);
         InOrder inOrder = Mockito.inOrder(observer);
@@ -103,7 +105,7 @@ public class TestEventStream {
     
     @Test(expected=IllegalStateException.class)
     public void testCallObserveOnWrongThread() throws Exception {
-        EventStream<String> stream = callOnIoThread(() -> createStream());
+        EventStream<String> stream = callOnIoThread(() -> EventStream.fromArray());
         
         stream.observe(Mockito.mock(EventObserver.class));
         fail("Trying to call observe should have thrown since this is the wrong thread.");
@@ -111,7 +113,7 @@ public class TestEventStream {
     
     @Test
     public void testToProperty() {
-        EventStream<String> stream = createStream("fajitas");
+        EventStream<String> stream = EventStream.fromArray("fajitas");
         
         Property<String> property = stream.toProperty("tacos");
         PropertyObserver<String> observer = Mockito.mock(PropertyObserver.class);
@@ -128,7 +130,7 @@ public class TestEventStream {
     
     @Test(expected=IllegalStateException.class)
     public void testCallToPropertyOnWrongThread() throws Exception {
-        EventStream<String> stream = callOnIoThread(() -> createStream());
+        EventStream<String> stream = callOnIoThread(() -> EventStream.fromArray());
         
         stream.toProperty("burritos");
         fail("Trying to call toProperty should have thrown since this is the wrong thread.");
@@ -136,7 +138,7 @@ public class TestEventStream {
     
     @Test
     public void testAsObservable() {
-        EventStream<String> stream = createStream("tacos", "burritos", "fajitas");
+        EventStream<String> stream = EventStream.fromArray("tacos", "burritos", "fajitas");
         
         Observable<String> observable = stream.asObservable();
         
@@ -156,7 +158,7 @@ public class TestEventStream {
     
     @Test
     public void testCallSubscribeOnAnObservableFromWrongThread() throws Exception {
-        EventStream<String> stream = createStream();
+        EventStream<String> stream = EventStream.fromArray();
 
         Throwable exception = callOnIoThread(() -> {            
             return stream.asObservable()
@@ -301,25 +303,55 @@ public class TestEventStream {
         EventStream.merge(new ArrayList<>());
     }
     
-    /**
-     * Creates an event stream from the provided events. Each subscriber to the
-     * returned event stream will be dispatched all the events and then be
-     * completed.
-     * 
-     * @param events
-     *            some events to create an event stream for.
-     * @return a new {@link EventStream} that will dispatch all the events when
-     *         subscribed to and then complete.
-     * TODO: Factor this into an operator and add a method to EventStream.
-     */
-    public static <T> EventStream<T> createStream(T... events) {
-        return new EventStream<>(observer -> {
-            EventSubscriber<T> subscriber = new EventSubscriber<>(observer);
-            
-            Arrays.asList(events).forEach(subscriber::onEvent);
-            subscriber.onCompleted();
-            
-            return subscriber;
-        });
+    @Test
+    public void testFromIterable() {
+        List<String> stringEvents = Arrays.asList("tacos", "burritos", "fajitas");
+        
+        EventStream<String> eventStream = EventStream.fromIterable(stringEvents);
+        
+        Consumer<String> onEvent = mock(Consumer.class);
+        Runnable onCompleted = mock(Runnable.class);
+        
+        InOrder inOrder = inOrder(onEvent, onCompleted);
+        
+        eventStream.observe(onEvent, onCompleted);
+        
+        inOrder.verify(onEvent).accept("tacos");
+        inOrder.verify(onEvent).accept("burritos");
+        inOrder.verify(onEvent).accept("fajitas");
+        inOrder.verify(onCompleted).run();
+        inOrder.verifyNoMoreInteractions();
+        
+        // a second subscriber should receive the same events
+        Consumer<String> onEvent2 = mock(Consumer.class);
+        Runnable onCompleted2 = mock(Runnable.class);
+        
+        InOrder inOrder2 = inOrder(onEvent2, onCompleted2);
+        
+        eventStream.observe(onEvent2, onCompleted2);
+        
+        inOrder2.verify(onEvent2).accept("tacos");
+        inOrder2.verify(onEvent2).accept("burritos");
+        inOrder2.verify(onEvent2).accept("fajitas");
+        inOrder2.verify(onCompleted2).run();
+        inOrder2.verifyNoMoreInteractions();
+    }
+    
+    @Test
+    public void testFromArray() {
+        EventStream<String> eventStream = EventStream.fromArray("tacos", "burritos", "fajitas");
+        
+        Consumer<String> onEvent = mock(Consumer.class);
+        Runnable onCompleted = mock(Runnable.class);
+        
+        InOrder inOrder = inOrder(onEvent, onCompleted);
+        
+        eventStream.observe(onEvent, onCompleted);
+        
+        inOrder.verify(onEvent).accept("tacos");
+        inOrder.verify(onEvent).accept("burritos");
+        inOrder.verify(onEvent).accept("fajitas");
+        inOrder.verify(onCompleted).run();
+        inOrder.verifyNoMoreInteractions();
     }
 }
