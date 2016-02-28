@@ -38,6 +38,7 @@ import mb.rxui.property.operator.OperatorTake;
 import mb.rxui.property.operator.PropertyConditionBuilder;
 import mb.rxui.property.operator.PropertyOperator;
 import mb.rxui.property.publisher.CombinePropertyPublisher;
+import mb.rxui.property.publisher.JustPropertyPublisher;
 import mb.rxui.property.publisher.PropertyPublisher;
 import mb.rxui.subscription.Subscription;
 import rx.Observable;
@@ -447,5 +448,18 @@ public class PropertyStream<M> implements Supplier<M> {
         Supplier<R> combineSupplier = () -> combiner.apply(stream1.get(), stream2.get());
         
         return new PropertyStream<R>(new CombinePropertyPublisher<R>(combineSupplier, streams));
+    }
+    
+    /**
+     * Creates a new property stream that only emits the provided value and then
+     * completes. Another name for this would be a constant property.
+     * 
+     * @param value
+     *            the value to emit
+     * @return a new {@link PropertyStream} that when subscribed to emits the
+     *         provided values and then signals disposed.
+     */
+    public static <R> PropertyStream<R> just(R value) {
+        return new PropertyStream<>(new JustPropertyPublisher<>(value));
     }
 }
