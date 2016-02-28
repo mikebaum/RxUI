@@ -14,7 +14,9 @@
 package mb.rxui.property;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.util.function.Consumer;
 
@@ -198,5 +200,20 @@ public class TestPropertyStream {
         eventStream.onEvent(event -> property.setValue(event)); 
         // FIXME: uncomment this code when issue #37 is fixed. See: https://github.com/mikebaum/RxUI/issues/37
         // assertEquals("burritos", property.get());
+    }
+    
+    @Test
+    public void testJust() throws Exception {
+        PropertyStream<String> stream = PropertyStream.just("tacos");
+        
+        Consumer<String> onChanged = mock(Consumer.class);
+        Runnable onDispose = mock(Runnable.class);
+
+        stream.observe(onChanged, onDispose);
+        
+        verify(onChanged).accept("tacos");
+        verify(onDispose).run();
+        assertEquals("tacos", stream.get());
+        verifyNoMoreInteractions(onChanged, onDispose);
     }
 }
