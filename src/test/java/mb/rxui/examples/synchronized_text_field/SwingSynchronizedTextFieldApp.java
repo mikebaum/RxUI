@@ -13,11 +13,8 @@
  */
 package mb.rxui.examples.synchronized_text_field;
 
-import java.awt.GridLayout;
-
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import mb.rxui.property.Property;
