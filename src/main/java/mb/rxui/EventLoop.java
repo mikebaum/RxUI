@@ -15,6 +15,7 @@ package mb.rxui;
 
 import static javafx.application.Platform.isFxApplicationThread;
 import static javax.swing.SwingUtilities.isEventDispatchThread;
+import static mb.rxui.Preconditions.checkState;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -42,7 +43,12 @@ public interface EventLoop {
      *             if the current thread does not match the valid thread for
      *             this event loop.
      */
-    void checkInEventLoop();
+    default void checkInEventLoop() {
+        checkState(isInEventLoop(),
+                   "Method should have been called on the " + getThreadName()
+                        + " Thread, but instead it was called from: " + 
+                   Thread.currentThread());
+    }
     
     /**
      * @return true if the current thread matches the thread of this event loop, false otherwise.
@@ -58,7 +64,14 @@ public interface EventLoop {
      *             if the current thread does not match the valid thread for
      *             this event loop.
      */
-    void invokeNow(Runnable runnable);
+    default void invokeNow(Runnable runnable) {
+        checkInEventLoop();
+        /*
+         * TODO: consider tracking how long it takes to run the runnable and
+         * logging a message if it take too long.
+         */
+        runnable.run();
+    }
 
     /**
      * Schedules a runnable to be executed on this event loop at a later time.
@@ -74,6 +87,30 @@ public interface EventLoop {
     Disposable invokeLater(Runnable runnable);
     
     /**
+     * Invokes the provided runnable immediately if on the event loop already,
+     * otherwise schedules a the runnable to execute later using the method
+     * {@link #invokeLater(Runnable)}
+     * 
+     * <p>
+     * <b>NOTE:</b> Use this only if you need to, since calling this method
+     * without really knowing what you are doing can cause events to be
+     * re-ordered, which may or may not be a problem.
+     * 
+     * @param runnable
+     *            some runnable to invoke
+     * @return a {@link Disposable} that can be used to cancel the execution of
+     *         this runnable should it not have already been executed.
+     */
+    default Disposable invokeNowOrLater(Runnable runnable) {
+        if (isInEventLoop()) {
+            runnable.run();
+            return () -> {};
+        }
+        
+        return invokeLater(runnable);
+    }
+    
+    /**
      * Schedules some runnable to execute at some later time.
      * 
      * @param runnable
@@ -87,8 +124,15 @@ public interface EventLoop {
      */
     Disposable schedule(Runnable runnable, long time, TimeUnit timeUnit);
     
+    /**
+     * Gets the name of the event loop thread
+     * 
+     * @return The name of the event loop thread, initially either
+     *         "JavaFx Platform" or "Event Disptach"
+     */
+    String getThreadName();
 
-    static EventLoop create() {
+    static EventLoop createEventLoop() {
         if (isEventDispatchThread())
             return SWING_EVENT_LOOP;
 

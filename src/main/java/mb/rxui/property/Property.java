@@ -80,7 +80,7 @@ public final class Property<M> extends PropertyStream<M> implements PropertySour
         this.propertySource = requireNonNull(propertySource);
         this.dispatcher = requireNonNull(dispatcher);
         this.initialValue = requireNonNull(get(), "A Property must be initialized with a value");
-        this.eventLoop = EventLoop.create();
+        this.eventLoop = EventLoop.createEventLoop();
     }
     
     @Override

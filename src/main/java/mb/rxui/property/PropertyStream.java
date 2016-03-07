@@ -70,7 +70,7 @@ public class PropertyStream<M> implements Supplier<M> {
      */
     protected PropertyStream(PropertyPublisher<M> propertyPublisher) {
         this.propertyPublisher = requireNonNull(propertyPublisher);
-        this.eventLoop = EventLoop.create();
+        this.eventLoop = EventLoop.createEventLoop();
         initialValue = requireNonNull(propertyPublisher.get());
     }
     

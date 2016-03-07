@@ -14,7 +14,6 @@
 package mb.rxui;
 
 import static mb.rxui.Preconditions.checkArgument;
-import static mb.rxui.Preconditions.checkState;
 
 import java.util.concurrent.TimeUnit;
 
@@ -29,13 +28,6 @@ import mb.rxui.disposables.DisposableRunnable;
  * A event loop that should be used for Swing/AWT applications.
  */
 public final class SwingEventLoop implements EventLoop {
-
-    @Override
-    public void checkInEventLoop() {
-        checkState(isInEventLoop(),
-                   "Method should have been called on the EDT, but instead it was called from: " + 
-                   Thread.currentThread());
-    }
 
     @Override
     public Disposable schedule(Runnable runnable, long time, TimeUnit timeUnit) {
@@ -58,16 +50,6 @@ public final class SwingEventLoop implements EventLoop {
     }
 
     @Override
-    public void invokeNow(Runnable runnable) {
-        checkInEventLoop();
-        /*
-         * TODO: consider tracking how long it takes to run the runnable and
-         * logging a message if it take too long.
-         */
-        runnable.run();
-    }
-
-    @Override
     public Disposable invokeLater(Runnable runnable) {
         
         DisposableRunnable disposableRunnable = new DisposableRunnable(runnable);
@@ -75,5 +57,9 @@ public final class SwingEventLoop implements EventLoop {
         SwingUtilities.invokeLater(disposableRunnable);
         
         return disposableRunnable;
+    }
+
+    public String getThreadName() {
+        return "Event Dispatch";
     }
 }
