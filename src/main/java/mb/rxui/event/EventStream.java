@@ -86,7 +86,7 @@ public class EventStream<E> {
      *            some {@link EventPublisher} to back this stream.
      */
     public EventStream(EventPublisher<E> eventPublisher) {        
-        this(eventPublisher, EventLoop.create());
+        this(eventPublisher, EventLoop.createEventLoop());
     }
     
     /**

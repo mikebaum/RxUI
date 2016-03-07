@@ -42,7 +42,7 @@ public class TestEventLoop {
         AtomicReference<EventLoop> eventLoop = new AtomicReference<>();
         
         EDT_TEST_HELPER.runTest(() -> {
-            eventLoop.set(EventLoop.create());
+            eventLoop.set(EventLoop.createEventLoop());
         });
         
         EDT_TEST_HELPER.runTest(() -> {
@@ -99,7 +99,7 @@ public class TestEventLoop {
         AtomicReference<EventLoop> eventLoop = new AtomicReference<>();
         
         EDT_TEST_HELPER.runTest(() -> {
-            eventLoop.set(EventLoop.create());
+            eventLoop.set(EventLoop.createEventLoop());
         });
         
         eventLoop.get().checkInEventLoop();
@@ -110,7 +110,7 @@ public class TestEventLoop {
         AtomicReference<EventLoop> eventLoop = new AtomicReference<>();
         
         JavaFxTestHelper.instance().runTest(() -> {
-            eventLoop.set(EventLoop.create());
+            eventLoop.set(EventLoop.createEventLoop());
         });
         
         JavaFxTestHelper.instance().runTest(() -> {
@@ -123,7 +123,7 @@ public class TestEventLoop {
         AtomicReference<EventLoop> eventLoop = new AtomicReference<>();
         
         JavaFxTestHelper.instance().runTest(() -> {
-            eventLoop.set(EventLoop.create());
+            eventLoop.set(EventLoop.createEventLoop());
         });
         
         eventLoop.get().checkInEventLoop();
@@ -131,12 +131,12 @@ public class TestEventLoop {
     
     @Test(expected=IllegalStateException.class)
     public void testCreateOnUnknownThread() throws Exception {
-        EventLoop.create();
+        EventLoop.createEventLoop();
     }
     
     @Test(expected=IllegalStateException.class)
     public void testArbitraryEventLoopThrows() throws Throwable {
-        EventLoop eventLoop = ThreadedTestHelper.createOnEDT(EventLoop::create);
+        EventLoop eventLoop = ThreadedTestHelper.createOnEDT(EventLoop::createEventLoop);
         
         JavaFxTestHelper.instance().runTestReThrowException(eventLoop::checkInEventLoop);
     }

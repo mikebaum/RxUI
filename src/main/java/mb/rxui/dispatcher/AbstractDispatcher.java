@@ -79,10 +79,10 @@ public abstract class AbstractDispatcher<V, S extends Subscriber & Observer<V>, 
     @Override
     public void dispatch(V newValue) {
         checkState(!isDisposed, "Dispatcher has been disposed, cannot dispatch: " + newValue);
-        dispatchOrQueue(createDisptachRunnable(newValue));
+        dispatchOrQueue(createDisptachValueRunnable(newValue));
     }
 
-    private Runnable createDisptachRunnable(V newValue) {
+    private Runnable createDisptachValueRunnable(V newValue) {
         return () -> {
             boolean isEventDispatcher = getType() == Dispatcher.Type.EVENT;
             
@@ -131,7 +131,7 @@ public abstract class AbstractDispatcher<V, S extends Subscriber & Observer<V>, 
     }
     
     protected void dispatchOrQueue(Runnable disptchRunnable) {
-        Runnable wrappedRunnable = wrapRunnable(disptchRunnable);
+        Runnable wrappedRunnable = wrapRunnableWithIsDispatching(disptchRunnable);
         if (isPaused()) {
             pausedDisptaches.add(wrappedRunnable);
         } else {
@@ -174,7 +174,7 @@ public abstract class AbstractDispatcher<V, S extends Subscriber & Observer<V>, 
      * @return a new runnable that ensures to toggle on/off the dispatch flag
      *         before and after execution.
      */
-    private Runnable wrapRunnable(Runnable runnable) {
+    private Runnable wrapRunnableWithIsDispatching(Runnable runnable) {
         return () -> {            
             isDispatching = true;
             try {

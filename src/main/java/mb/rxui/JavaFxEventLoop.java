@@ -14,7 +14,6 @@
 package mb.rxui;
 
 import static mb.rxui.Preconditions.checkArgument;
-import static mb.rxui.Preconditions.checkState;
 
 import java.util.concurrent.TimeUnit;
 
@@ -32,10 +31,8 @@ import mb.rxui.disposables.DisposableRunnable;
 public class JavaFxEventLoop implements EventLoop {
 
     @Override
-    public void checkInEventLoop() {
-        checkState(isInEventLoop(),
-                   "Method should have been called on the JavaFx Platform Thread, but instead it was called from: " + 
-                   Thread.currentThread());
+    public String getThreadName() {
+        return "JavaFx Platform";
     }
 
     @Override
@@ -56,16 +53,6 @@ public class JavaFxEventLoop implements EventLoop {
     @Override
     public boolean isInEventLoop() {
         return Platform.isFxApplicationThread();
-    }
-
-    @Override
-    public void invokeNow(Runnable runnable) {
-        checkInEventLoop();
-        /*
-         * TODO: consider tracking how long it takes to run the runnable and
-         * logging a message if it take too long.
-         */
-        runnable.run();
     }
 
     @Override

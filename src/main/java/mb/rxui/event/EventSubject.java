@@ -48,7 +48,7 @@ public class EventSubject<E> extends EventStream<E> implements EventSource<E>, D
      * @return An {@link EventSubject}
      */
     public static <E> EventSubject<E> create() {
-        return new EventSubject<>(new EventSourcePublisher<>(), EventLoop.create());
+        return new EventSubject<>(new EventSourcePublisher<>(), EventLoop.createEventLoop());
     }
 
     @Override
