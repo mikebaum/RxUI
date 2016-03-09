@@ -13,11 +13,15 @@
  */
 package mb.rxui;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+
+import java.time.Duration;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import javax.swing.SwingUtilities;
@@ -130,6 +134,31 @@ public class ThreadedTestHelper {
         };
     }
     
+    /**
+     * polls (at the provided interval) the provided getter until the provided
+     * predicate is satisfied for the given timeout.
+     * 
+     * @param getter
+     *            some supplier to poll
+     * @param predicate
+     *            some condition to wait for
+     * @param timeout
+     *            some timeout before giving up
+     * @param pollInterval
+     *            the time interval to poll at
+     */
+    public static <T> void waitForConditionOnEDT(Supplier<String> getter, 
+                                                 Predicate<String> predicate,
+                                                 Duration timeout,
+                                                 Duration pollInterval) {
+        Observable.interval(pollInterval.toMillis(), MILLISECONDS, Schedulers.from(SwingUtilities::invokeLater))
+                  .map(tick -> getter.get())
+                  .timeout(timeout.toMillis(), MILLISECONDS)
+                  .takeUntil(predicate::test)
+                  .toBlocking()
+                  .first();
+    }
+
     public static class TestRunException extends RuntimeException {
         public TestRunException(Throwable throwable) {
             super(throwable);

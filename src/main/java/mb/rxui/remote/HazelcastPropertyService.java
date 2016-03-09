@@ -15,6 +15,7 @@ package mb.rxui.remote;
 
 import static java.util.Objects.requireNonNull;
 import static mb.rxui.Preconditions.checkArgument;
+import static mb.rxui.Preconditions.checkState;
 
 import java.util.Set;
 import java.util.function.Consumer;
@@ -23,10 +24,13 @@ import java.util.stream.Collectors;
 import com.hazelcast.core.HazelcastException;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
+import com.hazelcast.core.LifecycleEvent.LifecycleState;
+import com.hazelcast.core.LifecycleService;
 import com.hazelcast.map.listener.EntryUpdatedListener;
 
+import mb.rxui.Subscriber;
 import mb.rxui.property.PropertyId;
-import mb.rxui.subscription.Subscription;
+import mb.rxui.subscription.CompositeSubscription;
 
 /**
  * A property service that is backed by Hazelcast.
@@ -39,14 +43,21 @@ public class HazelcastPropertyService implements PropertyService {
     private static final String PROPERTY_SERVICE_MAP_NAME = "Property";
     
     private final IMap<String, Object> propertyMap;
+    private final CompositeSubscription subscriptions;
+    
+    private volatile boolean isRunning;
 
     public HazelcastPropertyService(HazelcastInstance hazelcast) {
         this.propertyMap = requireNonNull(hazelcast.getMap(PROPERTY_SERVICE_MAP_NAME));
+        isRunning = hazelcast.getLifecycleService().isRunning();
+        subscriptions = new CompositeSubscription();
+        addLifecycleListener(hazelcast);
     }
 
     @Override
     public <T> T getValue(PropertyId<T> id) {
         checkPropertyExists(id);
+        checkHazelcastIsRunning();
         
         @SuppressWarnings("unchecked") // this should not throw, since the property id guarantees the type
         T value = (T) propertyMap.get(id.getUuid());
@@ -57,33 +68,52 @@ public class HazelcastPropertyService implements PropertyService {
     @Override
     public <T> void setValue(PropertyId<T> id, T value) {
         checkPropertyExists(id);
+        checkHazelcastIsRunning();
+        
         propertyMap.set(id.getUuid(), value);
     }
 
     @Override
     public <T> void registerProperty(PropertyId<T> id, T initialValue) {
         checkPropertyDoesNotExists(id);
+        checkHazelcastIsRunning();
+        
         propertyMap.put(id.getUuid(), initialValue);
     }
 
     @Override
     public Set<PropertyId<?>> getRegisteredProperties() {
+        checkHazelcastIsRunning();
+        
         return propertyMap.keySet().stream().map(PropertyId::new).collect(Collectors.toSet());
     }
     
     @Override
     public <T> boolean hasProperty(PropertyId<T> id) {
+        checkHazelcastIsRunning();
+        
         return propertyMap.containsKey(id.getUuid());
     }
 
     @Override
-    public <T> Subscription registerListener(PropertyId<T> id, Consumer<T> listener) {
+    public <T> Subscriber registerListener(PropertyId<T> id, Consumer<T> listener) {
+        checkPropertyExists(id);
+        checkHazelcastIsRunning();
+        
         String registrationId = propertyMap.addEntryListener(createEntryUpdatedListener(listener), id.getUuid(), true);
-        return Subscription.create(() -> propertyMap.removeEntryListener(registrationId));
+        
+        Subscriber subscriber = new Subscriber();
+        subscriptions.add(subscriber);
+        subscriber.doOnDispose(() -> propertyMap.removeEntryListener(registrationId));
+        subscriber.doOnDispose(() -> subscriptions.remove(subscriber));
+        
+        return subscriber;
     }
 
     @Override
     public <T> RemoteProperty<T> getProperty(PropertyId<T> id) {
+        checkHazelcastIsRunning();
+        
         return RemoteProperty.createRemoteProperty(this, id);
     }
 
@@ -94,8 +124,23 @@ public class HazelcastPropertyService implements PropertyService {
     private <T> void checkPropertyDoesNotExists(PropertyId<T> id) {
         checkArgument(!hasProperty(id), "A property with the id: [" + id + "] already exists.");
     }
+
+    private void checkHazelcastIsRunning() {
+        checkState(isRunning, "Hazelcast is not running");
+    }
     
     private <T> EntryUpdatedListener<String, T> createEntryUpdatedListener(Consumer<T> listener) {
         return event -> listener.accept(event.getValue());
+    }
+    
+    private void addLifecycleListener(HazelcastInstance hazelcast) {
+        LifecycleService lifecycleService = hazelcast.getLifecycleService();
+        
+        lifecycleService.addLifecycleListener(event -> {
+            if (event.getState() == LifecycleState.SHUTDOWN) {
+                isRunning = false;
+                subscriptions.dispose();
+            }
+        });
     }
 }

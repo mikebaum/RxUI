@@ -16,6 +16,7 @@ package mb.rxui.remote;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import mb.rxui.Subscriber;
 import mb.rxui.property.PropertyId;
 import mb.rxui.subscription.Subscription;
 
@@ -77,7 +78,7 @@ public interface PropertyService {
      *            some listener to respond to value updates.
      * @return a {@link Subscription}
      */
-    <T> Subscription registerListener(PropertyId<T> id, Consumer<T> listener);
+    <T> Subscriber registerListener(PropertyId<T> id, Consumer<T> listener);
     
     /**
      * Connects to a remote property with the provided id and retrieves RemoteProperty.

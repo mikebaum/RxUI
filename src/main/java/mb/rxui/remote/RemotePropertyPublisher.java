@@ -17,11 +17,13 @@ import static java.util.Objects.requireNonNull;
 import static mb.rxui.Preconditions.checkState;
 
 import mb.rxui.EventLoop;
+import mb.rxui.Subscriber;
 import mb.rxui.dispatcher.Dispatcher;
 import mb.rxui.dispatcher.PropertyDispatcher;
 import mb.rxui.disposables.Disposable;
 import mb.rxui.property.PropertyId;
 import mb.rxui.property.PropertyObserver;
+import mb.rxui.property.PropertySubscriber;
 import mb.rxui.property.publisher.PropertyPublisher;
 import mb.rxui.subscription.Subscription;
 
@@ -36,7 +38,7 @@ public class RemotePropertyPublisher<T> implements PropertyPublisher<T>, Disposa
     
     private final PropertyId<T> id;
     private final PropertyDispatcher<T> dispatcher;
-    private final Subscription subscription;
+    private final Subscriber subscriber;
     private final EventLoop eventLoop;
     private T value; // always accessed on the EDT does not need to be volatile
     
@@ -45,7 +47,8 @@ public class RemotePropertyPublisher<T> implements PropertyPublisher<T>, Disposa
         this.dispatcher = Dispatcher.createPropertyDispatcher();
         this.eventLoop = EventLoop.createEventLoop();
         this.value = requireNonNull(propertyService.getValue(id));
-        this.subscription = propertyService.registerListener(id, this::updateValue);
+        this.subscriber = propertyService.registerListener(id, this::updateValue);
+        subscriber.doOnDispose(this::dispose);
     }
 
     @Override
@@ -55,12 +58,22 @@ public class RemotePropertyPublisher<T> implements PropertyPublisher<T>, Disposa
     
     @Override
     public Subscription subscribe(PropertyObserver<T> observer) {
-        return dispatcher.subscribe(observer);
+        PropertySubscriber<T> subscriber = dispatcher.subscribe(observer);
+        
+        // push the latest value to the subscriber
+        subscriber.onChanged(get());
+
+        // dispose if this property is already disposed
+        if (dispatcher.isDisposed())
+            subscriber.onDisposed();
+        
+        return subscriber;
     }
 
     @Override
     public void dispose() {
-        subscription.dispose();
+        eventLoop.checkInEventLoop();
+        subscriber.dispose();
         dispatcher.dispose();
     }
     

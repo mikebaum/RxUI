@@ -18,12 +18,16 @@ import java.util.List;
 
 import mb.rxui.subscription.Subscription;
 
-public abstract class Subscriber implements Subscription {
+/**
+ * Base class for all subscribers. Provides a mechanism to dispose a
+ * subscription and notify on disposed.
+ */
+public class Subscriber implements Subscription {
 
     private final List<Runnable> onDisposedActions;
     private boolean isDisposed = false;
 
-    protected Subscriber() {
+    public Subscriber() {
         onDisposedActions = new ArrayList<>();
     }
 
