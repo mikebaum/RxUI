@@ -40,7 +40,7 @@ public class CompositeSubscription implements Subscription {
             return;
         
         isDisposed = true;
-        subscriptions.forEach(Disposable::dispose);
+        new ArrayList<>(subscriptions).forEach(Disposable::dispose);
         subscriptions.clear();
     }
 
@@ -54,5 +54,9 @@ public class CompositeSubscription implements Subscription {
             subscription.dispose();
         else
             subscriptions.add(subscription);
+    }
+    
+    public void remove(Subscription subscription) {
+        subscriptions.remove(subscription);
     }
 }
